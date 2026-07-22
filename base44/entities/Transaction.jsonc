@@ -1,0 +1,35 @@
+{
+  "name": "Transaction",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "purchase",
+        "generation",
+        "referral",
+        "admin_adjustment",
+        "free_trial"
+      ]
+    },
+    "amount": {
+      "type": "integer"
+    },
+    "description": {
+      "type": "string"
+    },
+    "reference": {
+      "type": "string"
+    },
+    "balance_after": {
+      "type": "integer"
+    },
+    "related_generation_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "type",
+    "amount"
+  ]
+}

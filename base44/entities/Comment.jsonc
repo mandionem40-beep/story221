@@ -1,0 +1,16 @@
+{
+  "name": "Comment",
+  "type": "object",
+  "properties": {
+    "reel_id": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "reel_id",
+    "content"
+  ]
+}

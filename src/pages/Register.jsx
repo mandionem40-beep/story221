@@ -1,19 +1,27 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Mail, Lock, Loader2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { UserPlus, Mail, Lock, User, Loader2, Gift } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
 import { toast } from "@/components/ui/use-toast";
+import { generateReferralCode } from "@/lib/generation-utils";
 
 export default function Register() {
+  const navigate = useNavigate();
+  const urlParams = useMemo(() => new URLSearchParams(window.location.search), []);
+  const refCode = urlParams.get("ref");
+
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [acceptCGU, setAcceptCGU] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
@@ -22,16 +30,35 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
+
+    if (username.trim().length < 3) {
+      setError("Le nom d'utilisateur doit comporter au moins 3 caractères.");
       return;
     }
+    if (password !== confirmPassword) {
+      setError("Les mots de passe ne correspondent pas.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Le mot de passe doit comporter au moins 6 caractères.");
+      return;
+    }
+    if (!acceptCGU) {
+      setError("Vous devez accepter les Conditions d'utilisation et la Politique de confidentialité.");
+      return;
+    }
+
     setLoading(true);
     try {
-      await base44.auth.register({ email, password });
+      await base44.auth.register({ email: email.trim(), password });
       setShowOtp(true);
     } catch (err) {
-      setError(err.message || "Registration failed");
+      const msg = err.message || "L'inscription a échoué";
+      if (msg.toLowerCase().includes("already") || msg.toLowerCase().includes("exist")) {
+        setError("Cet email est déjà utilisé.");
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -41,13 +68,24 @@ export default function Register() {
     setError("");
     setLoading(true);
     try {
-      const result = await base44.auth.verifyOtp({ email, otpCode });
+      const result = await base44.auth.verifyOtp({ email: email.trim(), otpCode });
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
       }
-      window.location.href = "/";
+      const refCodeGen = generateReferralCode(username.trim());
+      await base44.auth.updateMe({
+        username: username.trim(),
+        full_name: username.trim(),
+        country: "Sénégal",
+        referral_code: refCodeGen,
+        referred_by: refCode || null,
+        diamonds: 0,
+        free_trial_used: false,
+        role: "user",
+      });
+      window.location.href = "/app";
     } catch (err) {
-      setError(err.message || "Invalid verification code");
+      setError(err.message || "Code de vérification invalide");
     } finally {
       setLoading(false);
     }
@@ -56,26 +94,23 @@ export default function Register() {
   const handleResend = async () => {
     setError("");
     try {
-      await base44.auth.resendOtp(email);
-      toast({
-        title: "Code sent",
-        description: "Check your email for the new code.",
-      });
+      await base44.auth.resendOtp(email.trim());
+      toast({ title: "Code envoyé", description: "Vérifiez votre boîte mail." });
     } catch (err) {
-      setError(err.message || "Failed to resend code");
+      setError(err.message || "Échec de l'envoi du code");
     }
   };
 
   const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", "/");
+    base44.auth.loginWithProvider("google", "/app");
   };
 
   if (showOtp) {
     return (
       <AuthLayout
         icon={Mail}
-        title="Verify your email"
-        subtitle={`We sent a code to ${email}`}
+        title="Vérifiez votre email"
+        subtitle={`Un code a été envoyé à ${email}`}
       >
         {error && (
           <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
@@ -108,16 +143,16 @@ export default function Register() {
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Verifying...
+              Vérification...
             </>
           ) : (
-            "Verify"
+            "Vérifier"
           )}
         </Button>
         <p className="text-center text-sm text-muted-foreground mt-4">
-          Didn't receive the code?{" "}
+          Pas reçu le code ?{" "}
           <button onClick={handleResend} className="text-primary font-medium hover:underline">
-            Resend
+            Renvoyer
           </button>
         </p>
       </AuthLayout>
@@ -127,13 +162,13 @@ export default function Register() {
   return (
     <AuthLayout
       icon={UserPlus}
-      title="Create your account"
-      subtitle="Sign up to get started"
+      title="Créer mon compte"
+      subtitle="Rejoignez le premier studio IA social d'Afrique"
       footer={
         <>
-          Already have an account?{" "}
+          Déjà un compte ?{" "}
           <Link to="/login" className="text-primary font-medium hover:underline">
-            Log in
+            Se connecter
           </Link>
         </>
       }
@@ -144,7 +179,7 @@ export default function Register() {
         onClick={handleGoogle}
       >
         <GoogleIcon className="w-5 h-5 mr-2" />
-        Continue with Google
+        Continuer avec Google
       </Button>
 
       <div className="relative mb-6">
@@ -152,7 +187,7 @@ export default function Register() {
           <div className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-3 text-muted-foreground">or</span>
+          <span className="bg-card px-3 text-muted-foreground">ou</span>
         </div>
       </div>
 
@@ -164,6 +199,24 @@ export default function Register() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
+          <Label htmlFor="username">Nom d'utilisateur</Label>
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+            <Input
+              id="username"
+              type="text"
+              autoFocus
+              placeholder="votre_nom"
+              value={username}
+              onChange={(e) => setUsername(e.target.value.replace(/\s+/g, "_"))}
+              className="pl-10 h-12"
+              required
+              minLength={3}
+              maxLength={30}
+            />
+          </div>
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
@@ -171,17 +224,16 @@ export default function Register() {
               id="email"
               type="email"
               autoComplete="email"
-              autoFocus
-              placeholder="you@example.com"
+              placeholder="vous@exemple.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value.trim())}
               className="pl-10 h-12"
               required
             />
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">Mot de passe</Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
@@ -193,11 +245,12 @@ export default function Register() {
               onChange={(e) => setPassword(e.target.value)}
               className="pl-10 h-12"
               required
+              minLength={6}
             />
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="confirm">Confirm Password</Label>
+          <Label htmlFor="confirm">Confirmer le mot de passe</Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
@@ -209,17 +262,40 @@ export default function Register() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="pl-10 h-12"
               required
+              minLength={6}
             />
           </div>
         </div>
+        <div className="flex items-start gap-2 pt-1">
+          <Checkbox
+            id="cgu"
+            checked={acceptCGU}
+            onCheckedChange={setAcceptCGU}
+            className="mt-0.5"
+          />
+          <label htmlFor="cgu" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
+            J'accepte les{" "}
+            <a href="#" className="text-primary hover:underline">Conditions d'utilisation</a>
+            {" "}et la{" "}
+            <a href="#" className="text-primary hover:underline">Politique de confidentialité</a>
+          </label>
+        </div>
+
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
+          <Gift className="w-4 h-4 text-primary flex-shrink-0" />
+          <p className="text-xs text-muted-foreground">
+            Recevez gratuitement votre première génération vidéo après votre inscription.
+          </p>
+        </div>
+
         <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Creating account...
+              Création...
             </>
           ) : (
-            "Create account"
+            "Créer mon compte"
           )}
         </Button>
       </form>

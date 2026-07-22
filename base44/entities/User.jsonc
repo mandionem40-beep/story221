@@ -1,17 +1,44 @@
 {
+  "name": "User",
+  "type": "object",
   "properties": {
+    "username": {
+      "type": "string"
+    },
+    "bio": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "avatar_url": {
+      "type": "string"
+    },
     "role": {
       "type": "string",
-      "description": "The role of the user in the app",
       "enum": [
-        "admin",
-        "user"
-      ]
+        "user",
+        "super_admin"
+      ],
+      "default": "user"
+    },
+    "diamonds": {
+      "type": "integer",
+      "default": 0
+    },
+    "free_trial_used": {
+      "type": "boolean",
+      "default": false
+    },
+    "referral_code": {
+      "type": "string"
+    },
+    "referred_by": {
+      "type": "string"
+    },
+    "referral_rewarded": {
+      "type": "boolean",
+      "default": false
     }
-  },
-  "required": [
-    "role"
-  ],
-  "name": "User",
-  "type": "object"
+  }
 }

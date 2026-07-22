@@ -1,0 +1,12 @@
+{
+  "name": "Favorite",
+  "type": "object",
+  "properties": {
+    "reel_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "reel_id"
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "name": "Generation",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "video",
+        "image",
+        "film",
+        "serie",
+        "anime",
+        "cartoon",
+        "ad",
+        "storyboard",
+        "story",
+        "music_clip",
+        "voice",
+        "character"
+      ],
+      "default": "video"
+    },
+    "title": {
+      "type": "string"
+    },
+    "prompt": {
+      "type": "string"
+    },
+    "enhanced_script": {
+      "type": "string"
+    },
+    "scenes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "characters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processing",
+        "completed",
+        "failed"
+      ],
+      "default": "pending"
+    },
+    "pipeline_step": {
+      "type": "string"
+    },
+    "cost_diamonds": {
+      "type": "integer",
+      "default": 0
+    },
+    "duration_minutes": {
+      "type": "integer",
+      "default": 1
+    },
+    "language": {
+      "type": "string",
+      "default": "Fran\u00e7ais"
+    },
+    "style": {
+      "type": "string"
+    },
+    "format": {
+      "type": "string"
+    },
+    "voice": {
+      "type": "string"
+    },
+    "music": {
+      "type": "string"
+    },
+    "resolution": {
+      "type": "string"
+    },
+    "result_url": {
+      "type": "string"
+    },
+    "result_type": {
+      "type": "string",
+      "enum": [
+        "video",
+        "image",
+        "audio",
+        "text"
+      ]
+    },
+    "ad_sector": {
+      "type": "string"
+    },
+    "ad_brand_name": {
+      "type": "string"
+    },
+    "ad_logo_url": {
+      "type": "string"
+    },
+    "ad_message": {
+      "type": "string"
+    },
+    "ad_colors": {
+      "type": "string"
+    },
+    "ad_private_use": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_published": {
+      "type": "boolean",
+      "default": false
+    },
+    "reel_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "type",
+    "prompt"
+  ]
+}

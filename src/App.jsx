@@ -1,13 +1,26 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
+import ProtectedRoute from '@/components/ProtectedRoute';
 // Add page imports here
 import Landing from './pages/Landing';
+import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import ForgotPassword from '@/pages/ForgotPassword';
+import ResetPassword from '@/pages/ResetPassword';
+import Layout from '@/components/dashboard/Layout';
+import Home from '@/pages/Home';
+import Create from '@/pages/Create';
+import Library from '@/pages/Library';
+import Reels from '@/pages/Reels';
+import Diamonds from '@/pages/Diamonds';
+import Profile from '@/pages/Profile';
+import SuperAdmin from '@/pages/SuperAdmin';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -35,9 +48,23 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-    {/* Add your page Route elements here */}
-    <Route path="/" element={<Landing />} />
-    <Route path="*" element={<PageNotFound />} />
+      <Route path="/" element={<Landing />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+        <Route element={<Layout />}>
+          <Route path="/app" element={<Home />} />
+          <Route path="/app/create" element={<Create />} />
+          <Route path="/app/library" element={<Library />} />
+          <Route path="/app/reels" element={<Reels />} />
+          <Route path="/app/diamonds" element={<Diamonds />} />
+          <Route path="/app/profile" element={<Profile />} />
+        </Route>
+        <Route path="/admin" element={<SuperAdmin />} />
+      </Route>
+      <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
 };

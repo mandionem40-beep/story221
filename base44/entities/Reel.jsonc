@@ -1,0 +1,47 @@
+{
+  "name": "Reel",
+  "type": "object",
+  "properties": {
+    "generation_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "video_url": {
+      "type": "string"
+    },
+    "thumbnail_url": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "video",
+        "image",
+        "story"
+      ]
+    },
+    "views": {
+      "type": "integer",
+      "default": 0
+    },
+    "trending_score": {
+      "type": "number",
+      "default": 0
+    },
+    "author_name": {
+      "type": "string"
+    },
+    "author_avatar": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "generation_id",
+    "title"
+  ]
+}

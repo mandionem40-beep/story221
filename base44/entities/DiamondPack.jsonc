@@ -1,0 +1,32 @@
+{
+  "name": "DiamondPack",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "diamonds": {
+      "type": "integer"
+    },
+    "price_fcfa": {
+      "type": "integer"
+    },
+    "popular": {
+      "type": "boolean",
+      "default": false
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "display_order": {
+      "type": "integer",
+      "default": 0
+    }
+  },
+  "required": [
+    "name",
+    "diamonds",
+    "price_fcfa"
+  ]
+}
