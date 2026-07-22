@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,13 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [otpCode, setOtpCode] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setTimeout(() => setResendCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendCooldown]);
 
   const fullPhone = `${phonePrefix}${phoneNumber.trim()}`;
   const detectedCountry = countryPrefixes.find((c) => c.prefix === phonePrefix);
@@ -65,7 +72,9 @@ export default function Register() {
 
     setLoading(true);
     try {
-      await base44.auth.register({ email: email.trim(), password });
+      const cleanEmail = email.trim().toLowerCase();
+      await base44.auth.register({ email: cleanEmail, password });
+      setEmail(cleanEmail);
       setShowOtp(true);
     } catch (err) {
       const msg = err.message || "L'inscription a échoué";
@@ -83,7 +92,7 @@ export default function Register() {
     setError("");
     setLoading(true);
     try {
-      const result = await base44.auth.verifyOtp({ email: email.trim(), otpCode });
+      const result = await base44.auth.verifyOtp({ email: email.trim().toLowerCase(), otpCode });
       if (!result?.access_token) {
         throw new Error("Réponse invalide du serveur. Veuillez réessayer.");
       }
@@ -112,8 +121,9 @@ export default function Register() {
   const handleResend = async () => {
     setError("");
     try {
-      await base44.auth.resendOtp(email.trim());
-      toast({ title: "Code envoyé", description: "Vérifiez votre boîte mail." });
+      await base44.auth.resendOtp(email.trim().toLowerCase());
+      toast({ title: "Code envoyé", description: "Vérifiez votre boîte mail et vos spams." });
+      setResendCooldown(45);
     } catch (err) {
       setError(err.message || "Échec de l'envoi du code");
     }
@@ -171,15 +181,22 @@ export default function Register() {
             "Vérifier"
           )}
         </Button>
-        <div className="mt-4 p-3 rounded-lg bg-secondary/50 border border-border">
+        <div className="mt-4 p-3 rounded-lg bg-secondary/50 border border-border space-y-1">
           <p className="text-xs text-muted-foreground text-center">
-            💡 Vérifiez votre dossier Spam ou Courriers indésirables si vous ne recevez pas le code.
+            💡 Pas de code ? Vérifiez vos <strong>Spams</strong> / Courriers indésirables.
+          </p>
+          <p className="text-xs text-muted-foreground text-center">
+            Ajoutez <strong className="text-foreground">app@base44.com</strong> à vos contacts pour garantir la réception.
           </p>
         </div>
         <p className="text-center text-sm text-muted-foreground mt-4">
           Pas reçu le code ?{" "}
-          <button onClick={handleResend} className="text-primary font-medium hover:underline">
-            Renvoyer
+          <button
+            onClick={handleResend}
+            disabled={resendCooldown > 0}
+            className="text-primary font-medium hover:underline disabled:text-muted-foreground disabled:no-underline"
+          >
+            {resendCooldown > 0 ? `Renvoyer dans ${resendCooldown}s` : "Renvoyer"}
           </button>
         </p>
       </AuthLayout>
