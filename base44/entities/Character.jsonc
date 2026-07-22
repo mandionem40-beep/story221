@@ -16,6 +16,24 @@
     },
     "image_url": {
       "type": "string"
+    },
+    "age": {
+      "type": "string"
+    },
+    "personality": {
+      "type": "string"
+    },
+    "clothing": {
+      "type": "string"
+    },
+    "emotions": {
+      "type": "string"
+    },
+    "speech_style": {
+      "type": "string"
+    },
+    "reference_image_url": {
+      "type": "string"
     }
   },
   "required": [

@@ -38,6 +38,7 @@ export async function runGenerationPipeline(config, callbacks) {
       onStep(scriptStepIdx);
       const res = await base44.functions.invoke("claude-director", {
         prompt, type, options, mode: mode || "create", previousGeneration: previousGeneration || null,
+        reference_images: options.reference_images || [],
       });
       const pkg = res.data || {};
       title = pkg.title || "Création sans titre";
@@ -48,6 +49,11 @@ export async function runGenerationPipeline(config, callbacks) {
         appearance: c.appearance || c.clothing || "",
         voice: c.voice || "",
         image_url: c.image_url,
+        age: c.age || "",
+        personality: c.personality || "",
+        clothing: c.clothing || "",
+        emotions: c.emotions || "",
+        speech_style: c.speech_style || "",
       }));
       scenes = (pkg.scenes || []).map(s => typeof s === "string" ? s : (s.description || `Scène ${s.number || ""}`));
       dialogues = pkg.dialogues || [];
@@ -111,7 +117,7 @@ export async function runGenerationPipeline(config, callbacks) {
       try {
         const videoResult = await base44.integrations.Core.GenerateVideo({
           prompt: (enginePrompts.video || buildVideoFallbackPrompt(enhancedScript, characters, options, scenes)).substring(0, 500),
-          duration: 4,
+          duration: 8,
           aspect_ratio: aspectRatio,
         });
         videoUrl = videoResult.url;

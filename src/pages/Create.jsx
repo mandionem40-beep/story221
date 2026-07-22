@@ -74,6 +74,7 @@ export default function Create() {
       ad_message: genType === "ad" ? options.adMessage : undefined,
       ad_colors: genType === "ad" ? options.adColors : undefined,
       ad_private_use: genType === "ad" ? options.adPrivateUse : false,
+      reference_images: options.reference_images || [],
     });
     setGeneration(gen);
 
@@ -198,6 +199,7 @@ export default function Create() {
       type: genType, prompt, cost_diamonds: cost, duration_minutes: options.duration,
       language: options.language, style: options.style, format: options.format, voice: options.voice,
       music: options.music, resolution: options.resolution, status: "processing", pipeline_step: "script",
+      reference_images: continueGen.reference_images || [],
     });
     setGeneration(gen);
     const newBalance = useFreeTrial ? user.diamonds : user.diamonds - cost;

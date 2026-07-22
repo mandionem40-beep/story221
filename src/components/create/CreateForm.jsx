@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Upload, Loader2, Diamond, Gift, AlertCircle } from "lucide-react";
+import { Upload, Loader2, Diamond, Gift, AlertCircle, X } from "lucide-react";
 import { styles, formats, voices, musics, resolutions, languages, adSectors, calculateCost, getContentType } from "@/lib/generation-utils";
 import { base44 } from "@/api/base44Client";
 import { toast } from "@/components/ui/use-toast";
@@ -24,6 +24,7 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit, initial
   const [adColors, setAdColors] = useState("");
   const [adPrivateUse, setAdPrivateUse] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [referenceImages, setReferenceImages] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
   const config = getContentType(type);
@@ -44,6 +45,22 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit, initial
     setUploading(false);
   };
 
+  const handleReferenceUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const result = await base44.integrations.Core.UploadFile({ file });
+      setReferenceImages((prev) => [...prev, result.file_url]);
+    } catch { /* ignore */ }
+    setUploading(false);
+    e.target.value = "";
+  };
+
+  const handleRemoveReference = (idx) => {
+    setReferenceImages((prev) => prev.filter((_, i) => i !== idx));
+  };
+
   const handleSubmit = async () => {
     if (!prompt.trim()) return;
     setSubmitting(true);
@@ -54,6 +71,7 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit, initial
         options: {
           duration, style, format, voice, music, resolution, language,
           adSector, adBrandName, adMessage, adLogoUrl, adColors, adPrivateUse,
+          reference_images: referenceImages,
         },
       });
     } catch (err) {
@@ -91,6 +109,44 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit, initial
           className="w-full min-h-[100px] rounded-xl bg-card border border-border p-3 text-sm text-white placeholder:text-muted-foreground/50 resize-y"
           rows={4}
         />
+      </div>
+
+      {/* Reference images */}
+      <div>
+        <Label className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+          Images de référence (optionnel)
+        </Label>
+        <p className="text-xs text-muted-foreground mb-3">
+          Importez des photos de personnages, décors, objets... Claude les analysera et l'IA les respectera pendant toute la génération.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {referenceImages.map((url, i) => (
+            <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden border border-border group">
+              <img src={url} alt="" className="w-full h-full object-cover" />
+              <button
+                onClick={() => handleRemoveReference(i)}
+                className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X className="w-3 h-3 text-white" />
+              </button>
+            </div>
+          ))}
+          {referenceImages.length < 5 && (
+            <label className="w-20 h-20 rounded-lg border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-primary/40 transition-colors">
+              {uploading ? (
+                <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
+              ) : (
+                <Upload className="w-5 h-5 text-muted-foreground" />
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleReferenceUpload}
+              />
+            </label>
+          )}
+        </div>
       </div>
 
       {/* Duration (for per_minute types) */}
