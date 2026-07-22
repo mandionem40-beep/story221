@@ -73,19 +73,26 @@ export default function Hero() {
 
             {/* Badges */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="mt-8 flex flex-wrap gap-3 justify-center lg:justify-start">
-              
-              {badges.map((badge) =>
-              <div
-                key={badge.label}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/60 border border-border text-xs sm:text-sm text-muted-foreground">
-                
-                  <badge.icon className="w-3.5 h-3.5 text-primary" />
+              className="mt-8 flex flex-wrap gap-2.5 justify-center lg:justify-start"
+            >
+              {badges.map((badge, i) =>
+                <motion.div
+                  key={badge.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.4 + i * 0.1 }}
+                  whileHover={{ y: -3, scale: 1.04 }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-secondary/60 border border-border text-xs sm:text-sm text-muted-foreground hover:border-primary/40 hover:text-white hover:bg-secondary transition-colors cursor-default"
+                >
+                  <motion.span
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
+                    className="inline-flex"
+                  >
+                    <badge.icon className="w-3.5 h-3.5 text-primary" />
+                  </motion.span>
                   {badge.label}
-                </div>
+                </motion.div>
               )}
             </motion.div>
           </div>
