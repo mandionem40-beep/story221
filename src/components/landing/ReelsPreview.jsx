@@ -4,34 +4,43 @@ import { Heart, MessageCircle, Share2, Bookmark, Music2 } from "lucide-react";
 
 const reelPreviews = [
   {
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/293e857b4_Air_Sngal_intrieur.mp4",
-    title: "Air Sénégal ✈️ décollage & hôtesses",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/ce83f3a5f_Fruits_amoureux_clins.mp4",
+    title: "Fraise & banane amoureuses 🍓🍌❤️",
     author: "@studio221",
     likes: "124.5K",
     comments: "3.2K",
     shares: "8.9K",
-    song: "Teranga Lounge - Story221",
+    song: "Romance AI - Story221",
   },
   {
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/8fe79f431_BRT_intrieur_joyeux.mp4",
-    title: "BRT Dakar 🚌 passagers joyeux",
-    author: "@ad_lab",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/88193005f_Air_Sngal_dcollage_htesses.mp4",
+    title: "Air Sénégal ✈️ décollage & hôtesses",
+    author: "@studio221",
     likes: "211.8K",
     comments: "5.4K",
     shares: "12.3K",
+    song: "Teranga Lounge - Story221",
+  },
+  {
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/e894e035f_BRT_Dakar_intrieur.mp4",
+    title: "BRT Dakar 🚌 passagers joyeux",
+    author: "@ad_lab",
+    likes: "342.1K",
+    comments: "9.8K",
+    shares: "21.5K",
     song: "Afro Future - Teranga Beat",
   },
   {
     video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/f2e612431_Prsident_descend_avion.mp4",
     title: "Le Président descend de l'avion ✈️🇸🇳",
     author: "@aisha_creates",
-    likes: "342.1K",
-    comments: "9.8K",
-    shares: "21.5K",
+    likes: "276.4K",
+    comments: "8.1K",
+    shares: "18.9K",
     song: "Hype Beat - Story221",
   },
   {
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/e4a84669e_Sadio_Man_dribble_lion.mp4",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/eaf4bde31_Sadio_Man_dribble_lion.mp4",
     title: "Sadio Mané dribble un lion 🦁⚽",
     author: "@motion.afrik",
     likes: "489.2K",
@@ -40,12 +49,12 @@ const reelPreviews = [
     song: "Allez les Lions - Viral Mix",
   },
   {
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/8b392fb92_Kankourang_vole.mp4",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/6d1996c8c_Kankourang_vole_raliste.mp4",
     title: "Le Kankourang vole dans la nuit 🔴",
     author: "@aisha_creates",
-    likes: "276.4K",
-    comments: "8.1K",
-    shares: "18.9K",
+    likes: "156.7K",
+    comments: "4.2K",
+    shares: "9.8K",
     song: "Mystique Beat - Teranga Nights",
   },
 ];
@@ -56,7 +65,7 @@ function ReelFeed() {
   useEffect(() => {
     const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % reelPreviews.length);
-    }, 5000);
+    }, 7000);
     return () => clearInterval(timer);
   }, []);
 
