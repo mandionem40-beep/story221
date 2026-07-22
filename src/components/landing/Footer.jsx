@@ -1,4 +1,5 @@
-import { Sparkles, Instagram, Facebook, Youtube, Music2 } from "lucide-react";
+import { Instagram, Facebook, Youtube, Music2 } from "lucide-react";
+import Logo from "@/components/Logo";
 
 const footerLinks = {
   "À propos": ["Notre histoire", "Équipe", "Carrières", "Blog"],
@@ -20,13 +21,8 @@ export default function Footer() {
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Logo + description */}
           <div className="col-span-2">
-            <a href="#hero" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center glow-red-sm">
-                <Sparkles className="w-4 h-4 text-white" />
-              </div>
-              <span className="text-xl font-bold text-white">
-                Story<span className="gradient-text-red">221</span>
-              </span>
+            <a href="#hero" className="mb-4 inline-block">
+              <Logo size="md" />
             </a>
             <p className="text-sm text-muted-foreground max-w-xs">
               Le premier studio IA social d'Afrique. Créez des films, vidéos et histoires à partir d'un simple prompt.

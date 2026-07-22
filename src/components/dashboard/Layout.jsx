@@ -2,8 +2,9 @@ import { useEffect, useState, useCallback } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
-import { Home, Library, Clapperboard, Diamond, User, Sparkles, LogOut, Bell } from "lucide-react";
+import { Home, Library, Clapperboard, Diamond, User, LogOut, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Logo from "@/components/Logo";
 
 const navItems = [
   { label: "Accueil", icon: Home, path: "/app" },
@@ -51,13 +52,8 @@ export default function Layout() {
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-64 flex-col bg-card border-r border-border z-40">
         <div className="p-6">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center glow-red-sm">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-lg font-bold text-white">
-              Story<span className="gradient-text-red">221</span>
-            </span>
+          <Link to="/">
+            <Logo size="md" />
           </Link>
         </div>
 
@@ -115,13 +111,8 @@ export default function Layout() {
 
       {/* Mobile Top Bar */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-background/80 backdrop-blur-xl border-b border-border flex items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-white" />
-          </div>
-          <span className="text-base font-bold text-white">
-            Story<span className="gradient-text-red">221</span>
-          </span>
+        <Link to="/">
+          <Logo size="sm" />
         </Link>
         <Link
           to="/app/diamonds"

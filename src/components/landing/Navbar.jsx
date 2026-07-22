@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Logo from "@/components/Logo";
 
 const navLinks = [
   { label: "Accueil", href: "#hero" },
@@ -31,13 +31,8 @@ export default function Navbar() {
       <nav className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-18 gap-2">
           {/* Logo */}
-          <a href="#hero" className="flex items-center gap-2 group flex-shrink-0">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center glow-red-sm transition-transform group-hover:scale-110">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-lg sm:text-xl font-bold tracking-tight text-white whitespace-nowrap">
-              Story<span className="gradient-text-red">221</span>
-            </span>
+          <a href="#hero" className="group flex-shrink-0">
+            <Logo size="md" />
           </a>
 
           {/* Nav links — always visible, scrollable on mobile */}
