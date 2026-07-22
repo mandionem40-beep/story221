@@ -20,7 +20,7 @@ export default function ShowcaseGallery() {
   }, []);
 
   return (
-    <section id="showcase" className="py-20 lg:py-28">
+    <section id="showcase" className="pt-8 lg:pt-12 pb-20 lg:pb-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">

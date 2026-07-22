@@ -4,6 +4,7 @@ import Features from "@/components/landing/Features";
 import HowItWorks from "@/components/landing/HowItWorks";
 import ReelsPreview from "@/components/landing/ReelsPreview";
 import ShowcaseGallery from "@/components/landing/ShowcaseGallery";
+import Reviews from "@/components/landing/Reviews";
 import Pricing from "@/components/landing/Pricing";
 import FAQ from "@/components/landing/FAQ";
 import FinalCTA from "@/components/landing/FinalCTA";
@@ -19,6 +20,7 @@ export default function Landing() {
         <Features />
         <HowItWorks />
         <ReelsPreview />
+        <Reviews />
         <Pricing />
         <FAQ />
         <FinalCTA />
