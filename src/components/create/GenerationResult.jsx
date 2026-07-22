@@ -161,6 +161,8 @@ export default function GenerationResult({ generation, result, onPublish, onNew 
         <ShareModal
           url={result?.resultUrl || `${window.location.origin}/app/reels`}
           title={result?.title || generation?.title || "Ma création Story221"}
+          mediaUrl={result?.resultUrl}
+          mediaType={result?.resultType}
           onClose={() => setShowShare(false)}
         />
       )}

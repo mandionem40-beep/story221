@@ -1,12 +1,17 @@
 import { useState } from "react";
-import { X, Copy, Check, MessageCircle, Facebook, Instagram, Music, Share2 } from "lucide-react";
+import { X, Copy, Check, MessageCircle, Facebook, Instagram, Music, Share2, Loader2, Send } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { base44 } from "@/api/base44Client";
 
-export default function ShareModal({ url, title, onClose }) {
+export default function ShareModal({ url, title, mediaUrl, mediaType, onClose }) {
   const [copied, setCopied] = useState(false);
+  const [igPublishing, setIgPublishing] = useState(false);
+  const [igPublished, setIgPublished] = useState(false);
 
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title || "Regardez ma création sur Story221 !");
+
+  const canAutoPublishIg = !!mediaUrl && (mediaType === "image" || mediaType === "video");
 
   const handleCopy = () => {
     navigator.clipboard?.writeText(url);
@@ -30,6 +35,26 @@ export default function ShareModal({ url, title, onClose }) {
       toast({ title: "Lien copié !", description: "Collez-le dans l'application." });
     }
     window.open(platformUrl, "_blank");
+  };
+
+  const handleInstagramPublish = async () => {
+    setIgPublishing(true);
+    try {
+      const response = await base44.functions.invoke("instagram-publish", {
+        mediaUrl,
+        caption: `${title || "Ma création Story221"}\n\n#story221 #ia #creation`,
+        mediaType,
+      });
+      if (response.data?.success) {
+        setIgPublished(true);
+        toast({ title: "Publié sur Instagram !", description: "Votre création est en ligne sur le compte officiel Story221." });
+      } else {
+        throw new Error(response.data?.error || "Échec");
+      }
+    } catch (err) {
+      toast({ title: "Erreur Instagram", description: "Impossible de publier sur Instagram.", variant: "destructive" });
+    }
+    setIgPublishing(false);
   };
 
   const platforms = [
@@ -64,7 +89,7 @@ export default function ShareModal({ url, title, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="bg-card rounded-t-2xl sm:rounded-2xl border border-border w-full sm:max-w-sm p-6 animate-slide-up"
+        className="bg-card rounded-t-2xl sm:rounded-2xl border border-border w-full sm:max-w-sm p-6 animate-slide-up max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
@@ -85,6 +110,37 @@ export default function ShareModal({ url, title, onClose }) {
               <span className="text-xs text-muted-foreground">{p.name}</span>
             </button>
           ))}
+        </div>
+
+        {/* Auto-publication Instagram sur le compte officiel Story221 */}
+        <div className="mb-5 p-4 rounded-xl bg-gradient-to-r from-purple-600/10 to-pink-500/10 border border-purple-500/20">
+          <div className="flex items-start gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center flex-shrink-0">
+              <Instagram className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-white">Publication auto Instagram</p>
+              <p className="text-xs text-muted-foreground">
+                {canAutoPublishIg
+                  ? "Publier sur le compte officiel Story221"
+                  : "Disponible pour les vidéos et images uniquement"}
+              </p>
+            </div>
+            {igPublished && <Check className="w-5 h-5 text-green-500 flex-shrink-0" />}
+          </div>
+          <button
+            onClick={handleInstagramPublish}
+            disabled={!canAutoPublishIg || igPublishing || igPublished}
+            className="w-full h-10 rounded-lg bg-gradient-to-r from-purple-600 to-pink-500 text-white text-sm font-medium flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+          >
+            {igPublishing ? (
+              <><Loader2 className="w-4 h-4 animate-spin" />Publication en cours...</>
+            ) : igPublished ? (
+              <><Check className="w-4 h-4" />Publié !</>
+            ) : (
+              <><Send className="w-4 h-4" />Publier sur Story221</>
+            )}
+          </button>
         </div>
 
         <div className="space-y-2">
