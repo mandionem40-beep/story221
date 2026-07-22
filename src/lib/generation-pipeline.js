@@ -22,16 +22,19 @@ function buildScriptPrompt(prompt, type, options) {
   return p;
 }
 
-function buildVideoPrompt(script, characters, options) {
-  let p = `${script}\n\n`;
+function buildVideoPrompt(script, characters, options, scenes) {
+  const sceneDesc = scenes && scenes.length > 0
+    ? scenes.slice(0, 3).join(" ")
+    : script;
+  let p = `Cinematic video scene: ${sceneDesc}`;
   if (characters.length > 0) {
-    p += `Personnages: ${characters.map(c => `${c.name} (${c.appearance || c.description})`).join(", ")}.\n`;
+    p += `. Characters: ${characters.map(c => c.appearance || c.description || c.name).slice(0, 2).join(", ")}`;
   }
-  p += `Style visuel: ${options.style}. Format: ${options.format}. Résolution: ${options.resolution}.`;
+  p += `. Visual style: ${options.style || "Cinématique"}. High quality, detailed, professional lighting, smooth camera motion.`;
   if (options.music && options.music !== "Aucune") {
-    p += ` Ambiance musicale: ${options.music}.`;
+    p += ` Mood: ${options.music}.`;
   }
-  return p.substring(0, 800);
+  return p.substring(0, 500);
 }
 
 function buildImagePrompt(prompt, options) {
@@ -155,14 +158,26 @@ export async function runGenerationPipeline(config, callbacks) {
     const videoStepIdx = steps.findIndex(s => s.id === "video");
     if (videoStepIdx >= 0) {
       onStep(videoStepIdx);
+      const aspectRatio = options.format === "vertical" ? "9:16" : "16:9";
       try {
         const videoResult = await base44.integrations.Core.GenerateVideo({
-          prompt: buildVideoPrompt(enhancedScript, characters, options),
+          prompt: buildVideoPrompt(enhancedScript, characters, options, scenes),
           duration: 4,
-          aspect_ratio: options.format === "vertical" ? "9:16" : options.format === "square" ? "16:9" : "16:9",
+          aspect_ratio: aspectRatio,
         });
         videoUrl = videoResult.url;
-      } catch { /* continue without video — fall back to images */ }
+      } catch (videoErr) {
+        console.error("Video generation failed:", videoErr);
+        // Fallback: generate a thumbnail image so the user gets a visual result
+        try {
+          const imgResult = await base44.integrations.Core.GenerateImage({
+            prompt: buildImagePrompt(buildVideoPrompt(enhancedScript, characters, options, scenes), options),
+          });
+          imageUrl = imgResult.url;
+        } catch (imgErr) {
+          console.error("Image fallback also failed:", imgErr);
+        }
+      }
       await base44.entities.Generation.update(generationId, { pipeline_step: "video" });
     }
 
