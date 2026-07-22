@@ -42,14 +42,7 @@ export default function Hero() {
                   className="inline-block mr-[0.3em]"
                 >
                   <motion.span
-                    animate={{
-                      y: [0, -4, 0],
-                      textShadow: [
-                        "0 0 0px rgba(255,255,255,0)",
-                        "0 0 14px rgba(255,255,255,0.2)",
-                        "0 0 0px rgba(255,255,255,0)",
-                      ],
-                    }}
+                    animate={{ y: [0, -3, 0] }}
                     transition={{ duration: 3.5, repeat: Infinity, delay: i * 0.4, ease: "easeInOut" }}
                     className="inline-block"
                   >
@@ -87,14 +80,7 @@ export default function Hero() {
                   className="inline-block mr-[0.3em]"
                 >
                   <motion.span
-                    animate={{
-                      y: [0, -4, 0],
-                      textShadow: [
-                        "0 0 0px rgba(255,255,255,0)",
-                        "0 0 14px rgba(255,255,255,0.2)",
-                        "0 0 0px rgba(255,255,255,0)",
-                      ],
-                    }}
+                    animate={{ y: [0, -3, 0] }}
                     transition={{ duration: 3.5, repeat: Infinity, delay: 0.3 + i * 0.4, ease: "easeInOut" }}
                     className="inline-block"
                   >
