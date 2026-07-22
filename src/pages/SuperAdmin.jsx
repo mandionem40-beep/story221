@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
-import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp } from "lucide-react";
+import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import AnalyticsTab from "@/components/admin/AnalyticsTab";
 import AdjustCreditsDialog from "@/components/admin/AdjustCreditsDialog";
@@ -12,6 +12,7 @@ const tabs = [
   { id: "packs", label: "Packs", icon: Package },
   { id: "transactions", label: "Transactions", icon: CreditCard },
   { id: "reels", label: "Reels", icon: Clapperboard },
+  { id: "showcase", label: "Vitrine", icon: Video },
   { id: "reports", label: "Signalements", icon: Flag },
   { id: "logs", label: "Logs", icon: ScrollText },
   { id: "analytics", label: "Analytics", icon: TrendingUp },
@@ -23,6 +24,7 @@ export default function SuperAdmin() {
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(true);
   const [newPack, setNewPack] = useState({ name: "", diamonds: 0, price_fcfa: 0, popular: false });
+  const [newShowcase, setNewShowcase] = useState({ title: "", subtitle: "", tags: "", video_url: "", thumbnail_url: "" });
   const [adjustUser, setAdjustUser] = useState(null);
   const [showAdjust, setShowAdjust] = useState(false);
 
@@ -55,6 +57,8 @@ export default function SuperAdmin() {
         result = { transactions: await base44.entities.Transaction.list("-created_date", 200) };
       } else if (tab === "reels") {
         result = { reels: await base44.entities.Reel.list("-created_date", 200) };
+      } else if (tab === "showcase") {
+        result = { showcases: await base44.entities.ShowcaseVideo.list("display_order", 200) };
       } else if (tab === "reports") {
         result = { reports: await base44.entities.Report.list("-created_date", 200) };
       } else if (tab === "logs") {
@@ -88,6 +92,37 @@ export default function SuperAdmin() {
     logAction("delete_reel", `Reel ${reelId} supprimé`);
     loadTabData("reels");
     toast({ title: "Reel supprimé" });
+  };
+
+  const handleAddShowcase = async () => {
+    if (!newShowcase.title) return;
+    const tags = newShowcase.tags ? newShowcase.tags.split(",").map(t => t.trim()).filter(Boolean) : [];
+    await base44.entities.ShowcaseVideo.create({
+      title: newShowcase.title,
+      subtitle: newShowcase.subtitle,
+      tags,
+      video_url: newShowcase.video_url,
+      thumbnail_url: newShowcase.thumbnail_url,
+      active: true,
+      display_order: (data.showcases?.length || 0) + 1,
+    });
+    logAction("add_showcase", `Vidéo vitrine "${newShowcase.title}" ajoutée`);
+    setNewShowcase({ title: "", subtitle: "", tags: "", video_url: "", thumbnail_url: "" });
+    loadTabData("showcase");
+    toast({ title: "Vidéo ajoutée à la vitrine" });
+  };
+
+  const handleToggleShowcase = async (item) => {
+    await base44.entities.ShowcaseVideo.update(item.id, { active: !item.active });
+    loadTabData("showcase");
+  };
+
+  const handleDeleteShowcase = async (id) => {
+    if (!confirm("Supprimer cette vidéo de la vitrine ?")) return;
+    await base44.entities.ShowcaseVideo.delete(id);
+    logAction("delete_showcase", `Vidéo vitrine ${id} supprimée`);
+    loadTabData("showcase");
+    toast({ title: "Vidéo supprimée" });
   };
 
   const handleResolveReport = async (reportId) => {
@@ -311,6 +346,68 @@ export default function SuperAdmin() {
                       <button onClick={() => handleDeleteReel(reel.id)} className="w-9 h-9 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center">
                         <Trash2 className="w-4 h-4" />
                       </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Showcase tab */}
+            {activeTab === "showcase" && (
+              <div>
+                <h2 className="text-xl font-bold text-white mb-6">Vitrine — Vidéos en vedette</h2>
+                <p className="text-sm text-muted-foreground mb-4">Ces vidéos apparaissent sur la page d'accueil dans la section "Ils ont créé ça avec Story221".</p>
+
+                <div className="rounded-2xl bg-card border border-border p-4 mb-6">
+                  <h3 className="text-sm font-semibold text-white mb-3">Ajouter une vidéo</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                    <input value={newShowcase.title} onChange={e => setNewShowcase({...newShowcase, title: e.target.value})} placeholder="Titre *" className="h-10 rounded-lg bg-background border border-border px-3 text-sm text-white" />
+                    <input value={newShowcase.subtitle} onChange={e => setNewShowcase({...newShowcase, subtitle: e.target.value})} placeholder="Sous-titre (ex: Style Afrobeat)" className="h-10 rounded-lg bg-background border border-border px-3 text-sm text-white" />
+                    <input value={newShowcase.tags} onChange={e => setNewShowcase({...newShowcase, tags: e.target.value})} placeholder="Tags séparés par virgules (ex: ANNIVERSAIRE, FÊTE)" className="h-10 rounded-lg bg-background border border-border px-3 text-sm text-white" />
+                    <input value={newShowcase.thumbnail_url} onChange={e => setNewShowcase({...newShowcase, thumbnail_url: e.target.value})} placeholder="URL de la miniature (image)" className="h-10 rounded-lg bg-background border border-border px-3 text-sm text-white" />
+                    <input value={newShowcase.video_url} onChange={e => setNewShowcase({...newShowcase, video_url: e.target.value})} placeholder="URL de la vidéo" className="h-10 rounded-lg bg-background border border-border px-3 text-sm text-white sm:col-span-2" />
+                  </div>
+                  <button onClick={handleAddShowcase} className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold flex items-center gap-1.5">
+                    <Plus className="w-4 h-4" />Ajouter à la vitrine
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {(data.showcases || []).map(item => (
+                    <div key={item.id} className="rounded-2xl bg-card border border-border overflow-hidden">
+                      <div className="relative aspect-video bg-secondary">
+                        {item.thumbnail_url ? (
+                          <img src={item.thumbnail_url} alt={item.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Video className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                        )}
+                        {!item.active && (
+                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                            <span className="text-xs text-white font-semibold">Masqué</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-3">
+                        <p className="text-sm font-semibold text-white truncate">{item.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">{item.subtitle || "—"}</p>
+                        {item.tags && item.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {item.tags.map((t, i) => (
+                              <span key={i} className="px-1.5 py-0.5 rounded bg-secondary text-[10px] text-muted-foreground">{t}</span>
+                            ))}
+                          </div>
+                        )}
+                        <div className="flex gap-2 mt-3">
+                          <button onClick={() => handleToggleShowcase(item)} className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-medium ${item.active ? "bg-green-500/20 text-green-500" : "bg-secondary text-muted-foreground"}`}>
+                            {item.active ? "Visible" : "Masqué"}
+                          </button>
+                          <button onClick={() => handleDeleteShowcase(item.id)} className="w-9 h-9 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>

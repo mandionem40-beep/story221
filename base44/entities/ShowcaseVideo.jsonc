@@ -1,0 +1,35 @@
+{
+  "name": "ShowcaseVideo",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "video_url": {
+      "type": "string"
+    },
+    "thumbnail_url": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "display_order": {
+      "type": "integer",
+      "default": 0
+    }
+  },
+  "required": [
+    "title"
+  ]
+}
