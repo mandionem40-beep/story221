@@ -3,12 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Play, Sparkles, Film, Mic, Palette, Clapperboard } from "lucide-react";
 
 const pipelineSteps = [
-  { icon: Sparkles, label: "Prompt", text: "Une fraise en or tombe amoureuse d'une fraise en argent..." },
-  { icon: Film, label: "Scénario", text: "Mandione, une fraise dorée, rencontre Yama, une fraise d'argent..." },
-  { icon: Palette, label: "Personnages", text: "Mandione — fraise dorée · Yama — fraise d'argent" },
-  { icon: Mic, label: "Voix IA", text: "Synthèse vocale en cours..." },
-  { icon: Clapperboard, label: "Film final", text: "Une vidéo complète, prête à publier." },
-];
+{ icon: Sparkles, label: "Prompt", text: "Une fraise en or tombe amoureuse d'une fraise en argent..." },
+{ icon: Film, label: "Scénario", text: "Mandione, une fraise dorée, rencontre Yama, une fraise d'argent..." },
+{ icon: Palette, label: "Personnages", text: "Mandione — fraise dorée · Yama — fraise d'argent" },
+{ icon: Mic, label: "Voix IA", text: "Synthèse vocale en cours..." },
+{ icon: Clapperboard, label: "Film final", text: "Une vidéo complète, prête à publier." }];
+
 
 export default function HeroDemo() {
   const [step, setStep] = useState(0);
@@ -23,7 +23,7 @@ export default function HeroDemo() {
   const current = pipelineSteps[step];
 
   return (
-    <div className="relative flex justify-center">
+    <div className="relative flex justify-center hidden">
       {/* Phone mockup */}
       <div className="relative w-[260px] sm:w-[300px] h-[520px] rounded-[2.5rem] bg-card border-2 border-border p-3 overflow-hidden glow-red">
         <div className="w-full h-full rounded-[2rem] bg-background overflow-hidden relative">
@@ -47,8 +47,8 @@ export default function HeroDemo() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.4 }}
-                  className="text-center"
-                >
+                  className="text-center">
+                  
                   <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mx-auto mb-4 glow-red-sm">
                     <current.icon className="w-8 h-8 text-primary" />
                   </div>
@@ -60,14 +60,14 @@ export default function HeroDemo() {
 
             {/* Progress dots */}
             <div className="flex items-center justify-center gap-1.5 pb-6">
-              {pipelineSteps.map((_, i) => (
-                <div
-                  key={i}
-                  className={`h-1 rounded-full transition-all duration-300 ${
-                    i === step ? "w-6 bg-primary" : "w-1.5 bg-border"
-                  }`}
-                />
-              ))}
+              {pipelineSteps.map((_, i) =>
+              <div
+                key={i}
+                className={`h-1 rounded-full transition-all duration-300 ${
+                i === step ? "w-6 bg-primary" : "w-1.5 bg-border"}`
+                } />
+
+              )}
             </div>
 
             {/* Bottom result bar */}
@@ -79,9 +79,9 @@ export default function HeroDemo() {
                     <motion.div
                       className="h-full bg-primary rounded-full"
                       initial={{ width: 0 }}
-                      animate={{ width: `${((step + 1) / pipelineSteps.length) * 100}%` }}
-                      transition={{ duration: 0.5 }}
-                    />
+                      animate={{ width: `${(step + 1) / pipelineSteps.length * 100}%` }}
+                      transition={{ duration: 0.5 }} />
+                    
                   </div>
                   <p className="text-[9px] text-muted-foreground mt-1">{step + 1}/{pipelineSteps.length} étapes</p>
                 </div>
@@ -95,8 +95,8 @@ export default function HeroDemo() {
       <motion.div
         animate={{ y: [0, -8, 0] }}
         transition={{ duration: 3, repeat: Infinity }}
-        className="absolute -top-3 -right-2 sm:right-4 flex items-center gap-1.5 px-3 py-2 rounded-full bg-card border border-border text-xs font-semibold glow-red-sm"
-      >
+        className="absolute -top-3 -right-2 sm:right-4 flex items-center gap-1.5 px-3 py-2 rounded-full bg-card border border-border text-xs font-semibold glow-red-sm">
+        
         <span className="text-base">🎬</span>
         <span className="text-white">IA Cinéma</span>
       </motion.div>
@@ -104,11 +104,11 @@ export default function HeroDemo() {
       <motion.div
         animate={{ y: [0, 8, 0] }}
         transition={{ duration: 3, repeat: Infinity, delay: 1 }}
-        className="absolute bottom-8 -left-2 sm:left-4 flex items-center gap-1.5 px-3 py-2 rounded-full bg-card border border-border text-xs font-semibold"
-      >
+        className="absolute bottom-8 -left-2 sm:left-4 flex items-center gap-1.5 px-3 py-2 rounded-full bg-card border border-border text-xs font-semibold">
+        
         <span className="text-base">⚡</span>
         <span className="text-white">2 min</span>
       </motion.div>
-    </div>
-  );
+    </div>);
+
 }
