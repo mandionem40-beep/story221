@@ -50,7 +50,17 @@ export default function ShowcaseGallery() {
                 onClick={() => setPlaying(video)}
               >
                 <div className="relative aspect-video overflow-hidden">
-                  {video.thumbnail_url ? (
+                  {video.video_url ? (
+                    <video
+                      src={video.video_url}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      preload="metadata"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : video.thumbnail_url ? (
                     <img
                       src={video.thumbnail_url}
                       alt={video.title}
@@ -61,7 +71,7 @@ export default function ShowcaseGallery() {
                       <ImageIcon className="w-8 h-8 text-muted-foreground" />
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity" />
                   <div className="absolute top-3 left-3 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
                     <Play className="w-4 h-4 text-white fill-white ml-0.5" />
                   </div>
