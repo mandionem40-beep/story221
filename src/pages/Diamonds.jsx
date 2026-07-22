@@ -16,6 +16,8 @@ export default function Diamonds() {
     if (params.get('status') === 'success') {
       toast({ title: "Paiement réussi !", description: "Vos diamants seront crédités sous peu." });
       window.history.replaceState({}, '', '/app/diamonds');
+      // L'IPN peut prendre quelques secondes — on rafraîchit après un court délai
+      setTimeout(() => { refreshUser(); loadData(); }, 3000);
     }
     loadData();
   }, []);
