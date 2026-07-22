@@ -84,9 +84,10 @@ export default function Register() {
     setLoading(true);
     try {
       const result = await base44.auth.verifyOtp({ email: email.trim(), otpCode });
-      if (result?.access_token) {
-        base44.auth.setToken(result.access_token);
+      if (!result?.access_token) {
+        throw new Error("Réponse invalide du serveur. Veuillez réessayer.");
       }
+      base44.auth.setToken(result.access_token);
       const refCodeGen = generateReferralCode(username.trim());
       await base44.auth.updateMe({
         username: username.trim(),
@@ -170,6 +171,11 @@ export default function Register() {
             "Vérifier"
           )}
         </Button>
+        <div className="mt-4 p-3 rounded-lg bg-secondary/50 border border-border">
+          <p className="text-xs text-muted-foreground text-center">
+            💡 Vérifiez votre dossier Spam ou Courriers indésirables si vous ne recevez pas le code.
+          </p>
+        </div>
         <p className="text-center text-sm text-muted-foreground mt-4">
           Pas reçu le code ?{" "}
           <button onClick={handleResend} className="text-primary font-medium hover:underline">

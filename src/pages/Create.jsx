@@ -14,6 +14,10 @@ export default function Create() {
   const { currentUser, refreshUser } = useOutletContext();
   const urlParams = useMemo(() => new URLSearchParams(window.location.search), []);
   const [type, setType] = useState(urlParams.get("type") || "video");
+  const [initialPrompt] = useState(urlParams.get("prompt") || "");
+  const [initialDuration] = useState(parseInt(urlParams.get("duration")) || 1);
+  const [initialStyle] = useState(urlParams.get("style") || "");
+  const [initialLanguage] = useState(urlParams.get("language") || "");
   const [phase, setPhase] = useState("form"); // form | pipeline | result | error
   const [currentStep, setCurrentStep] = useState(0);
   const [pipelineError, setPipelineError] = useState(null);
@@ -186,7 +190,7 @@ export default function Create() {
       </div>
 
       {phase === "form" && (
-        <CreateForm type={type} onTypeChange={handleTypeChange} user={currentUser} onSubmit={handleSubmit} />
+        <CreateForm type={type} onTypeChange={handleTypeChange} user={currentUser} onSubmit={handleSubmit} initialPrompt={initialPrompt} initialDuration={initialDuration} initialStyle={initialStyle} initialLanguage={initialLanguage} />
       )}
 
       {(phase === "pipeline" || phase === "error") && (

@@ -8,15 +8,15 @@ import { styles, formats, voices, musics, resolutions, languages, adSectors, cal
 import { base44 } from "@/api/base44Client";
 import { toast } from "@/components/ui/use-toast";
 
-export default function CreateForm({ type, onTypeChange, user, onSubmit }) {
-  const [prompt, setPrompt] = useState("");
-  const [duration, setDuration] = useState(1);
-  const [style, setStyle] = useState(styles[0]);
+export default function CreateForm({ type, onTypeChange, user, onSubmit, initialPrompt = "", initialDuration = 1, initialStyle = "", initialLanguage = "" }) {
+  const [prompt, setPrompt] = useState(initialPrompt);
+  const [duration, setDuration] = useState(initialDuration || 1);
+  const [style, setStyle] = useState(initialStyle || styles[0]);
   const [format, setFormat] = useState("vertical");
   const [voice, setVoice] = useState("river");
   const [music, setMusic] = useState(musics[0]);
   const [resolution, setResolution] = useState("720p");
-  const [language, setLanguage] = useState("Français");
+  const [language, setLanguage] = useState(initialLanguage || "Français");
   const [adSector, setAdSector] = useState(adSectors[0].id);
   const [adBrandName, setAdBrandName] = useState("");
   const [adMessage, setAdMessage] = useState("");

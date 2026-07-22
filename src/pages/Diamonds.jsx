@@ -27,7 +27,7 @@ export default function Diamonds() {
     try {
       const [packData, txData] = await Promise.all([
         base44.entities.DiamondPack.filter({ active: true }),
-        base44.entities.Transaction.list("-created_date", 50),
+        base44.entities.Transaction.filter({ created_by_id: currentUser?.id }, "-created_date", 50),
       ]);
       setPacks((packData || []).sort((a, b) => (a.display_order || 0) - (b.display_order || 0)));
       setTransactions(txData || []);

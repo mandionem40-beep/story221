@@ -1,121 +1,210 @@
-import { useEffect, useState } from "react";
-import { Link, useOutletContext } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Plus, Diamond, Gift, Sparkles } from "lucide-react";
-import { contentTypes } from "@/lib/generation-utils";
+import { useState, useEffect } from "react";
+import { useNavigate, useOutletContext, Link } from "react-router-dom";
+import { Send, Settings, Diamond, Gift, Sparkles, ChevronDown } from "lucide-react";
+import { contentTypes, calculateCost, styles, languages } from "@/lib/generation-utils";
 import { base44 } from "@/api/base44Client";
 import { Image } from "@/components/ui/image";
 
 export default function Home() {
   const { currentUser } = useOutletContext();
+  const navigate = useNavigate();
+  const [prompt, setPrompt] = useState("");
+  const [type, setType] = useState("video");
+  const [duration, setDuration] = useState(1);
+  const [language, setLanguage] = useState("Français");
+  const [style, setStyle] = useState(styles[0]);
+  const [showSettings, setShowSettings] = useState(false);
   const [recentGens, setRecentGens] = useState([]);
 
   useEffect(() => {
     const loadRecent = async () => {
       try {
-        const gens = await base44.entities.Generation.list("-created_date", 4);
+        const gens = await base44.entities.Generation.filter(
+          { created_by_id: currentUser?.id },
+          "-created_date",
+          4
+        );
         setRecentGens(gens || []);
-      } catch {
-        // empty state is fine
-      }
+      } catch { /* empty state is fine */ }
     };
     loadRecent();
-  }, []);
+  }, [currentUser]);
 
+  const config = contentTypes.find(t => t.id === type) || contentTypes[0];
+  const cost = calculateCost(type, duration);
   const diamonds = currentUser?.diamonds ?? 0;
   const freeTrialAvailable = !currentUser?.free_trial_used;
-  const username = currentUser?.username || currentUser?.full_name || "créateur";
+
+  const handleGenerate = () => {
+    if (!prompt.trim()) return;
+    const params = new URLSearchParams();
+    params.set("type", type);
+    params.set("prompt", prompt.trim());
+    if (config.costType === "per_minute") params.set("duration", duration);
+    params.set("style", style);
+    params.set("language", language);
+    navigate(`/app/create?${params.toString()}`);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      handleGenerate();
+    }
+  };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 lg:py-10">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 lg:py-8">
       {/* Welcome */}
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-white">
-          Bonjour, <span className="gradient-text-red">{username}</span> 👋
+          Bonjour, <span className="gradient-text-red">{currentUser?.username || currentUser?.full_name || "créateur"}</span> 👋
         </h1>
-        <p className="text-muted-foreground mt-1 text-sm sm:text-base">Que voulez-vous créer aujourd'hui ?</p>
+        <p className="text-muted-foreground mt-1 text-sm sm:text-base">Décrivez votre idée, l'IA s'occupe du reste.</p>
       </div>
 
-      {/* Balance + Free Trial */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8">
-        <div className="rounded-2xl bg-card border border-border p-4 sm:p-5 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Diamond className="w-5 h-5 text-primary" fill="currentColor" />
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Solde</p>
-            <p className="text-lg font-bold text-white">{diamonds} 💎</p>
-          </div>
+      {/* Balance badges */}
+      <div className="flex items-center gap-2 mb-5">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-border">
+          <Diamond className="w-4 h-4 text-primary" fill="currentColor" />
+          <span className="text-sm font-semibold text-white">{diamonds}</span>
         </div>
-        <div className="rounded-2xl bg-card border border-border p-4 sm:p-5 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Gift className="w-5 h-5 text-primary" />
+        {freeTrialAvailable && (
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+            <Gift className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium text-primary">Essai gratuit</span>
           </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Essai gratuit</p>
-            <p className="text-lg font-bold text-white">{freeTrialAvailable ? "Disponible" : "Utilisé"}</p>
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* Big Create Button */}
-      <Link
-        to="/app/create"
-        className="block relative rounded-2xl overflow-hidden mb-8 group"
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-primary/5" />
-        <div className="absolute inset-0 bg-glow-red opacity-50" />
-        <div className="relative p-6 sm:p-8 flex items-center gap-4">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-primary flex items-center justify-center glow-red group-hover:scale-110 transition-transform">
-            <Plus className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
-          </div>
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white">Créer</h2>
-            <p className="text-sm text-white/70">Lancez une génération IA en quelques clics</p>
-          </div>
-        </div>
-      </Link>
+      {/* Chat / Prompt box */}
+      <div className="rounded-2xl bg-card border border-border overflow-hidden mb-3 focus-within:border-primary/40 transition-colors">
+        <textarea
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Une fraise en or appelée Mandione tombe amoureuse d'une fraise en argent appelée Yama..."
+          className="w-full min-h-[120px] bg-transparent p-4 text-sm text-white placeholder:text-muted-foreground/50 resize-none border-none outline-none"
+          autoFocus
+        />
 
-      {/* Content Types */}
-      <div className="mb-4">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Types de création</h3>
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-10">
-        {contentTypes.map((type, i) => (
-          <motion.div
-            key={type.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: i * 0.05 }}
-          >
-            <Link
-              to={`/app/create?type=${type.id}`}
-              className="block rounded-2xl bg-card border border-border p-4 hover:border-primary/40 transition-all group"
+        {/* Settings bar */}
+        <div className="flex items-center gap-2 px-3 py-2.5 border-t border-border overflow-x-auto scrollbar-hide">
+          {/* Type selector */}
+          <div className="relative flex-shrink-0">
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              className="appearance-none pl-8 pr-7 h-9 rounded-lg bg-secondary border border-border text-xs font-medium text-white cursor-pointer"
             >
-              <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${type.color} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
-                <type.icon className="w-5 h-5 text-white" />
-              </div>
-              <p className="text-sm font-medium text-white">{type.label}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {type.costType === "per_minute" ? `${type.baseCost} 💎/min` : `${type.baseCost} 💎`}
-              </p>
-            </Link>
-          </motion.div>
-        ))}
+              {contentTypes.map(t => (
+                <option key={t.id} value={t.id}>{t.label}</option>
+              ))}
+            </select>
+            <config.icon className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-primary pointer-events-none" />
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+          </div>
+
+          {/* Duration (for per_minute types) */}
+          {config.costType === "per_minute" && (
+            <div className="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-secondary border border-border flex-shrink-0">
+              <span className="text-xs text-muted-foreground">Durée</span>
+              <input
+                type="range"
+                min="1"
+                max="10"
+                value={duration}
+                onChange={(e) => setDuration(parseInt(e.target.value))}
+                className="w-14 accent-primary"
+              />
+              <span className="text-xs font-medium text-white">{duration}min</span>
+            </div>
+          )}
+
+          {/* Language */}
+          <div className="relative flex-shrink-0">
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="appearance-none px-3 pr-7 h-9 rounded-lg bg-secondary border border-border text-xs font-medium text-white cursor-pointer"
+            >
+              {languages.map(l => <option key={l.id} value={l.id}>{l.label}</option>)}
+            </select>
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+          </div>
+
+          {/* More settings */}
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            className={`flex items-center gap-1.5 h-9 px-3 rounded-lg border transition-colors flex-shrink-0 ${
+              showSettings ? "bg-primary/20 border-primary/40 text-primary" : "bg-secondary border-border text-muted-foreground hover:text-white"
+            }`}
+          >
+            <Settings className="w-3.5 h-3.5" />
+            <span className="text-xs font-medium">Réglages</span>
+          </button>
+
+          {/* Cost indicator */}
+          <div className="flex items-center gap-1 ml-auto flex-shrink-0">
+            <Diamond className="w-4 h-4 text-primary" fill="currentColor" />
+            <span className="text-sm font-bold text-white">{cost}</span>
+          </div>
+        </div>
+
+        {/* Expanded settings */}
+        {showSettings && (
+          <div className="px-3 py-3 border-t border-border">
+            <label className="text-xs text-muted-foreground mb-1.5 block">Style visuel</label>
+            <select value={style} onChange={(e) => setStyle(e.target.value)} className="w-full h-9 rounded-lg bg-secondary border border-border px-3 text-xs text-white">
+              {styles.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+        )}
       </div>
 
-      {/* Recent Creations */}
+      {/* Generate button */}
+      <button
+        onClick={handleGenerate}
+        disabled={!prompt.trim()}
+        className="w-full h-12 rounded-2xl bg-primary text-white font-semibold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed glow-red-sm"
+      >
+        <Send className="w-4 h-4" />
+        {prompt.trim() ? `Générer (${cost} 💎)` : "Tapez votre idée..."}
+      </button>
+
+      {/* Quick type grid */}
+      <div className="mt-8">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Types de création</h3>
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+          {contentTypes.map(t => (
+            <button
+              key={t.id}
+              onClick={() => setType(t.id)}
+              className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all ${
+                type === t.id ? "bg-primary/10 border-primary/40" : "bg-card border-border hover:border-primary/30"
+              }`}
+            >
+              <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${t.color} flex items-center justify-center`}>
+                <t.icon className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-[10px] font-medium text-white text-center leading-tight">{t.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Recent creations */}
       {recentGens.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-4">
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Créations récentes</h3>
             <Link to="/app/library" className="text-sm text-primary hover:underline">Tout voir</Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {recentGens.map((gen) => (
+            {recentGens.map(gen => (
               <Link
                 key={gen.id}
-                to={`/app/library`}
+                to="/app/library"
                 className="rounded-xl bg-card border border-border overflow-hidden hover:border-primary/30 transition-colors"
               >
                 {gen.result_url ? (
@@ -124,7 +213,7 @@ export default function Home() {
                   </div>
                 ) : (
                   <div className="aspect-video bg-secondary flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 text-muted-foreground" />
+                    <Sparkles className="w-5 h-5 text-muted-foreground" />
                   </div>
                 )}
                 <div className="p-2">
