@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
 
@@ -51,18 +52,18 @@ export default function Navbar() {
 
           {/* CTA — always visible */}
           <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-            <a
-              href="/login"
+            <Link
+              to="/login"
               className="text-xs sm:text-sm text-muted-foreground hover:text-white transition-colors whitespace-nowrap"
             >
               Connexion
-            </a>
-            <a
-              href="/register"
+            </Link>
+            <Link
+              to="/register"
               className="px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg bg-primary text-white text-xs sm:text-sm font-semibold hover:bg-primary/90 transition-all glow-red-sm whitespace-nowrap"
             >
               Créer
-            </a>
+            </Link>
           </div>
         </div>
       </nav>

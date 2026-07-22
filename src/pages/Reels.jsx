@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import ReelCard from "@/components/reels/ReelCard";
 import { Sparkles } from "lucide-react";
@@ -47,9 +47,9 @@ export default function Reels() {
         </div>
         <p className="text-white font-medium mb-1">Aucun Reel pour le moment</p>
         <p className="text-sm text-muted-foreground mb-4">Soyez le premier à publier une création !</p>
-        <a href="/app/create" className="px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold">
+        <Link to="/app/create" className="px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold">
           Créer
-        </a>
+        </Link>
       </div>
     );
   }

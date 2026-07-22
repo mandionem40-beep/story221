@@ -50,7 +50,8 @@ export default function Diamonds() {
         throw new Error("URL de paiement non reçue");
       }
     } catch (err) {
-      toast({ title: "Erreur", description: "Impossible d'initier le paiement.", variant: "destructive" });
+      const errMsg = err.response?.data?.error || err.message || "Impossible d'initier le paiement.";
+      toast({ title: "Erreur de paiement", description: errMsg, variant: "destructive" });
       setPurchasing(null);
     }
   };

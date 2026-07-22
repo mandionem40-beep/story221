@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
 import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video } from "lucide-react";
@@ -187,7 +188,7 @@ export default function SuperAdmin() {
         <ShieldAlert className="w-12 h-12 text-destructive mb-4" />
         <h1 className="text-xl font-bold text-white mb-2">Accès refusé</h1>
         <p className="text-sm text-muted-foreground mb-4">Vous n'avez pas les permissions nécessaires pour accéder à cette page.</p>
-        <a href="/app" className="px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold">Retour à l'accueil</a>
+        <Link to="/app" className="px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold">Retour à l'accueil</Link>
       </div>
     );
   }
@@ -213,9 +214,9 @@ export default function SuperAdmin() {
               {tab.label}
             </button>
           ))}
-          <a href="/app" className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-white hover:bg-secondary whitespace-nowrap mt-2">
+          <Link to="/app" className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-white hover:bg-secondary whitespace-nowrap mt-2">
             ← Retour à l'app
-          </a>
+          </Link>
         </nav>
       </aside>
 

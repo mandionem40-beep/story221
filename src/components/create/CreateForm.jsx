@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Upload, Loader2, Diamond, Gift, AlertCircle } from "lucide-react";
 import { styles, formats, voices, musics, resolutions, languages, adSectors, calculateCost, getContentType } from "@/lib/generation-utils";
 import { base44 } from "@/api/base44Client";
+import { toast } from "@/components/ui/use-toast";
 
 export default function CreateForm({ type, onTypeChange, user, onSubmit }) {
   const [prompt, setPrompt] = useState("");
@@ -46,15 +47,20 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit }) {
   const handleSubmit = async () => {
     if (!prompt.trim()) return;
     setSubmitting(true);
-    await onSubmit({
-      prompt: prompt.trim(),
-      type,
-      options: {
-        duration, style, format, voice, music, resolution, language,
-        adSector, adBrandName, adMessage, adLogoUrl, adColors, adPrivateUse,
-      },
-    });
-    setSubmitting(false);
+    try {
+      await onSubmit({
+        prompt: prompt.trim(),
+        type,
+        options: {
+          duration, style, format, voice, music, resolution, language,
+          adSector, adBrandName, adMessage, adLogoUrl, adColors, adPrivateUse,
+        },
+      });
+    } catch (err) {
+      toast({ title: "Erreur", description: err.message || "Impossible de lancer la génération.", variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Search, Trash2, Copy, Sparkles, Film, Image as ImageIcon, Mic, BookOpen, UserCircle, Music } from "lucide-react";
 import { Image } from "@/components/ui/image";
@@ -15,7 +15,7 @@ const categories = [
 ];
 
 export default function Library() {
-  const { refreshUser } = useOutletContext();
+  const { refreshUser, currentUser } = useOutletContext();
   const [generations, setGenerations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
@@ -29,7 +29,7 @@ export default function Library() {
   const loadGenerations = async () => {
     setLoading(true);
     try {
-      const gens = await base44.entities.Generation.list("-created_date", 100);
+      const gens = await base44.entities.Generation.filter({ created_by_id: currentUser?.id });
       setGenerations(gens || []);
     } catch { /* ignore */ }
     setLoading(false);
@@ -122,9 +122,9 @@ export default function Library() {
           </div>
           <p className="text-white font-medium mb-1">Aucune création</p>
           <p className="text-sm text-muted-foreground mb-4">Lancez votre première génération IA !</p>
-          <a href="/app/create" className="inline-block px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold">
+          <Link to="/app/create" className="inline-block px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold">
             Créer
-          </a>
+          </Link>
         </div>
       )}
 

@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Upload, Copy, Check, Users, Heart, Eye, Sparkles, Loader2, Edit, Save, X } from "lucide-react";
 import { Image } from "@/components/ui/image";
 import { toast } from "@/components/ui/use-toast";
-import { generateReferralCode } from "@/lib/generation-utils";
 
 export default function Profile() {
   const { currentUser, refreshUser } = useOutletContext();
@@ -29,16 +28,16 @@ export default function Profile() {
   const loadStats = async () => {
     try {
       const [gens, follows, myFollows] = await Promise.all([
-        base44.entities.Generation.list("-created_date", 200),
+        base44.entities.Generation.filter({ created_by_id: currentUser?.id }),
         base44.entities.Follow.filter({ followed_id: currentUser?.id }),
-        base44.entities.Follow.filter({}),
+        base44.entities.Follow.filter({ created_by_id: currentUser?.id }),
       ]);
       // Get likes on my reels
       const myReelIds = (gens.filter(g => g.is_published) || []).map(g => g.reel_id).filter(Boolean);
       let totalLikes = 0;
       let totalViews = 0;
       if (myReelIds.length > 0) {
-        const myReels = await base44.entities.Reel.filter({});
+        const myReels = await base44.entities.Reel.filter({ created_by_id: currentUser?.id });
         totalViews = myReels.filter(r => myReelIds.includes(r.id)).reduce((sum, r) => sum + (r.views || 0), 0);
         for (const reelId of myReelIds.slice(0, 10)) {
           try {
@@ -198,7 +197,7 @@ export default function Profile() {
             <p className="text-lg font-bold text-white">{diamonds}</p>
           </div>
         </div>
-        <a href="/app/diamonds" className="text-sm text-primary hover:underline">Acheter</a>
+        <Link to="/app/diamonds" className="text-sm text-primary hover:underline">Acheter</Link>
       </div>
 
       {/* Referral */}

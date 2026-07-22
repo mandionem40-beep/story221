@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { ArrowRight, Gift } from "lucide-react";
 
 export default function FinalCTA() {
@@ -30,13 +31,13 @@ export default function FinalCTA() {
               Recevez une vidéo IA offerte dès votre inscription. Aucune carte requise.
             </p>
 
-            <a
-              href="/register"
+            <Link
+              to="/register"
               className="mt-8 inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-primary text-white font-semibold text-base sm:text-lg hover:bg-primary/90 transition-all glow-red hover:scale-[1.02]"
             >
               Créer mon compte
               <ArrowRight className="w-5 h-5" />
-            </a>
+            </Link>
           </div>
         </motion.div>
       </div>

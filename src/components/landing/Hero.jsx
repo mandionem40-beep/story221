@@ -1,14 +1,7 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { ArrowRight, Play, Gift, Zap, Diamond, Clapperboard } from "lucide-react";
-
-const pipelineSteps = [
-{ label: "Prompt", icon: "✍️", text: "Une fraise en or tombe amoureuse d'une fraise en argent..." },
-{ label: "Scénario", icon: "📖", text: "Mandione, une fraise dorée, rencontre Yama, une fraise d'argent..." },
-{ label: "Storyboard", icon: "🎬", text: "Plan 1: Marché · Plan 2: Rencontre · Plan 3: Romance" },
-{ label: "Personnages", icon: "🎨", text: "Mandione — fraise dorée · Yama — fraise d'argent" },
-{ label: "Film final", icon: "🍿", text: "Une vidéo complète, cohérente, prête à publier." }];
-
+import HeroDemo from "@/components/landing/HeroDemo";
 
 const badges = [
 { icon: Gift, label: "1 vidéo offerte" },
@@ -18,15 +11,6 @@ const badges = [
 
 
 export default function Hero() {
-  const [step, setStep] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setStep((prev) => (prev + 1) % pipelineSteps.length);
-    }, 2800);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <section id="hero" className="relative min-h-screen flex items-center pt-24 pb-16 overflow-hidden">
       {/* Background glow */}
@@ -72,13 +56,12 @@ export default function Hero() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               
-              <a
-                href="/register"
+              <Link
+                to="/register"
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-primary text-white font-semibold text-base hover:bg-primary/90 transition-all glow-red hover:scale-[1.02]">
-                
                 Créer gratuitement
                 <ArrowRight className="w-5 h-5" />
-              </a>
+              </Link>
               <a
                 href="#reels"
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-secondary border border-border text-white font-semibold text-base hover:bg-secondary/80 transition-all">
@@ -113,69 +96,7 @@ export default function Hero() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             className="relative">
-            
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
+            <HeroDemo />
           </motion.div>
         </div>
       </div>

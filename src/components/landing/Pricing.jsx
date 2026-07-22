@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Check, Diamond } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const packs = [
   { name: "Découverte", diamonds: 50, price: "2 500", popular: false },
@@ -69,15 +70,16 @@ export default function Pricing() {
                   ))}
                 </ul>
 
-                <button
-                  className={`mt-8 w-full py-3 rounded-xl font-semibold text-sm transition-all ${
+                <Link
+                  to="/register"
+                  className={`mt-8 w-full py-3 rounded-xl font-semibold text-sm transition-all inline-block text-center ${
                     pack.popular
                       ? "bg-primary text-white hover:bg-primary/90 glow-red-sm hover:glow-red"
                       : "bg-secondary text-white hover:bg-secondary/80 border border-border"
                   }`}
                 >
                   Acheter
-                </button>
+                </Link>
               </div>
             </motion.div>
           ))}
