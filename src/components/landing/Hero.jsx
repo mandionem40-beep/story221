@@ -36,56 +36,31 @@ export default function Hero() {
               {"Transformez vos idées en".split(" ").map((word, i) => (
                 <motion.span
                   key={`a-${i}`}
-                  initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
-                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                  transition={{ duration: 0.7, delay: 0.1 + i * 0.12, ease: "easeOut" }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.1 + i * 0.12, ease: "easeOut" }}
                   className="inline-block mr-[0.3em]"
                 >
-                  <motion.span
-                    animate={{ y: [0, -3, 0] }}
-                    transition={{ duration: 3.5, repeat: Infinity, delay: i * 0.4, ease: "easeInOut" }}
-                    className="inline-block"
-                  >
-                    {word}
-                  </motion.span>
+                  {word}
                 </motion.span>
               ))}
               <motion.span
-                initial={{ opacity: 0, scale: 0.8, filter: "blur(12px)" }}
-                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
                 className="inline-block gradient-text-red mr-[0.3em]"
               >
-                <motion.span
-                  animate={{
-                    textShadow: [
-                      "0 0 20px rgba(255,0,51,0.3)",
-                      "0 0 40px rgba(255,0,51,0.6)",
-                      "0 0 20px rgba(255,0,51,0.3)",
-                    ],
-                    scale: [1, 1.04, 1],
-                  }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                  className="inline-block"
-                >
-                  films
-                </motion.span>
+                films
               </motion.span>
               {"grâce à l'IA.".split(" ").map((word, i) => (
                 <motion.span
                   key={`b-${i}`}
-                  initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
-                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                  transition={{ duration: 0.7, delay: 0.9 + i * 0.12, ease: "easeOut" }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.7 + i * 0.12, ease: "easeOut" }}
                   className="inline-block mr-[0.3em]"
                 >
-                  <motion.span
-                    animate={{ y: [0, -3, 0] }}
-                    transition={{ duration: 3.5, repeat: Infinity, delay: 0.3 + i * 0.4, ease: "easeInOut" }}
-                    className="inline-block"
-                  >
-                    {word}
-                  </motion.span>
+                  {word}
                 </motion.span>
               ))}
             </h1>
