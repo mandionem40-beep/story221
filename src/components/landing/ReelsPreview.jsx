@@ -1,12 +1,127 @@
-import { motion } from "framer-motion";
-import { Heart, MessageCircle, Share2, Bookmark } from "lucide-react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Heart, MessageCircle, Share2, Bookmark, Music2 } from "lucide-react";
 
 const reelPreviews = [
-  { emoji: "🍓", title: "Mandione & Yama", author: "@creator1", likes: "1.2K", color: "from-pink-500/20 to-red-500/20" },
-  { emoji: "🚀", title: "Voyage spatial", author: "@studio221", likes: "856", color: "from-blue-500/20 to-purple-500/20" },
-  { emoji: "🏞️", title: "Savane story", author: "@africa_ai", likes: "2.1K", color: "from-amber-500/20 to-orange-500/20" },
-  { emoji: "💃", title: "Danse animation", author: "@motion", likes: "643", color: "from-violet-500/20 to-fuchsia-500/20" },
+  {
+    video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    title: "Quand le boss part en voyage 🌍",
+    author: "@aisha_creates",
+    likes: "124.5K",
+    comments: "3.2K",
+    shares: "8.9K",
+    song: "Original Sound - DJ Mbalax",
+  },
+  {
+    video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+    title: "Dakar by night ✨ #Senegal",
+    author: "@studio221",
+    likes: "89.3K",
+    comments: "1.7K",
+    shares: "4.1K",
+    song: "Trending Audio - Teranga Beat",
+  },
+  {
+    video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    title: "On s'évade de la capitale 🚗💨",
+    author: "@motion.afrik",
+    likes: "211.8K",
+    comments: "5.4K",
+    shares: "12.3K",
+    song: "Viral Remix - Afrobeats Mix",
+  },
+  {
+    video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+    title: "Le meltdown du lundi 😤😂",
+    author: "@comedy_lab",
+    likes: "342.1K",
+    comments: "9.8K",
+    shares: "21.5K",
+    song: "Funny Sound - Story221",
+  },
 ];
+
+function ReelFeed() {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % reelPreviews.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const reel = reelPreviews[index];
+
+  return (
+    <div className="relative w-[260px] sm:w-[300px] h-[520px] rounded-[2.5rem] bg-card border-2 border-border p-2 overflow-hidden">
+      <div className="w-full h-full rounded-[2rem] bg-black overflow-hidden relative">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={index}
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "-100%", opacity: 0 }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
+            className="absolute inset-0"
+          >
+            <video
+              src={reel.video_url}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Right action rail */}
+        <div className="absolute right-2 bottom-20 flex flex-col items-center gap-5 z-10">
+          <div className="flex flex-col items-center gap-1">
+            <Heart className="w-7 h-7 text-white fill-primary" />
+            <span className="text-white text-[10px] font-semibold">{reel.likes}</span>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <MessageCircle className="w-7 h-7 text-white" />
+            <span className="text-white text-[10px] font-semibold">{reel.comments}</span>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <Bookmark className="w-7 h-7 text-white" />
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <Share2 className="w-7 h-7 text-white" />
+            <span className="text-white text-[10px] font-semibold">{reel.shares}</span>
+          </div>
+          <div className="w-9 h-9 rounded-full border-2 border-white/40 flex items-center justify-center animate-spin-slow" style={{ animation: "spin 4s linear infinite" }}>
+            <Music2 className="w-4 h-4 text-white" />
+          </div>
+        </div>
+
+        {/* Bottom caption */}
+        <div className="absolute left-3 right-16 bottom-4 z-10">
+          <p className="text-white font-semibold text-sm">{reel.author}</p>
+          <p className="text-white/90 text-xs mt-1 leading-snug">{reel.title}</p>
+          <div className="flex items-center gap-1.5 mt-2">
+            <Music2 className="w-3 h-3 text-white flex-shrink-0" />
+            <p className="text-white/80 text-[11px] truncate">{reel.song}</p>
+          </div>
+        </div>
+
+        {/* Progress dots */}
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+          {reelPreviews.map((_, i) => (
+            <div
+              key={i}
+              className={`h-0.5 rounded-full transition-all ${i === index ? "w-6 bg-white" : "w-2 bg-white/40"}`}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ReelsPreview() {
   return (
@@ -44,46 +159,14 @@ export default function ReelsPreview() {
             </div>
           </div>
 
-          {/* Right: Phone mockup with reels */}
+          {/* Right: Phone mockup with real reels */}
           <div className="relative flex justify-center">
-            <div className="relative w-[260px] sm:w-[300px] h-[500px] rounded-[2.5rem] bg-card border-2 border-border p-3 overflow-hidden">
-              <div className="w-full h-full rounded-[2rem] bg-background overflow-hidden relative">
-                {reelPreviews.map((reel, i) => (
-                  <motion.div
-                    key={reel.title}
-                    initial={{ y: i === 0 ? 0 : "100%" }}
-                    animate={{ y: i === 0 ? [0, -400, -400] : ["100%", "100%", 0] }}
-                    transition={{
-                      duration: 8,
-                      times: [0, 0.5, 0.5],
-                      repeat: Infinity,
-                      repeatDelay: 1,
-                      delay: i * 4,
-                    }}
-                    className={`absolute inset-0 bg-gradient-to-b ${reel.color} flex flex-col justify-end p-5`}
-                  >
-                    <div className="text-6xl text-center mb-auto mt-20">{reel.emoji}</div>
-                    <div className="flex items-end justify-between">
-                      <div>
-                        <p className="text-white font-semibold text-sm">{reel.title}</p>
-                        <p className="text-white/70 text-xs">{reel.author}</p>
-                      </div>
-                      <div className="flex flex-col gap-4 items-center">
-                        <Heart className="w-5 h-5 text-white fill-white" />
-                        <MessageCircle className="w-5 h-5 text-white" />
-                        <Share2 className="w-5 h-5 text-white" />
-                        <Bookmark className="w-5 h-5 text-white" />
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
+            <ReelFeed />
             {/* Floating like badge */}
             <motion.div
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ duration: 1.5, repeat: Infinity }}
-              className="absolute -right-2 top-12 flex items-center gap-1.5 px-3 py-2 rounded-full bg-primary text-white text-xs font-semibold glow-red"
+              className="absolute -right-2 top-16 flex items-center gap-1.5 px-3 py-2 rounded-full bg-primary text-white text-xs font-semibold glow-red z-20"
             >
               <Heart className="w-3.5 h-3.5 fill-white" />
               +1
