@@ -1,68 +1,72 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
-import { PAYDUNYA_API_BASE, getPaydunyaHeaders } from '../../shared/paydunya.ts';
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
-
-    const body = await req.json();
+    let payload;
+    const contentType = req.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      payload = await req.json();
+    } else {
+      const formData = await req.formData();
+      payload = Object.fromEntries(formData);
+    }
 
     // PayDunya sends response_code "00" for successful payments
-    if (body.response_code !== "00") {
-      return Response.json({ status: "ignored", reason: "not successful" });
+    if (payload.response_code !== "00") {
+      return Response.json({ status: "ignored", reason: "payment not successful" });
     }
 
-    const data = body.data || {};
+    const data = payload.data || {};
     const customData = data.custom_data || {};
+    const invoiceData = data.invoice || {};
+
     const userId = customData.user_id;
     const diamonds = parseInt(customData.diamonds) || 0;
-    const packName = customData.pack_name || "Pack";
+    const packName = customData.pack_name || "Pack diamants";
     const amount = parseInt(customData.amount) || 0;
-    const token = data.token || body.token;
+    const token = invoiceData.token || payload.token || "";
 
-    if (!userId || !diamonds) {
-      return Response.json({ status: "ignored", reason: "missing data" });
+    if (!userId || diamonds <= 0) {
+      return Response.json({ status: "ignored", reason: "missing user_id or diamonds" });
     }
 
-    // Verify the transaction with PayDunya to confirm it's genuine
-    if (token) {
-      const verifyResponse = await fetch(`${PAYDUNYA_API_BASE}/checkout-invoice/confirm/${token}`, {
-        method: "GET",
-        headers: getPaydunyaHeaders(),
-      });
-      const verifyData = await verifyResponse.json();
-      if (verifyData.response_code !== "00") {
-        return Response.json({ status: "ignored", reason: "verification failed" });
-      }
+    const base44 = createClientFromRequest(req);
+
+    // Prevent duplicate crediting
+    const reference = `paydunya_${token || Date.now()}`;
+    const existing = await base44.asServiceRole.entities.Transaction.filter({ reference });
+    if (existing && existing.length > 0) {
+      return Response.json({ status: "duplicate", message: "Transaction already processed" });
     }
 
-    // Idempotency: check if this transaction was already processed
-    const txRef = `paydunya_${token || body.transaction_id || Date.now()}`;
-    const existingTx = await base44.asServiceRole.entities.Transaction.filter({ reference: txRef });
-    if (existingTx && existingTx.length > 0) {
-      return Response.json({ status: "already_processed" });
+    // Credit diamonds to user
+    let user;
+    try {
+      user = await base44.asServiceRole.entities.User.get(userId);
+    } catch {
+      return Response.json({ status: "error", reason: "user not found" });
+    }
+    if (!user) {
+      return Response.json({ status: "error", reason: "user not found" });
     }
 
-    // Get current user balance and credit diamonds
-    const userRecord = await base44.asServiceRole.entities.User.get(userId);
-    const currentBalance = userRecord?.diamonds || 0;
-    const newBalance = currentBalance + diamonds;
-
+    const newBalance = (user.diamonds || 0) + diamonds;
     await base44.asServiceRole.entities.User.update(userId, { diamonds: newBalance });
 
+    // Create transaction record
     await base44.asServiceRole.entities.Transaction.create({
       type: "purchase",
       amount: diamonds,
-      description: `Achat pack ${packName} via PayDunya`,
-      reference: txRef,
+      description: `Achat pack ${packName} (${amount} FCFA)`,
+      reference: reference,
       balance_after: newBalance,
-      related_generation_id: null,
+      created_by_id: userId,
     });
 
     return Response.json({
       status: "success",
-      diamonds: diamonds,
-      newBalance: newBalance,
+      diamonds_credited: diamonds,
+      new_balance: newBalance,
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

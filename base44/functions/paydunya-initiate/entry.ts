@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
-import { PAYDUNYA_API_BASE, getPaydunyaHeaders } from '../../shared/paydunya.ts';
+import { PAYDUNYA_API_BASE, getPaydunyaHeaders, getIpnCallbackUrl, getAppOrigin } from "../../shared/paydunya.ts";
 
 Deno.serve(async (req) => {
   try {
@@ -7,36 +7,34 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { packId, packName, diamonds, amount } = await req.json();
+    const body = await req.json();
+    const { packId, packName, diamonds, amount } = body;
 
-    if (!packId || !diamonds || !amount) {
-      return Response.json({ error: 'Missing pack information' }, { status: 400 });
+    if (!diamonds || !amount) {
+      return Response.json({ error: 'Missing required fields: diamonds, amount' }, { status: 400 });
     }
 
-    const origin = req.headers.get("origin") || req.headers.get("referer") || "https://story221.com";
-    const appId = Deno.env.get("BASE44_APP_ID");
-    const callbackUrl = `https://api.base44.com/v1/apps/${appId}/functions/paydunya-ipn`;
+    const appOrigin = getAppOrigin(req);
 
-    const body = {
+    const invoiceData = {
       invoice: {
         total_amount: amount,
-        description: `Achat de ${diamonds} diamants - Pack ${packName}`,
+        description: `Achat de ${diamonds} diamants - ${packName || "Pack"}`,
       },
       store: {
         name: "Story221",
-        website_url: origin,
-        logo_url: "",
+        website_url: appOrigin,
       },
       actions: {
-        cancel_url: `${origin}/app/diamonds?status=cancel`,
-        return_url: `${origin}/app/diamonds?status=success`,
-        callback_url: callbackUrl,
+        cancel_url: `${appOrigin}/app/diamonds`,
+        return_url: `${appOrigin}/app/diamonds?status=success`,
+        callback_url: getIpnCallbackUrl(),
       },
       custom_data: {
         user_id: user.id,
-        pack_id: packId,
+        pack_id: packId || "",
         diamonds: diamonds,
-        pack_name: packName,
+        pack_name: packName || "",
         amount: amount,
       },
     };
@@ -44,20 +42,19 @@ Deno.serve(async (req) => {
     const response = await fetch(`${PAYDUNYA_API_BASE}/checkout-invoice/create`, {
       method: "POST",
       headers: getPaydunyaHeaders(),
-      body: JSON.stringify(body),
+      body: JSON.stringify(invoiceData),
     });
 
-    const data = await response.json();
+    const result = await response.json();
 
-    if (data.response_code === "00") {
+    if (result.response_code === "00") {
       return Response.json({
-        checkoutUrl: data.response_text,
-        token: data.token,
+        checkoutUrl: result.response_text,
+        token: result.token,
       });
     } else {
       return Response.json({
-        error: data.response_text || "PayDunya error",
-        code: data.response_code,
+        error: result.response_text || "Failed to create PayDunya invoice",
       }, { status: 400 });
     }
   } catch (error) {
