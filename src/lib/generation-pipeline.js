@@ -62,6 +62,7 @@ export async function runGenerationPipeline(config, callbacks) {
       onStep(scriptStepIdx);
       const result = await base44.integrations.Core.InvokeLLM({
         prompt: buildScriptPrompt(prompt, type, options),
+        model: "gemini_3_1_pro",
         response_json_schema: {
           type: "object",
           properties: {
@@ -96,6 +97,7 @@ export async function runGenerationPipeline(config, callbacks) {
       const sceneCount = Math.max(3, Math.ceil(options.duration * 2));
       const result = await base44.integrations.Core.InvokeLLM({
         prompt: `Découpe ce script en ${sceneCount} scènes cohérentes pour une vidéo de ${options.duration} minutes.\n\nScript: "${enhancedScript}"\n\nRéponds en JSON avec: scenes (array de strings, chaque string est une description de scène).`,
+        model: "gemini_3_1_pro",
         response_json_schema: {
           type: "object",
           properties: { scenes: { type: "array", items: { type: "string" } } }
@@ -126,6 +128,7 @@ export async function runGenerationPipeline(config, callbacks) {
       onStep(dialogueStepIdx);
       const result = await base44.integrations.Core.InvokeLLM({
         prompt: `Génère les dialogues pour chaque scène.\n\nScènes: ${JSON.stringify(scenes)}\nPersonnages: ${JSON.stringify(characters.map(c => c.name))}\nLangue: ${options.language}\n\nRéponds en JSON avec: dialogues (array d'objets {scene, text}).`,
+        model: "gemini_3_1_pro",
         response_json_schema: {
           type: "object",
           properties: {
@@ -199,6 +202,7 @@ export async function runGenerationPipeline(config, callbacks) {
       onStep(contentStepIdx);
       const result = await base44.integrations.Core.InvokeLLM({
         prompt: `Écris une histoire complète et captivante basée sur: "${prompt}". Style: ${options.style}. Langue: ${options.language}. Longueur: ${options.duration * 500} mots environ.`,
+        model: "gemini_3_1_pro",
       });
       enhancedScript = typeof result === "string" ? result : result?.enhanced_script || enhancedScript;
       await base44.entities.Generation.update(generationId, { enhanced_script: enhancedScript, pipeline_step: "content" });
