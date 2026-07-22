@@ -31,15 +31,48 @@ export default function Hero() {
               <span className="text-xs sm:text-sm text-muted-foreground">Le premier studio IA social d'Afrique</span>
             </motion.div>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1]">
-              
-              Transformez vos idées en{" "}
-              <span className="gradient-text-red">films</span> grâce à l'IA.
-            </motion.h1>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1]">
+              {"Transformez vos idées en".split(" ").map((word, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  transition={{ duration: 0.7, delay: 0.1 + i * 0.12, ease: "easeOut" }}
+                  className="inline-block"
+                >
+                  {word}{" "}
+                </motion.span>
+              ))}
+              <motion.span
+                initial={{ opacity: 0, scale: 0.8, filter: "blur(12px)" }}
+                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+                className="inline-block gradient-text-red"
+              >
+                <motion.span
+                  animate={{ textShadow: [
+                    "0 0 20px rgba(255,0,51,0.3)",
+                    "0 0 40px rgba(255,0,51,0.6)",
+                    "0 0 20px rgba(255,0,51,0.3)",
+                  ]}}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  className="inline-block"
+                >
+                  films
+                </motion.span>
+              </motion.span>
+              {"grâce à l'IA.".split(" ").map((word, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  transition={{ duration: 0.7, delay: 0.9 + i * 0.12, ease: "easeOut" }}
+                  className="inline-block"
+                >
+                  {word}{" "}
+                </motion.span>
+              ))}
+            </h1>
 
             <motion.p
               initial={{ opacity: 0, y: 20 }}
