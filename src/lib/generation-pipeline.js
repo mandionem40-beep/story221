@@ -1,28 +1,7 @@
 import { base44 } from "@/api/base44Client";
 import { getPipelineSteps } from "./generation-utils";
 
-function buildScriptPrompt(prompt, type, options) {
-  const typeLabels = {
-    video: "une vidéo", film: "un film", serie: "un épisode de série",
-    anime: "un anime", cartoon: "un cartoon", ad: "une publicité",
-    music_clip: "un clip musical", story: "une histoire", storyboard: "un storyboard",
-  };
-  const typeLabel = typeLabels[type] || "un contenu";
-  let p = `Tu es un scénariste professionnel. Améliore et enrichis ce prompt pour créer ${typeLabel}.\n\nPrompt: "${prompt}"\n`;
-  p += `Style: ${options.style}\nDurée: ${options.duration} minutes\nLangue: ${options.language}\n`;
-  if (type === "ad" && options.ad_sector) {
-    p += `Secteur publicitaire: ${options.ad_sector}\n`;
-    if (options.ad_brand_name) p += `Marque: ${options.ad_brand_name}\n`;
-    if (options.ad_message) p += `Message: ${options.ad_message}\n`;
-  }
-  p += `\nRéponds en JSON avec: title (string), enhanced_script (string - le script complet et détaillé), characters (array d'objets {name, description, appearance}).`;
-  if (options.language === "Wolof") {
-    p += " Le script et les descriptions doivent être en Wolof.";
-  }
-  return p;
-}
-
-function buildVideoPrompt(script, characters, options, scenes) {
+function buildVideoFallbackPrompt(script, characters, options, scenes) {
   const sceneDesc = scenes && scenes.length > 0
     ? scenes.slice(0, 3).join(" ")
     : script;
@@ -37,12 +16,8 @@ function buildVideoPrompt(script, characters, options, scenes) {
   return p.substring(0, 500);
 }
 
-function buildImagePrompt(prompt, options) {
-  return `${prompt}. Style: ${options.style}. Haute qualité, détaillé, professionnel.`;
-}
-
 export async function runGenerationPipeline(config, callbacks) {
-  const { prompt, type, options, generationId } = config;
+  const { prompt, type, options, generationId, mode, previousGeneration } = config;
   const { onStep, onComplete, onError } = callbacks;
   const steps = getPipelineSteps(type);
 
@@ -54,56 +29,38 @@ export async function runGenerationPipeline(config, callbacks) {
   let voiceUrl = null;
   let videoUrl = null;
   let imageUrl = null;
+  let enginePrompts = {};
 
   try {
-    // Step: Script enhancement
-    const scriptStepIdx = steps.findIndex(s => s.id === "script" || s.id === "prompt");
+    // Step: Creative direction by Claude (intent, optimized prompt, scenario, scenes, characters, dialogues, engine prompts)
+    const scriptStepIdx = steps.findIndex(s => s.id === "script" || s.id === "prompt" || s.id === "text");
     if (scriptStepIdx >= 0) {
       onStep(scriptStepIdx);
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: buildScriptPrompt(prompt, type, options),
-        model: "gemini_3_1_pro",
-        response_json_schema: {
-          type: "object",
-          properties: {
-            title: { type: "string" },
-            enhanced_script: { type: "string" },
-            characters: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  name: { type: "string" },
-                  description: { type: "string" },
-                  appearance: { type: "string" }
-                }
-              }
-            }
-          }
-        }
+      const res = await base44.functions.invoke("claude-director", {
+        prompt, type, options, mode: mode || "create", previousGeneration: previousGeneration || null,
       });
-      title = result.title || "Création sans titre";
-      enhancedScript = result.enhanced_script || prompt;
-      characters = result.characters || [];
+      const pkg = res.data || {};
+      title = pkg.title || "Création sans titre";
+      enhancedScript = pkg.enhanced_script || pkg.scenario?.summary || prompt;
+      characters = (pkg.characters || []).map(c => ({
+        name: c.name,
+        description: c.description || c.personality || "",
+        appearance: c.appearance || c.clothing || "",
+        voice: c.voice || "",
+        image_url: c.image_url,
+      }));
+      scenes = (pkg.scenes || []).map(s => typeof s === "string" ? s : (s.description || `Scène ${s.number || ""}`));
+      dialogues = pkg.dialogues || [];
+      enginePrompts = pkg.engine_prompts || {};
       await base44.entities.Generation.update(generationId, {
-        title, enhanced_script: enhancedScript, characters, pipeline_step: steps[scriptStepIdx].id,
+        title, enhanced_script: enhancedScript, characters, scenes, pipeline_step: steps[scriptStepIdx].id,
       });
     }
 
-    // Step: Scenes
+    // Step: Scenes (already produced by Claude) — persist & mark done
     const scenesStepIdx = steps.findIndex(s => s.id === "scenes");
     if (scenesStepIdx >= 0) {
       onStep(scenesStepIdx);
-      const sceneCount = Math.max(3, Math.ceil(options.duration * 2));
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Découpe ce script en ${sceneCount} scènes cohérentes pour une vidéo de ${options.duration} minutes.\n\nScript: "${enhancedScript}"\n\nRéponds en JSON avec: scenes (array de strings, chaque string est une description de scène).`,
-        model: "gemini_3_1_pro",
-        response_json_schema: {
-          type: "object",
-          properties: { scenes: { type: "array", items: { type: "string" } } }
-        }
-      });
-      scenes = result.scenes || [];
       await base44.entities.Generation.update(generationId, { scenes, pipeline_step: "scenes" });
     }
 
@@ -114,7 +71,7 @@ export async function runGenerationPipeline(config, callbacks) {
       for (const char of characters.slice(0, 3)) {
         try {
           const imgResult = await base44.integrations.Core.GenerateImage({
-            prompt: `Portrait du personnage: ${char.name}. ${char.appearance || char.description || ""}. Style: ${options.style}.`,
+            prompt: `${enginePrompts.image || ("Portrait du personnage: " + char.name)}. ${char.appearance || char.description || ""}.`,
           });
           char.image_url = imgResult.url;
         } catch { /* continue without image */ }
@@ -122,29 +79,18 @@ export async function runGenerationPipeline(config, callbacks) {
       await base44.entities.Generation.update(generationId, { characters, pipeline_step: "characters" });
     }
 
-    // Step: Dialogues
+    // Step: Dialogues (already produced by Claude) — mark done
     const dialogueStepIdx = steps.findIndex(s => s.id === "dialogues");
     if (dialogueStepIdx >= 0) {
       onStep(dialogueStepIdx);
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Génère les dialogues pour chaque scène.\n\nScènes: ${JSON.stringify(scenes)}\nPersonnages: ${JSON.stringify(characters.map(c => c.name))}\nLangue: ${options.language}\n\nRéponds en JSON avec: dialogues (array d'objets {scene, text}).`,
-        model: "gemini_3_1_pro",
-        response_json_schema: {
-          type: "object",
-          properties: {
-            dialogues: { type: "array", items: { type: "object", properties: { scene: { type: "string" }, text: { type: "string" } } } }
-          }
-        }
-      });
-      dialogues = result.dialogues || [];
       await base44.entities.Generation.update(generationId, { pipeline_step: "dialogues" });
     }
 
-    // Step: Voice
+    // Step: Voice synthesis (uses Claude's optimized voice prompt / dialogues)
     const voiceStepIdx = steps.findIndex(s => s.id === "voice");
     if (voiceStepIdx >= 0) {
       onStep(voiceStepIdx);
-      const voiceText = (dialogues.map(d => d.text).join(" ") || enhancedScript).substring(0, 5000);
+      const voiceText = (enginePrompts.voice || dialogues.map(d => d.text).join(" ") || enhancedScript).substring(0, 5000);
       try {
         const langCode = options.language === "Wolof" ? "wo" : options.language === "Anglais" ? "en" : "fr";
         const speechResult = await base44.integrations.Core.GenerateSpeech({
@@ -157,24 +103,23 @@ export async function runGenerationPipeline(config, callbacks) {
       await base44.entities.Generation.update(generationId, { pipeline_step: "voice" });
     }
 
-    // Step: Video generation
+    // Step: Video generation (uses Claude's optimized video prompt)
     const videoStepIdx = steps.findIndex(s => s.id === "video");
     if (videoStepIdx >= 0) {
       onStep(videoStepIdx);
       const aspectRatio = options.format === "vertical" ? "9:16" : "16:9";
       try {
         const videoResult = await base44.integrations.Core.GenerateVideo({
-          prompt: buildVideoPrompt(enhancedScript, characters, options, scenes),
+          prompt: (enginePrompts.video || buildVideoFallbackPrompt(enhancedScript, characters, options, scenes)).substring(0, 500),
           duration: 4,
           aspect_ratio: aspectRatio,
         });
         videoUrl = videoResult.url;
       } catch (videoErr) {
         console.error("Video generation failed:", videoErr);
-        // Fallback: generate a thumbnail image so the user gets a visual result
         try {
           const imgResult = await base44.integrations.Core.GenerateImage({
-            prompt: buildImagePrompt(buildVideoPrompt(enhancedScript, characters, options, scenes), options),
+            prompt: (enginePrompts.image || buildVideoFallbackPrompt(enhancedScript, characters, options, scenes)).substring(0, 500),
           });
           imageUrl = imgResult.url;
         } catch (imgErr) {
@@ -184,27 +129,22 @@ export async function runGenerationPipeline(config, callbacks) {
       await base44.entities.Generation.update(generationId, { pipeline_step: "video" });
     }
 
-    // Step: Image generation (for image/character types)
+    // Step: Image generation (image/character types)
     const genStepIdx = steps.findIndex(s => s.id === "generate");
     if (genStepIdx >= 0 && !videoUrl) {
       onStep(genStepIdx);
       try {
         const imgResult = await base44.integrations.Core.GenerateImage({
-          prompt: buildImagePrompt(prompt, options),
+          prompt: (enginePrompts.image || `${prompt}. Style: ${options.style}. Haute qualité, détaillé.`).substring(0, 500),
         });
         imageUrl = imgResult.url;
       } catch { /* continue */ }
     }
 
-    // Step: Story content
+    // Step: Story content (already produced by Claude as enhanced_script)
     const contentStepIdx = steps.findIndex(s => s.id === "content");
     if (contentStepIdx >= 0) {
       onStep(contentStepIdx);
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Écris une histoire complète et captivante basée sur: "${prompt}". Style: ${options.style}. Langue: ${options.language}. Longueur: ${options.duration * 500} mots environ.`,
-        model: "gemini_3_1_pro",
-      });
-      enhancedScript = typeof result === "string" ? result : result?.enhanced_script || enhancedScript;
       await base44.entities.Generation.update(generationId, { enhanced_script: enhancedScript, pipeline_step: "content" });
     }
 
@@ -227,7 +167,7 @@ export async function runGenerationPipeline(config, callbacks) {
 
     onComplete({
       title, enhancedScript, characters, scenes, dialogues,
-      voiceUrl, videoUrl, imageUrl, resultUrl, resultType,
+      voiceUrl, videoUrl, imageUrl, resultUrl, resultType, enginePrompts,
     });
   } catch (error) {
     await base44.entities.Generation.update(generationId, {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useOutletContext, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Search, Trash2, Copy, Sparkles, Film, Image as ImageIcon, Mic, BookOpen, UserCircle, Music } from "lucide-react";
+import { Search, Trash2, Copy, Sparkles, Film, Image as ImageIcon, Mic, BookOpen, UserCircle, Music, Wand2 } from "lucide-react";
 import { Image } from "@/components/ui/image";
 import { toast } from "@/components/ui/use-toast";
 
@@ -195,6 +195,11 @@ export default function Library() {
                 </div>
               )}
               <div className="flex gap-2 mt-4">
+                <Link to={`/app/create?continue=${selected.id}&type=${selected.type}`} className="flex-1 py-2.5 rounded-lg bg-primary text-white text-sm font-medium flex items-center justify-center gap-1.5 glow-red-sm">
+                  <Wand2 className="w-4 h-4" /> Continuer l'histoire
+                </Link>
+              </div>
+              <div className="flex gap-2 mt-2">
                 <button onClick={() => handleDuplicate(selected)} className="flex-1 py-2.5 rounded-lg bg-secondary text-white text-sm font-medium flex items-center justify-center gap-1.5">
                   <Copy className="w-4 h-4" /> Dupliquer
                 </button>

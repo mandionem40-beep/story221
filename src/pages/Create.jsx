@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { toast } from "@/components/ui/use-toast";
@@ -7,7 +7,7 @@ import { runGenerationPipeline } from "@/lib/generation-pipeline";
 import CreateForm from "@/components/create/CreateForm";
 import PipelineProgress from "@/components/create/PipelineProgress";
 import GenerationResult from "@/components/create/GenerationResult";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Wand2, Sparkles } from "lucide-react";
 
 export default function Create() {
   const navigate = useNavigate();
@@ -23,6 +23,16 @@ export default function Create() {
   const [pipelineError, setPipelineError] = useState(null);
   const [generation, setGeneration] = useState(null);
   const [result, setResult] = useState(null);
+  const continueId = urlParams.get("continue");
+  const [continueGen, setContinueGen] = useState(null);
+
+  useEffect(() => {
+    if (continueId) {
+      base44.entities.Generation.get(continueId)
+        .then((g) => { setContinueGen(g); setType(g.type); })
+        .catch(() => {});
+    }
+  }, [continueId]);
 
   const steps = getPipelineSteps(type);
 
@@ -163,6 +173,54 @@ export default function Create() {
     } catch { /* ignore */ }
   };
 
+  const handleLaunchContinue = async () => {
+    if (!continueGen) return;
+    const genType = continueGen.type;
+    const options = {
+      duration: continueGen.duration_minutes || 1,
+      language: continueGen.language || "Français",
+      style: continueGen.style || "Cinématique",
+      format: continueGen.format || "vertical",
+      voice: continueGen.voice || "river",
+      music: continueGen.music || "Aucune",
+      resolution: continueGen.resolution || "720p",
+    };
+    const cost = calculateCost(genType, options.duration);
+    const user = await base44.auth.me();
+    const useFreeTrial = !user.free_trial_used && cost > 0;
+    if (!useFreeTrial && user.diamonds < cost) {
+      toast({ title: "Solde insuffisant", description: "Achetez des diamants pour continuer.", variant: "destructive" });
+      navigate("/app/diamonds");
+      return;
+    }
+    const prompt = `Continue cette histoire: ${continueGen.title || (continueGen.prompt || "").substring(0, 60)}`;
+    const gen = await base44.entities.Generation.create({
+      type: genType, prompt, cost_diamonds: cost, duration_minutes: options.duration,
+      language: options.language, style: options.style, format: options.format, voice: options.voice,
+      music: options.music, resolution: options.resolution, status: "processing", pipeline_step: "script",
+    });
+    setGeneration(gen);
+    const newBalance = useFreeTrial ? user.diamonds : user.diamonds - cost;
+    await base44.auth.updateMe({ diamonds: newBalance, free_trial_used: useFreeTrial ? true : user.free_trial_used });
+    await base44.entities.Transaction.create({
+      type: useFreeTrial ? "free_trial" : "generation", amount: -cost,
+      description: `Continuation: ${prompt.substring(0, 50)}`, reference: `gen_${gen.id}`,
+      balance_after: newBalance, related_generation_id: gen.id,
+    });
+    refreshUser();
+    setPhase("pipeline");
+    setCurrentStep(0);
+    setPipelineError(null);
+    await runGenerationPipeline(
+      { prompt, type: genType, options, generationId: gen.id, mode: "continue", previousGeneration: continueGen },
+      {
+        onStep: (stepIdx) => setCurrentStep(stepIdx),
+        onComplete: (res) => { setResult(res); setPhase("result"); refreshUser(); },
+        onError: (error) => { setPipelineError(error); setPhase("error"); refundDiamonds(gen.id, user, useFreeTrial, cost); refreshUser(); },
+      }
+    );
+  };
+
   const handleNew = () => {
     setPhase("form");
     setGeneration(null);
@@ -189,7 +247,36 @@ export default function Create() {
         </div>
       </div>
 
-      {phase === "form" && (
+      {phase === "form" && continueId && !continueGen && (
+        <div className="flex items-center justify-center py-20">
+          <Sparkles className="w-6 h-6 text-primary animate-pulse" />
+        </div>
+      )}
+
+      {phase === "form" && continueId && continueGen && (
+        <div className="space-y-5">
+          <div className="rounded-2xl bg-card border border-border p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Wand2 className="w-5 h-5 text-primary" />
+              <span className="text-sm font-semibold text-primary">Continuer l'histoire</span>
+            </div>
+            <h2 className="text-lg font-bold text-white mb-1">{continueGen.title || "Création"}</h2>
+            <p className="text-xs text-muted-foreground mb-3">{getContentType(continueGen.type).label} · {continueGen.duration_minutes} min · {continueGen.language}</p>
+            {continueGen.enhanced_script && (
+              <p className="text-sm text-muted-foreground line-clamp-3">{continueGen.enhanced_script.substring(0, 240)}…</p>
+            )}
+            <p className="text-xs text-muted-foreground mt-3">Claude reprend le scénario, les personnages et les décors pour écrire la suite naturelle.</p>
+          </div>
+          <div className="flex items-center justify-between">
+            <button onClick={() => navigate("/app/library")} className="text-sm text-muted-foreground hover:text-white">Annuler</button>
+            <button onClick={handleLaunchContinue} className="px-6 py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-colors glow-red-sm">
+              Lancer la suite · {calculateCost(continueGen.type, continueGen.duration_minutes || 1)} 💎
+            </button>
+          </div>
+        </div>
+      )}
+
+      {phase === "form" && !continueId && (
         <CreateForm type={type} onTypeChange={handleTypeChange} user={currentUser} onSubmit={handleSubmit} initialPrompt={initialPrompt} initialDuration={initialDuration} initialStyle={initialStyle} initialLanguage={initialLanguage} />
       )}
 
