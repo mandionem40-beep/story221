@@ -1,5 +1,5 @@
-export const LOGO_ICON_URL = "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/9ea955134_image.png";
-export const LOGO_FULL_URL = "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/0e22c6695_logostory221.png";
+export const LOGO_ICON_URL = "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/2b10bae57_image.png";
+export const LOGO_FULL_URL = "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/2b10bae57_image.png";
 
 export default function Logo({ size = "md", showText = true, full = false, className = "" }) {
   const sizeMap = {
