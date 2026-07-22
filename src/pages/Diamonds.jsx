@@ -12,6 +12,11 @@ export default function Diamonds() {
   const [purchasing, setPurchasing] = useState(null);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('status') === 'success') {
+      toast({ title: "Paiement réussi !", description: "Vos diamants seront crédités sous peu." });
+      window.history.replaceState({}, '', '/app/diamonds');
+    }
     loadData();
   }, []);
 
@@ -31,24 +36,21 @@ export default function Diamonds() {
   const handleBuy = async (pack) => {
     setPurchasing(pack.id);
     try {
-      // Payment integration — credits diamonds directly (admin flow)
-      // In production, this goes through a payment provider (Stripe)
-      const newBalance = (currentUser?.diamonds || 0) + pack.diamonds;
-      await base44.auth.updateMe({ diamonds: newBalance });
-      await base44.entities.Transaction.create({
-        type: "purchase",
-        amount: pack.diamonds,
-        description: `Achat pack ${pack.name}`,
-        reference: `purchase_${Date.now()}`,
-        balance_after: newBalance,
+      const response = await base44.functions.invoke('paydunya-initiate', {
+        packId: pack.id,
+        packName: pack.name,
+        diamonds: pack.diamonds,
+        amount: pack.price_fcfa,
       });
-      refreshUser();
-      loadData();
-      toast({ title: "Achat réussi !", description: `${pack.diamonds} diamants crédités.` });
+      if (response.data?.checkoutUrl) {
+        window.location.href = response.data.checkoutUrl;
+      } else {
+        throw new Error("URL de paiement non reçue");
+      }
     } catch (err) {
-      toast({ title: "Erreur", description: "Impossible d'effectuer l'achat.", variant: "destructive" });
+      toast({ title: "Erreur", description: "Impossible d'initier le paiement.", variant: "destructive" });
+      setPurchasing(null);
     }
-    setPurchasing(null);
   };
 
   const diamonds = currentUser?.diamonds ?? 0;

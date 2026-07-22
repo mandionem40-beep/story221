@@ -4,6 +4,7 @@ import { Heart, MessageCircle, Share2, Bookmark, UserPlus, UserCheck, Download, 
 import { Image } from "@/components/ui/image";
 import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/use-toast";
+import ShareModal from "@/components/share/ShareModal";
 
 export default function ReelCard({ reel, currentUser, isActive }) {
   const videoRef = useRef(null);
@@ -17,6 +18,7 @@ export default function ReelCard({ reel, currentUser, isActive }) {
   const [newComment, setNewComment] = useState("");
   const [reporting, setReporting] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showShare, setShowShare] = useState(false);
 
   const isOwner = reel.created_by_id === currentUser?.id;
 
@@ -99,8 +101,7 @@ export default function ReelCard({ reel, currentUser, isActive }) {
   };
 
   const handleShare = () => {
-    navigator.clipboard?.writeText(`${window.location.origin}/app/reels`);
-    toast({ title: "Lien copié", description: "Le lien a été copié dans le presse-papiers." });
+    setShowShare(true);
   };
 
   const handleDownload = () => {
@@ -275,6 +276,13 @@ export default function ReelCard({ reel, currentUser, isActive }) {
             </div>
           </div>
         </div>
+      )}
+      {showShare && (
+        <ShareModal
+          url={`${window.location.origin}/app/reels`}
+          title={reel.title || "Reel Story221"}
+          onClose={() => setShowShare(false)}
+        />
       )}
     </div>
   );

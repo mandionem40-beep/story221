@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import AnalyticsTab from "@/components/admin/AnalyticsTab";
+import AdjustCreditsDialog from "@/components/admin/AdjustCreditsDialog";
 
 const tabs = [
   { id: "stats", label: "Statistiques", icon: BarChart3 },
@@ -22,6 +23,8 @@ export default function SuperAdmin() {
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(true);
   const [newPack, setNewPack] = useState({ name: "", diamonds: 0, price_fcfa: 0, popular: false });
+  const [adjustUser, setAdjustUser] = useState(null);
+  const [showAdjust, setShowAdjust] = useState(false);
 
   useEffect(() => {
     if (user && user.role !== "admin" && user.role !== "super_admin") {
@@ -120,25 +123,24 @@ export default function SuperAdmin() {
     toast({ title: "Pack ajouté" });
   };
 
-  const handleAdjustCredits = async (userId, currentDiamonds) => {
-    const amount = prompt("Ajuster le solde de diamants (ex: +50 ou -20):", "0");
-    if (!amount) return;
-    const parsed = parseInt(amount);
-    if (isNaN(parsed)) return;
-    const newBalance = currentDiamonds + parsed;
-    // Note: only admins can update other users — this works if current user is admin
+  const handleAdjustCredits = async (amount, description) => {
+    if (!adjustUser) return;
+    const currentDiamonds = adjustUser.diamonds || 0;
+    const newBalance = currentDiamonds + amount;
     try {
-      await base44.entities.User.update(userId, { diamonds: newBalance });
+      await base44.entities.User.update(adjustUser.id, { diamonds: newBalance });
       await base44.entities.Transaction.create({
         type: "admin_adjustment",
-        amount: parsed,
-        description: `Ajustement manuel par l'admin`,
+        amount,
+        description: description || `Ajustement manuel par l'admin`,
         reference: `admin_${Date.now()}`,
         balance_after: newBalance,
       });
-      logAction("adjust_credits", `${parsed > 0 ? "+" : ""}${parsed} diamants pour ${userId}`, userId);
+      logAction("adjust_credits", `${amount > 0 ? "+" : ""}${amount} diamants pour ${adjustUser.id}`, adjustUser.id);
+      setShowAdjust(false);
+      setAdjustUser(null);
       loadTabData("users");
-      toast({ title: "Solde ajusté" });
+      toast({ title: "Solde ajusté", description: `Nouveau solde: ${newBalance} 💎` });
     } catch {
       toast({ title: "Erreur", description: "Action non autorisée.", variant: "destructive" });
     }
@@ -242,7 +244,7 @@ export default function SuperAdmin() {
                         <p className="text-sm text-white">{u.diamonds || 0} 💎</p>
                         <p className="text-xs text-muted-foreground">{u.role || "user"}</p>
                       </div>
-                      <button onClick={() => handleAdjustCredits(u.id, u.diamonds || 0)} className="px-3 py-1.5 rounded-lg bg-secondary text-white text-xs font-medium">
+                      <button onClick={() => { setAdjustUser(u); setShowAdjust(true); }} className="px-3 py-1.5 rounded-lg bg-secondary text-white text-xs font-medium">
                         Ajuster
                       </button>
                     </div>
@@ -371,6 +373,12 @@ export default function SuperAdmin() {
           </>
         )}
       </main>
+      <AdjustCreditsDialog
+        user={adjustUser}
+        open={showAdjust}
+        onClose={() => setShowAdjust(false)}
+        onConfirm={handleAdjustCredits}
+      />
     </div>
   );
 }

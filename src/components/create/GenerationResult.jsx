@@ -3,9 +3,11 @@ import { Download, Share2, Clapperboard, Loader2, Lock } from "lucide-react";
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Image } from "@/components/ui/image";
+import ShareModal from "@/components/share/ShareModal";
 
 export default function GenerationResult({ generation, result, onPublish, onNew }) {
   const [publishing, setPublishing] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const [published, setPublished] = useState(generation?.is_published);
   const isOwner = true; // This page is always viewed by the owner
 
@@ -27,8 +29,7 @@ export default function GenerationResult({ generation, result, onPublish, onNew 
   };
 
   const handleShare = () => {
-    const url = `${window.location.origin}/app/reels`;
-    navigator.clipboard?.writeText(url);
+    setShowShare(true);
   };
 
   const canDownload = published || generation?.ad_private_use;
@@ -155,6 +156,13 @@ export default function GenerationResult({ generation, result, onPublish, onNew 
             ))}
           </div>
         </div>
+      )}
+      {showShare && (
+        <ShareModal
+          url={result?.resultUrl || `${window.location.origin}/app/reels`}
+          title={result?.title || generation?.title || "Ma création Story221"}
+          onClose={() => setShowShare(false)}
+        />
       )}
     </div>
   );
