@@ -1,24 +1,26 @@
 import React, { useState, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { UserPlus, Mail, Lock, User, Loader2, Gift } from "lucide-react";
+import { UserPlus, Mail, Lock, User, Phone, Loader2, Gift, CheckCircle2 } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
+import AppleIcon from "@/components/AppleIcon";
 import { toast } from "@/components/ui/use-toast";
 import { generateReferralCode } from "@/lib/generation-utils";
+import { detectCountryFromPhone, isValidPhone } from "@/lib/phone-utils";
 
 export default function Register() {
-  const navigate = useNavigate();
   const urlParams = useMemo(() => new URLSearchParams(window.location.search), []);
   const refCode = urlParams.get("ref");
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [acceptCGU, setAcceptCGU] = useState(false);
@@ -27,12 +29,22 @@ export default function Register() {
   const [showOtp, setShowOtp] = useState(false);
   const [otpCode, setOtpCode] = useState("");
 
+  const detectedCountry = detectCountryFromPhone(phone);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     if (username.trim().length < 3) {
       setError("Le nom d'utilisateur doit comporter au moins 3 caractères.");
+      return;
+    }
+    if (!phone.trim()) {
+      setError("Le numéro de téléphone est obligatoire.");
+      return;
+    }
+    if (!isValidPhone(phone)) {
+      setError("Numéro de téléphone invalide. Format attendu : +221 77 123 45 67");
       return;
     }
     if (password !== confirmPassword) {
@@ -73,10 +85,13 @@ export default function Register() {
         base44.auth.setToken(result.access_token);
       }
       const refCodeGen = generateReferralCode(username.trim());
+      const countryInfo = detectCountryFromPhone(phone);
       await base44.auth.updateMe({
         username: username.trim(),
         full_name: username.trim(),
-        country: "Sénégal",
+        phone: phone.trim(),
+        phone_country: countryInfo?.country || "Inconnu",
+        country: countryInfo?.country || "Sénégal",
         referral_code: refCodeGen,
         referred_by: refCode || null,
         diamonds: 0,
@@ -103,6 +118,10 @@ export default function Register() {
 
   const handleGoogle = () => {
     base44.auth.loginWithProvider("google", "/app");
+  };
+
+  const handleApple = () => {
+    base44.auth.loginWithProvider("apple", "/app");
   };
 
   if (showOtp) {
@@ -173,14 +192,25 @@ export default function Register() {
         </>
       }
     >
-      <Button
-        variant="outline"
-        className="w-full h-12 text-sm font-medium mb-6"
-        onClick={handleGoogle}
-      >
-        <GoogleIcon className="w-5 h-5 mr-2" />
-        Continuer avec Google
-      </Button>
+      {/* Social login */}
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        <Button
+          variant="outline"
+          className="h-12 text-sm font-medium"
+          onClick={handleGoogle}
+        >
+          <GoogleIcon className="w-5 h-5 mr-2" />
+          Google
+        </Button>
+        <Button
+          variant="outline"
+          className="h-12 text-sm font-medium"
+          onClick={handleApple}
+        >
+          <AppleIcon className="w-5 h-5 mr-2" />
+          Apple
+        </Button>
+      </div>
 
       <div className="relative mb-6">
         <div className="absolute inset-0 flex items-center">
@@ -231,6 +261,36 @@ export default function Register() {
               required
             />
           </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="phone">
+            Numéro de téléphone
+            <span className="text-destructive ml-1">*</span>
+          </Label>
+          <div className="relative">
+            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+            <Input
+              id="phone"
+              type="tel"
+              autoComplete="tel"
+              placeholder="+221 77 123 45 67"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="pl-10 h-12"
+              required
+            />
+          </div>
+          {detectedCountry && (
+            <div className="flex items-center gap-1.5 text-xs text-primary">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              {detectedCountry.flag} {detectedCountry.country}
+            </div>
+          )}
+          {phone && !detectedCountry && (
+            <p className="text-xs text-muted-foreground">
+              Format attendu : +indicatif puis votre numéro
+            </p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">Mot de passe</Label>

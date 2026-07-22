@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
-import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles } from "lucide-react";
+import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import AnalyticsTab from "@/components/admin/AnalyticsTab";
 
 const tabs = [
   { id: "stats", label: "Statistiques", icon: BarChart3 },
@@ -12,6 +13,7 @@ const tabs = [
   { id: "reels", label: "Reels", icon: Clapperboard },
   { id: "reports", label: "Signalements", icon: Flag },
   { id: "logs", label: "Logs", icon: ScrollText },
+  { id: "analytics", label: "Analytics", icon: TrendingUp },
 ];
 
 export default function SuperAdmin() {
@@ -54,6 +56,17 @@ export default function SuperAdmin() {
         result = { reports: await base44.entities.Report.list("-created_date", 200) };
       } else if (tab === "logs") {
         result = { logs: await base44.entities.AdminLog.list("-created_date", 200) };
+      } else if (tab === "analytics") {
+        const [users, gens, txs, reels, likes, comments, follows] = await Promise.all([
+          base44.entities.User.list("-created_date", 200),
+          base44.entities.Generation.list("-created_date", 200),
+          base44.entities.Transaction.list("-created_date", 200),
+          base44.entities.Reel.list("-created_date", 200),
+          base44.entities.Like.list("-created_date", 200),
+          base44.entities.Comment.list("-created_date", 200),
+          base44.entities.Follow.list("-created_date", 200),
+        ]);
+        result = { users: users || [], generations: gens || [], transactions: txs || [], reels: reels || [], likes: likes || [], comments: comments || [], follows: follows || [] };
       }
       setData(result);
     } catch { /* ignore */ }
@@ -327,6 +340,11 @@ export default function SuperAdmin() {
                   </div>
                 )}
               </div>
+            )}
+
+            {/* Analytics tab */}
+            {activeTab === "analytics" && (
+              <AnalyticsTab data={data} />
             )}
 
             {/* Logs tab */}

@@ -11,6 +11,12 @@
     "country": {
       "type": "string"
     },
+    "phone": {
+      "type": "string"
+    },
+    "phone_country": {
+      "type": "string"
+    },
     "avatar_url": {
       "type": "string"
     },

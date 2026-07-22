@@ -131,6 +131,9 @@ export default function Profile() {
             <h1 className="text-xl font-bold text-white">@{username || "utilisateur"}</h1>
           )}
           <p className="text-sm text-muted-foreground mt-0.5">{country}</p>
+          {!editing && currentUser?.phone && (
+            <p className="text-sm text-muted-foreground mt-0.5">{currentUser.phone}</p>
+          )}
           {!editing && bio && <p className="text-sm text-white/70 mt-2 max-w-md">{bio}</p>}
         </div>
         <button
