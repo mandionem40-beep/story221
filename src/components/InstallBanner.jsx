@@ -6,6 +6,8 @@ export default function InstallBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if (sessionStorage.getItem("s221_install_dismissed")) return;
+
     const handler = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -14,11 +16,12 @@ export default function InstallBanner() {
     window.addEventListener("beforeinstallprompt", handler);
 
     const isStandalone =
-      window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
 
     let timer;
     if (!isStandalone) {
-      timer = setTimeout(() => setVisible(true), 1800);
+      timer = setTimeout(() => setVisible(true), 1500);
     }
 
     return () => {
@@ -32,42 +35,48 @@ export default function InstallBanner() {
       deferredPrompt.prompt();
       await deferredPrompt.userChoice;
       setDeferredPrompt(null);
-      setVisible(false);
+      dismiss();
     } else {
       const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-      if (isIOS) {
-        alert("Pour installer Story221 : appuyez sur le bouton Partager (ios) puis « Sur l'écran d'accueil ».");
-      } else {
-        alert("Ajoutez Story221 à votre écran d'accueil via le menu de votre navigateur « Installer l'application ».");
-      }
+      alert(
+        isIOS
+          ? "Pour installer Story221 : appuyez sur le bouton Partager puis « Sur l'écran d'accueil »."
+          : "Ajoutez Story221 à votre écran d'accueil via le menu « Installer l'application » de votre navigateur."
+      );
     }
+  };
+
+  const dismiss = () => {
+    setVisible(false);
+    sessionStorage.setItem("s221_install_dismissed", "1");
   };
 
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] w-[calc(100%-2rem)] max-w-lg animate-slide-up">
-      <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-card/90 border border-primary/30 glow-red-sm backdrop-blur-xl">
-        <div className="w-9 h-9 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
-          <Download className="w-4 h-4 text-primary" />
+    <div className="w-full bg-primary text-white">
+      <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 h-9 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <Download className="w-3.5 h-3.5 flex-shrink-0" />
+          <p className="text-xs sm:text-sm font-medium truncate">
+            Installez l'application Story221 en 1 clic
+          </p>
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-white">Installer Story221</p>
-          <p className="text-xs text-muted-foreground truncate">Accès en 1 clic, directement sur votre écran.</p>
+        <div className="flex items-center gap-2.5 flex-shrink-0">
+          <button
+            onClick={handleInstall}
+            className="px-3 py-1 rounded-md bg-white text-primary text-xs font-semibold hover:bg-white/90 transition-colors whitespace-nowrap"
+          >
+            Installer
+          </button>
+          <button
+            onClick={dismiss}
+            aria-label="Fermer"
+            className="text-white/80 hover:text-white transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
-        <button
-          onClick={handleInstall}
-          className="px-3.5 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors whitespace-nowrap"
-        >
-          Installer
-        </button>
-        <button
-          onClick={() => setVisible(false)}
-          aria-label="Fermer"
-          className="text-muted-foreground hover:text-white transition-colors flex-shrink-0"
-        >
-          <X className="w-4 h-4" />
-        </button>
       </div>
     </div>
   );

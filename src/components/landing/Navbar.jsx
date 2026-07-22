@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
+import InstallBanner from "@/components/InstallBanner";
 
 const navLinks = [
   { label: "Accueil", href: "#hero" },
@@ -29,6 +30,7 @@ export default function Navbar() {
           : "bg-transparent"
       )}
     >
+      <InstallBanner />
       <nav className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-18 gap-2">
           {/* Logo */}
