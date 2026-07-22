@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Play, Gift, Zap, Diamond, Clapperboard } from "lucide-react";
 import HeroDemo from "@/components/landing/HeroDemo";
+import HeroChat from "@/components/landing/HeroChat";
 
 const badges = [
 { icon: Gift, label: "1 vidéo offerte" },
@@ -31,30 +32,46 @@ export default function Hero() {
               <span className="text-xs sm:text-sm text-muted-foreground">Le premier studio IA social d'Afrique</span>
             </motion.div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1]">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.2]">
               {"Transformez vos idées en".split(" ").map((word, i) => (
                 <motion.span
-                  key={i}
+                  key={`a-${i}`}
                   initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
                   animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                   transition={{ duration: 0.7, delay: 0.1 + i * 0.12, ease: "easeOut" }}
-                  className="inline-block"
+                  className="inline-block mr-[0.3em]"
                 >
-                  {word}{" "}
+                  <motion.span
+                    animate={{
+                      y: [0, -4, 0],
+                      textShadow: [
+                        "0 0 0px rgba(255,255,255,0)",
+                        "0 0 14px rgba(255,255,255,0.2)",
+                        "0 0 0px rgba(255,255,255,0)",
+                      ],
+                    }}
+                    transition={{ duration: 3.5, repeat: Infinity, delay: i * 0.4, ease: "easeInOut" }}
+                    className="inline-block"
+                  >
+                    {word}
+                  </motion.span>
                 </motion.span>
               ))}
               <motion.span
                 initial={{ opacity: 0, scale: 0.8, filter: "blur(12px)" }}
                 animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                 transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
-                className="inline-block gradient-text-red"
+                className="inline-block gradient-text-red mr-[0.3em]"
               >
                 <motion.span
-                  animate={{ textShadow: [
-                    "0 0 20px rgba(255,0,51,0.3)",
-                    "0 0 40px rgba(255,0,51,0.6)",
-                    "0 0 20px rgba(255,0,51,0.3)",
-                  ]}}
+                  animate={{
+                    textShadow: [
+                      "0 0 20px rgba(255,0,51,0.3)",
+                      "0 0 40px rgba(255,0,51,0.6)",
+                      "0 0 20px rgba(255,0,51,0.3)",
+                    ],
+                    scale: [1, 1.04, 1],
+                  }}
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                   className="inline-block"
                 >
@@ -63,13 +80,26 @@ export default function Hero() {
               </motion.span>
               {"grâce à l'IA.".split(" ").map((word, i) => (
                 <motion.span
-                  key={i}
+                  key={`b-${i}`}
                   initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
                   animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                   transition={{ duration: 0.7, delay: 0.9 + i * 0.12, ease: "easeOut" }}
-                  className="inline-block"
+                  className="inline-block mr-[0.3em]"
                 >
-                  {word}{" "}
+                  <motion.span
+                    animate={{
+                      y: [0, -4, 0],
+                      textShadow: [
+                        "0 0 0px rgba(255,255,255,0)",
+                        "0 0 14px rgba(255,255,255,0.2)",
+                        "0 0 0px rgba(255,255,255,0)",
+                      ],
+                    }}
+                    transition={{ duration: 3.5, repeat: Infinity, delay: 0.3 + i * 0.4, ease: "easeInOut" }}
+                    className="inline-block"
+                  >
+                    {word}
+                  </motion.span>
                 </motion.span>
               ))}
             </h1>
@@ -128,6 +158,9 @@ export default function Hero() {
                 </motion.div>
               )}
             </motion.div>
+
+            {/* Animated chat */}
+            <HeroChat />
           </div>
 
           {/* Right: Animated demo */}
