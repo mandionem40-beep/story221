@@ -1,6 +1,4 @@
-export const PAYDUNYA_API_BASE = Deno.env.get("PAYDUNYA_MODE") === "live"
-  ? "https://app.paydunya.com/api/v1"
-  : "https://app.paydunya.com/sandbox-api/v1";
+export const PAYDUNYA_API_BASE = "https://app.paydunya.com/api/v1";
 
 export function getPaydunyaHeaders() {
   return {
