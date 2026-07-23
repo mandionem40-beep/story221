@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { PAYDUNYA_API_BASE, getPaydunyaHeaders } from "../../shared/paydunya.ts";
 
 Deno.serve(async (req) => {
   try {
@@ -30,10 +31,31 @@ Deno.serve(async (req) => {
       return Response.json({ status: "ignored", reason: "missing user_id or diamonds" });
     }
 
+    // CRITICAL SECURITY: Verify the payment with PayDunya before crediting
+    if (token) {
+      const confirmRes = await fetch(`${PAYDUNYA_API_BASE}/checkout-invoice/confirm/${token}`, {
+        method: "POST",
+        headers: getPaydunyaHeaders(),
+      });
+      const confirmData = await confirmRes.json();
+
+      if (confirmData.response_code !== "00" || confirmData.status !== "completed") {
+        return Response.json({ status: "ignored", reason: "payment verification failed" });
+      }
+
+      // Verify the amount matches what was charged
+      const confirmedAmount = parseInt(confirmData.invoice?.total_amount) || 0;
+      if (confirmedAmount !== amount) {
+        return Response.json({ status: "ignored", reason: "amount mismatch" });
+      }
+    } else {
+      return Response.json({ status: "ignored", reason: "missing token" });
+    }
+
     const base44 = createClientFromRequest(req);
 
     // Prevent duplicate crediting
-    const reference = `paydunya_${token || Date.now()}`;
+    const reference = `paydunya_${token}`;
     const existing = await base44.asServiceRole.entities.Transaction.filter({ reference });
     if (existing && existing.length > 0) {
       return Response.json({ status: "duplicate", message: "Transaction already processed" });

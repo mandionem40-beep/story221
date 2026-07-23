@@ -8,18 +8,29 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
-    const { packId, packName, diamonds, amount } = body;
+    const { packId } = body;
 
-    if (!diamonds || !amount) {
-      return Response.json({ error: 'Missing required fields: diamonds, amount' }, { status: 400 });
+    if (!packId) {
+      return Response.json({ error: 'packId requis' }, { status: 400 });
+    }
+
+    // SECURITY: Look up pack from database — never trust client-sent prices
+    let pack;
+    try {
+      pack = await base44.asServiceRole.entities.DiamondPack.get(packId);
+    } catch {
+      return Response.json({ error: 'Pack introuvable' }, { status: 404 });
+    }
+    if (!pack || !pack.active) {
+      return Response.json({ error: 'Pack introuvable ou inactif' }, { status: 404 });
     }
 
     const appOrigin = getAppOrigin(req);
 
     const invoiceData = {
       invoice: {
-        total_amount: amount,
-        description: `Achat de ${diamonds} diamants - ${packName || "Pack"}`,
+        total_amount: pack.price_fcfa,
+        description: `Achat de ${pack.diamonds} diamants - ${pack.name}`,
       },
       store: {
         name: "Story221",
@@ -32,10 +43,10 @@ Deno.serve(async (req) => {
       },
       custom_data: {
         user_id: user.id,
-        pack_id: packId || "",
-        diamonds: diamonds,
-        pack_name: packName || "",
-        amount: amount,
+        pack_id: pack.id,
+        diamonds: pack.diamonds,
+        pack_name: pack.name,
+        amount: pack.price_fcfa,
       },
     };
 
