@@ -40,8 +40,8 @@ const reelPreviews = [
     song: "Hype Beat - Story221",
   },
   {
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/eaf4bde31_Sadio_Man_dribble_lion.mp4",
-    title: "Sadio Mané dribble un lion 🦁⚽",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/d4f67d714_Mariage_Fruits_Mrs_Mbaye.mp4",
+    title: "Mariage Fruits Mrs Mbaye 🍓🍌❤️",
     author: "@motion.afrik",
     likes: "489.2K",
     comments: "15.3K",
