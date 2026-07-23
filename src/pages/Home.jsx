@@ -118,8 +118,8 @@ export default function Home() {
           autoFocus
         />
 
-        {/* Uploaded images preview */}
-        {uploadedImages.length > 0 && (
+        {/* Uploaded images preview + upload zone */}
+        {(uploadedImages.length > 0 || uploading) && (
           <div className="flex gap-2 px-3 pt-3 overflow-x-auto scrollbar-hide">
             {uploadedImages.map((url, idx) => (
               <div key={idx} className="relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border border-border group">
@@ -132,6 +132,11 @@ export default function Home() {
                 </button>
               </div>
             ))}
+            {uploading && (
+              <div className="flex-shrink-0 w-16 h-16 rounded-lg border border-dashed border-primary/40 flex items-center justify-center">
+                <Loader2 className="w-5 h-5 text-primary animate-spin" />
+              </div>
+            )}
           </div>
         )}
 
