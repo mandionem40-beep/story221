@@ -2,29 +2,37 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
-import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video, Share2, Mail } from "lucide-react";
+import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video, Share2, Mail, Cpu, Gift, Building2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import AnalyticsTab from "@/components/admin/AnalyticsTab";
 import AdjustCreditsDialog from "@/components/admin/AdjustCreditsDialog";
 import MessagesAdmin from "@/components/admin/MessagesAdmin";
+import DashboardTab from "@/components/admin/DashboardTab";
+import AIManagementTab from "@/components/admin/AIManagementTab";
+import GeneralSettingsTab from "@/components/admin/GeneralSettingsTab";
+import ReferralTab from "@/components/admin/ReferralTab";
+import UsersTab from "@/components/admin/UsersTab";
 
 const tabs = [
-  { id: "stats", label: "Statistiques", icon: BarChart3 },
+  { id: "dashboard", label: "Dashboard", icon: BarChart3 },
   { id: "users", label: "Utilisateurs", icon: Users },
   { id: "packs", label: "Packs", icon: Package },
-  { id: "transactions", label: "Transactions", icon: CreditCard },
+  { id: "transactions", label: "Paiements", icon: CreditCard },
   { id: "reels", label: "Reels", icon: Clapperboard },
   { id: "showcase", label: "Vitrine", icon: Video },
-  { id: "reports", label: "Signalements", icon: Flag },
+  { id: "reports", label: "Modération", icon: Flag },
+  { id: "ai", label: "IA", icon: Cpu },
+  { id: "referral", label: "Parrainage", icon: Gift },
   { id: "logs", label: "Logs", icon: ScrollText },
   { id: "analytics", label: "Analytics", icon: TrendingUp },
   { id: "settings", label: "Réseaux", icon: Share2 },
+  { id: "params", label: "Paramètres", icon: Building2 },
   { id: "messages", label: "Messagerie", icon: Mail },
 ];
 
 export default function SuperAdmin() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("stats");
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(true);
   const [newPack, setNewPack] = useState({ name: "", diamonds: 0, price_fcfa: 0, popular: false });
@@ -44,16 +52,28 @@ export default function SuperAdmin() {
     setLoading(true);
     try {
       let result = {};
-      if (tab === "stats") {
-        const [users, gens, txs, reels, packs] = await Promise.all([
-          base44.entities.User.list("-created_date", 200),
-          base44.entities.Generation.list("-created_date", 200),
-          base44.entities.Transaction.list("-created_date", 200),
-          base44.entities.Reel.list("-created_date", 200),
+      if (tab === "dashboard") {
+        const [users, gens, txs, reels, packs, reports, feedbacks, polls, conversations, referralClicks] = await Promise.all([
+          base44.entities.User.list("-created_date", 500),
+          base44.entities.Generation.list("-created_date", 500),
+          base44.entities.Transaction.list("-created_date", 500),
+          base44.entities.Reel.list("-created_date", 500),
           base44.entities.DiamondPack.list(),
+          base44.entities.Report.list("-created_date", 200),
+          base44.entities.Feedback.list("-created_date", 200),
+          base44.entities.Poll.list("-created_date", 200),
+          base44.entities.Conversation.list("-created_date", 200),
+          base44.entities.ReferralClick.list("-created_date", 200),
         ]);
-        const revenue = (txs || []).filter(t => t.type === "purchase").reduce((s, t) => s + (t.amount || 0), 0);
-        result = { users: users || [], generations: gens || [], transactions: txs || [], reels: reels || [], packs: packs || [], revenue };
+        // Build referral data from user.referred_by
+        const referredUsers = (users || []).filter(u => u.referred_by);
+        result = {
+          users: users || [], generations: gens || [], transactions: txs || [],
+          reels: reels || [], packs: packs || [], reports: reports || [],
+          feedbacks: feedbacks || [], polls: polls || [], conversations: conversations || [],
+          referrals: referredUsers, referralClicks: referralClicks || [],
+          messages: [],
+        };
       } else if (tab === "users") {
         result = { users: await base44.entities.User.list("-created_date", 200) };
       } else if (tab === "packs") {
@@ -81,6 +101,8 @@ export default function SuperAdmin() {
         result = { users: users || [], generations: gens || [], transactions: txs || [], reels: reels || [], likes: likes || [], comments: comments || [], follows: follows || [] };
       } else if (tab === "settings") {
         result = { socialLinks: await base44.entities.SocialLink.list("display_order", 50) };
+      } else if (tab === "params" || tab === "ai" || tab === "referral") {
+        result = {};  // these tabs load their own data
       } else if (tab === "messages") {
         result = {};  // MessagesAdmin loads its own data
       }
@@ -101,6 +123,20 @@ export default function SuperAdmin() {
     logAction("delete_reel", `Reel ${reelId} supprimé`);
     loadTabData("reels");
     toast({ title: "Reel supprimé" });
+  };
+
+  const handleToggleReelVisibility = async (reel) => {
+    await base44.entities.Reel.update(reel.id, { hidden: !reel.hidden });
+    logAction("toggle_reel_visibility", `Reel ${reel.id} ${reel.hidden ? "affiché" : "masqué"}`);
+    loadTabData("reels");
+    toast({ title: reel.hidden ? "Reel affiché" : "Reel masqué" });
+  };
+
+  const handleToggleReelFeatured = async (reel) => {
+    await base44.entities.Reel.update(reel.id, { featured: !reel.featured });
+    logAction("toggle_reel_featured", `Reel ${reel.id} ${reel.featured ? "retiré des vedettes" : "mis en vedette"}`);
+    loadTabData("reels");
+    toast({ title: reel.featured ? "Retiré des vedettes" : "Mis en vedette" });
   };
 
   const handleAddShowcase = async () => {
@@ -190,6 +226,41 @@ export default function SuperAdmin() {
     }
   };
 
+  const handleUserStatus = async (userObj, status) => {
+    const labels = { active: "activé", suspended: "suspendu", banned: "banni" };
+    try {
+      await base44.entities.User.update(userObj.id, { account_status: status });
+      logAction("user_status", `Utilisateur ${userObj.id} ${labels[status]}`, userObj.id);
+      loadTabData("users");
+      toast({ title: `Utilisateur ${labels[status]}` });
+    } catch {
+      toast({ title: "Erreur", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteUser = async (userObj) => {
+    if (!confirm(`Supprimer définitivement ${userObj.email} ? Cette action est irréversible.`)) return;
+    try {
+      await base44.entities.User.delete(userObj.id);
+      logAction("delete_user", `Utilisateur ${userObj.id} supprimé`, userObj.id);
+      loadTabData("users");
+      toast({ title: "Utilisateur supprimé" });
+    } catch {
+      toast({ title: "Erreur", variant: "destructive" });
+    }
+  };
+
+  const handleUpdateUserRole = async (userObj, role) => {
+    try {
+      await base44.entities.User.update(userObj.id, { role });
+      logAction("update_role", `Rôle de ${userObj.id} → ${role}`, userObj.id);
+      loadTabData("users");
+      toast({ title: "Rôle mis à jour" });
+    } catch {
+      toast({ title: "Erreur", variant: "destructive" });
+    }
+  };
+
   const handleAddSocial = async () => {
     if (!newSocial.url) return;
     const labels = { tiktok: "TikTok", instagram: "Instagram", youtube: "YouTube", facebook: "Facebook", x: "X (Twitter)", linkedin: "LinkedIn" };
@@ -270,67 +341,20 @@ export default function SuperAdmin() {
           <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>
         ) : (
           <>
-            {/* Stats tab */}
-            {activeTab === "stats" && (
-              <div>
-                <h2 className="text-xl font-bold text-white mb-6">Vue d'ensemble</h2>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                  {[
-                    { label: "Utilisateurs", value: data.users?.length || 0, icon: Users },
-                    { label: "Générations", value: data.generations?.length || 0, icon: Sparkles },
-                    { label: "Reels", value: data.reels?.length || 0, icon: Clapperboard },
-                    { label: "Revenus (💎)", value: data.revenue || 0, icon: CreditCard },
-                  ].map(s => (
-                    <div key={s.label} className="rounded-2xl bg-card border border-border p-5">
-                      <s.icon className="w-5 h-5 text-primary mb-2" />
-                      <p className="text-2xl font-bold text-white">{s.value}</p>
-                      <p className="text-xs text-muted-foreground">{s.label}</p>
-                    </div>
-                  ))}
-                </div>
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Utilisateurs récents</h3>
-                <div className="space-y-2">
-                  {(data.users || []).slice(0, 10).map(u => (
-                    <div key={u.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
-                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-semibold">
-                        {(u.username || u.email || "U").charAt(0).toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-white truncate">@{u.username || u.email?.split("@")[0]}</p>
-                        <p className="text-xs text-muted-foreground">{u.email}</p>
-                      </div>
-                      <span className="text-xs text-muted-foreground">{u.diamonds || 0} 💎</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            {/* Dashboard tab */}
+            {activeTab === "dashboard" && (
+              <DashboardTab data={data} />
             )}
 
             {/* Users tab */}
             {activeTab === "users" && (
-              <div>
-                <h2 className="text-xl font-bold text-white mb-6">Gestion des utilisateurs</h2>
-                <div className="space-y-2">
-                  {(data.users || []).map(u => (
-                    <div key={u.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
-                      <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-semibold flex-shrink-0">
-                        {(u.username || u.email || "U").charAt(0).toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-white truncate">@{u.username || u.email?.split("@")[0]}</p>
-                        <p className="text-xs text-muted-foreground truncate">{u.email}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-white">{u.diamonds || 0} 💎</p>
-                        <p className="text-xs text-muted-foreground">{u.role || "user"}</p>
-                      </div>
-                      <button onClick={() => { setAdjustUser(u); setShowAdjust(true); }} className="px-3 py-1.5 rounded-lg bg-secondary text-white text-xs font-medium">
-                        Ajuster
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <UsersTab
+                users={data.users || []}
+                onAdjust={(u) => { setAdjustUser(u); setShowAdjust(true); }}
+                onStatus={handleUserStatus}
+                onDelete={handleDeleteUser}
+                onRoleChange={handleUpdateUserRole}
+              />
             )}
 
             {/* Packs tab */}
@@ -380,17 +404,35 @@ export default function SuperAdmin() {
             {/* Reels tab */}
             {activeTab === "reels" && (
               <div>
-                <h2 className="text-xl font-bold text-white mb-6">Modération des Reels</h2>
+                <h2 className="text-xl font-bold text-white mb-6">Gestion des Reels</h2>
                 <div className="space-y-2">
                   {(data.reels || []).map(reel => (
                     <div key={reel.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-white truncate">{reel.title}</p>
-                        <p className="text-xs text-muted-foreground">{reel.views || 0} vues · @{reel.author_name || "createur"}</p>
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                          <span>{reel.views || 0} vues</span>
+                          <span>@{reel.author_name || "createur"}</span>
+                          {reel.trending_score > 0 && <span className="text-primary font-medium">🔥 Tendance</span>}
+                        </div>
                       </div>
-                      <button onClick={() => handleDeleteReel(reel.id)} className="w-9 h-9 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleToggleReelVisibility(reel)}
+                          className={`px-2.5 py-1.5 rounded-lg text-xs font-medium ${reel.hidden ? "bg-yellow-500/20 text-yellow-400" : "bg-secondary text-muted-foreground"}`}
+                        >
+                          {reel.hidden ? "Masqué" : "Visible"}
+                        </button>
+                        <button
+                          onClick={() => handleToggleReelFeatured(reel)}
+                          className={`px-2.5 py-1.5 rounded-lg text-xs font-medium ${reel.featured ? "bg-primary/20 text-primary" : "bg-secondary text-muted-foreground"}`}
+                        >
+                          ⭐
+                        </button>
+                        <button onClick={() => handleDeleteReel(reel.id)} className="w-8 h-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -484,6 +526,21 @@ export default function SuperAdmin() {
                   </div>
                 )}
               </div>
+            )}
+
+            {/* AI Management tab */}
+            {activeTab === "ai" && (
+              <AIManagementTab />
+            )}
+
+            {/* Referral tab */}
+            {activeTab === "referral" && (
+              <ReferralTab />
+            )}
+
+            {/* General Settings tab */}
+            {activeTab === "params" && (
+              <GeneralSettingsTab />
             )}
 
             {/* Analytics tab */}

@@ -1,0 +1,47 @@
+{
+  "name": "SiteContent",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "description": "Unique key, e.g. site_name, seo_meta_title, cms_terms"
+    },
+    "value": {
+      "type": "string",
+      "description": "The content value"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "general",
+        "seo",
+        "cms",
+        "landing",
+        "ai_config"
+      ],
+      "default": "general"
+    }
+  },
+  "required": [
+    "key",
+    "value"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    },
+    "read": true,
+    "update": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}
