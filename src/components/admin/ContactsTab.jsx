@@ -1,7 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { toast } from "@/components/ui/use-toast";
-import { Search, MessageCircle, Mail, Inbox, Send, Loader2, Users, Phone, X, CheckSquare, Square } from "lucide-react";
+import { Search, MessageCircle, Mail, Inbox, Send, Loader2, Users, Phone, X, CheckSquare, Square, FileText } from "lucide-react";
 
 const CHANNELS = [
   { id: "whatsapp", label: "WhatsApp", icon: MessageCircle, color: "bg-green-500/10 text-green-400" },
@@ -30,6 +30,11 @@ export default function ContactsTab({ allUsers, onRefresh }) {
   const [message, setMessage] = useState("");
   const [subject, setSubject] = useState("");
   const [sending, setSending] = useState(false);
+  const [templates, setTemplates] = useState([]);
+
+  useEffect(() => {
+    base44.entities.MessageTemplate.list("-created_date", 200).then(setTemplates).catch(() => {});
+  }, []);
 
   const usersWithPhone = useMemo(() => {
     return (allUsers || []).filter((u) => u.phone);
@@ -266,6 +271,27 @@ export default function ContactsTab({ allUsers, onRefresh }) {
           {/* Message */}
           <div className="mb-3">
             <label className="text-xs text-muted-foreground mb-1.5 block">Message</label>
+            {templates.length > 0 && (
+              <div className="mb-2">
+                <label className="text-[10px] text-muted-foreground mb-1 block flex items-center gap-1"><FileText className="w-3 h-3" />Utiliser un modèle</label>
+                <select
+                  value=""
+                  onChange={(e) => {
+                    const t = templates.find((tpl) => tpl.id === e.target.value);
+                    if (t) {
+                      setMessage(t.content);
+                      if (channel !== "whatsapp") setSubject(t.name);
+                    }
+                  }}
+                  className="w-full h-9 rounded-lg bg-secondary border border-border px-3 text-sm text-white"
+                >
+                  <option value="">— Sélectionner un modèle —</option>
+                  {templates.map((t) => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}

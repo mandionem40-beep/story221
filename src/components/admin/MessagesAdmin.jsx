@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { toast } from "@/components/ui/use-toast";
-import { Plus, Send, Loader2, Trash2, Users, Megaphone, BarChart3, Star, Mail, Clock, CheckCircle, X, Search, UserPlus, MessageCircle, TrendingUp } from "lucide-react";
+import { Plus, Send, Loader2, Trash2, Users, Megaphone, BarChart3, Star, Mail, Clock, CheckCircle, X, Search, UserPlus, MessageCircle, TrendingUp, FileText } from "lucide-react";
 import MessageThread from "@/components/messages/MessageThread";
 import PollCard from "@/components/messages/PollCard";
 import ContactsTab, { buildWhatsAppPhone } from "@/components/admin/ContactsTab";
+import TemplatesTab from "@/components/admin/TemplatesTab";
 
 const audienceGroups = [
   { id: "all", label: "Tous les utilisateurs" },
@@ -43,6 +44,9 @@ export default function MessagesAdmin() {
   // Stats
   const [stats, setStats] = useState(null);
 
+  // Templates (for campaign form picker)
+  const [campaignTemplates, setCampaignTemplates] = useState([]);
+
   useEffect(() => { loadData(tab); }, [tab]);
 
   const loadData = async (tab) => {
@@ -61,12 +65,14 @@ export default function MessagesAdmin() {
         setConversations((convs || []).map((c) => ({ ...c, _user: userMap[c.owner_id || c.created_by_id] })));
         setAllUsers(users || []);
       } else if (tab === "campaigns") {
-        const [cmps, users] = await Promise.all([
+        const [cmps, users, tmpls] = await Promise.all([
           base44.entities.Campaign.list("-created_date", 200),
           base44.entities.User.list("-created_date", 500),
+          base44.entities.MessageTemplate.list("-created_date", 200),
         ]);
         setCampaigns(cmps || []);
         setAllUsers(users || []);
+        setCampaignTemplates(tmpls || []);
       } else if (tab === "polls") {
         setPolls(await base44.entities.Poll.list("-created_date", 100));
       } else if (tab === "feedback") {
@@ -270,6 +276,7 @@ export default function MessagesAdmin() {
 
   const tabs = [
     { id: "contacts", label: "Contacts & Relance", icon: UserPlus },
+    { id: "templates", label: "Modèles", icon: FileText },
     { id: "conversations", label: "Conversations", icon: Mail },
     { id: "campaigns", label: "Campagnes", icon: Megaphone },
     { id: "polls", label: "Sondages", icon: BarChart3 },
@@ -303,6 +310,11 @@ export default function MessagesAdmin() {
           {/* CONTACTS TAB */}
           {tab === "contacts" && (
             <ContactsTab allUsers={allUsers} onRefresh={() => loadData("contacts")} />
+          )}
+
+          {/* TEMPLATES TAB */}
+          {tab === "templates" && (
+            <TemplatesTab />
           )}
 
           {/* CONVERSATIONS TAB */}
@@ -559,6 +571,24 @@ export default function MessagesAdmin() {
 
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">Message</label>
+                {campaignTemplates.length > 0 && (
+                  <div className="mb-2">
+                    <label className="text-[10px] text-muted-foreground mb-1 block flex items-center gap-1"><FileText className="w-3 h-3" />Utiliser un modèle</label>
+                    <select
+                      value=""
+                      onChange={(e) => {
+                        const t = campaignTemplates.find((tpl) => tpl.id === e.target.value);
+                        if (t) setCampaignForm((prev) => ({ ...prev, title: t.name, content: t.content }));
+                      }}
+                      className="w-full h-9 rounded-lg bg-secondary border border-border px-3 text-sm text-white"
+                    >
+                      <option value="">— Sélectionner un modèle —</option>
+                      {campaignTemplates.map((t) => (
+                        <option key={t.id} value={t.id}>{t.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <textarea value={campaignForm.content} onChange={(e) => setCampaignForm({ ...campaignForm, content: e.target.value })} placeholder="Contenu du message..." rows={4} className="w-full rounded-lg bg-secondary border border-border px-3 py-2.5 text-sm text-white resize-none outline-none" />
               </div>
 
