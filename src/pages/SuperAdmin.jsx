@@ -15,12 +15,15 @@ import UsersTab from "@/components/admin/UsersTab";
 import TransactionsTab from "@/components/admin/TransactionsTab";
 import PixelsTab from "@/components/admin/PixelsTab";
 import SocialPublishingTab from "@/components/admin/SocialPublishingTab";
+import FinanceTab from "@/components/admin/FinanceTab";
+import { Wallet } from "lucide-react";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: BarChart3 },
   { id: "users", label: "Utilisateurs", icon: Users },
   { id: "packs", label: "Packs", icon: Package },
   { id: "transactions", label: "Paiements", icon: CreditCard },
+  { id: "finance", label: "Finance", icon: Wallet },
   { id: "reels", label: "Reels", icon: Clapperboard },
   { id: "showcase", label: "Vitrine", icon: Video },
   { id: "reports", label: "Modération", icon: Flag },
@@ -85,6 +88,12 @@ export default function SuperAdmin() {
         result = { packs: await base44.entities.DiamondPack.list() };
       } else if (tab === "transactions") {
         result = { transactions: await base44.entities.Transaction.list("-created_date", 200) };
+      } else if (tab === "finance") {
+        const [txs, packs] = await Promise.all([
+          base44.entities.Transaction.list("-created_date", 500),
+          base44.entities.DiamondPack.list(),
+        ]);
+        result = { transactions: txs || [], packs: packs || [] };
       } else if (tab === "reels") {
         result = { reels: await base44.entities.Reel.list("-created_date", 200) };
       } else if (tab === "showcase") {
@@ -424,6 +433,11 @@ export default function SuperAdmin() {
             {/* Transactions tab */}
             {activeTab === "transactions" && (
               <TransactionsTab transactions={data.transactions || []} />
+            )}
+
+            {/* Finance tab */}
+            {activeTab === "finance" && (
+              <FinanceTab transactions={data.transactions || []} packs={data.packs || []} />
             )}
 
             {/* Reels tab */}
