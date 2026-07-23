@@ -40,7 +40,7 @@ const reelPreviews = [
     song: "Hype Beat - Story221",
   },
   {
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/d4f67d714_Mariage_Fruits_Mrs_Mbaye.mp4",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/38b40cf52_Mariage_Fruits_Image-to-Video.mp4",
     title: "Mariage Fruits Mrs Mbaye 🍓🍌❤️",
     author: "@motion.afrik",
     likes: "489.2K",
