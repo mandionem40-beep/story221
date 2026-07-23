@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Loader2 } from "lucide-react";
+import ShowcaseVideoCard from "@/components/landing/ShowcaseVideoCard";
 
 export default function ShowcaseGallery() {
   const [videos, setVideos] = useState([]);
@@ -41,35 +42,7 @@ export default function ShowcaseGallery() {
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
             {videos.map((video) => (
-              <div
-                key={video.id}
-                className="group relative rounded-2xl overflow-hidden bg-card border border-border transition-all duration-300 hover:border-primary/60"
-              >
-                {/* Glow effect on hover */}
-                <div className="pointer-events-none absolute -inset-2 rounded-3xl bg-primary/0 blur-xl transition-all duration-500 group-hover:bg-primary/25 group-hover:shadow-[0_0_40px_rgba(255,0,51,0.35)]" />
-                <div className="relative aspect-[9/16] overflow-hidden">
-                  {video.video_url ? (
-                    <video
-                      src={video.video_url}
-                      poster={video.thumbnail_url || undefined}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      preload="auto"
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  ) : video.thumbnail_url ? (
-                    <img
-                      src={video.thumbnail_url}
-                      alt=""
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary" />
-                  )}
-                </div>
-              </div>
+              <ShowcaseVideoCard key={video.id} video={video} />
             ))}
           </div>
         )}
