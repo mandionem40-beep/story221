@@ -1,0 +1,45 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "process_scheduled_campaigns",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "process_campaigns": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "process-scheduled-campaigns",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Traiter les campagnes programm\u00e9es",
+            "description": "Envoie les campagnes dues et calcule les conversions"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Traite automatiquement les campagnes marketing programm\u00e9es et met \u00e0 jour les taux de conversion (toutes les heures)",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 * * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Dakar",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Campagnes Programm\u00e9es Auto"
+}

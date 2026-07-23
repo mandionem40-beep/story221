@@ -40,6 +40,10 @@
     "read_count": {
       "type": "integer",
       "default": 0
+    },
+    "conversion_count": {
+      "type": "integer",
+      "default": 0
     }
   },
   "required": [

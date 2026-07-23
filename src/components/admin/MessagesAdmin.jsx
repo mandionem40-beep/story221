@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { toast } from "@/components/ui/use-toast";
-import { Plus, Send, Loader2, Trash2, Users, Megaphone, BarChart3, Star, Mail, Clock, CheckCircle, X, Search, UserPlus, MessageCircle } from "lucide-react";
+import { Plus, Send, Loader2, Trash2, Users, Megaphone, BarChart3, Star, Mail, Clock, CheckCircle, X, Search, UserPlus, MessageCircle, TrendingUp } from "lucide-react";
 import MessageThread from "@/components/messages/MessageThread";
 import PollCard from "@/components/messages/PollCard";
 import ContactsTab, { buildWhatsAppPhone } from "@/components/admin/ContactsTab";
@@ -28,7 +28,7 @@ export default function MessagesAdmin() {
   // Campaigns
   const [campaigns, setCampaigns] = useState([]);
   const [showCampaignForm, setShowCampaignForm] = useState(false);
-  const [campaignForm, setCampaignForm] = useState({ title: "", content: "", audience_type: "all", audience_group: "all", userSearch: "", selectedUsers: [] });
+  const [campaignForm, setCampaignForm] = useState({ title: "", content: "", audience_type: "all", audience_group: "all", userSearch: "", selectedUsers: [], schedule_mode: "now", scheduled_date: "" });
   const [allUsers, setAllUsers] = useState([]);
   const [sendingCampaign, setSendingCampaign] = useState(false);
 
@@ -116,7 +116,7 @@ export default function MessagesAdmin() {
   };
 
   const handleSendCampaign = async () => {
-    const { title, content, audience_type, audience_group, selectedUsers } = campaignForm;
+    const { title, content, audience_type, audience_group, selectedUsers, schedule_mode, scheduled_date } = campaignForm;
     if (!title.trim() || !content.trim()) return;
 
     let targetUsers = [];
@@ -129,17 +129,35 @@ export default function MessagesAdmin() {
       return;
     }
 
+    if (schedule_mode === "schedule" && !scheduled_date) {
+      toast({ title: "Date manquante", description: "Sélectionnez une date d'envoi.", variant: "destructive" });
+      return;
+    }
+
     setSendingCampaign(true);
     try {
+      const isScheduled = schedule_mode === "schedule";
       const campaign = await base44.entities.Campaign.create({
         title: title.trim(),
         content: content.trim(),
         audience_type,
         audience_criteria: audience_type === "group" ? audience_group : JSON.stringify(selectedUsers),
-        status: "sent",
-        sent_count: targetUsers.length,
+        status: isScheduled ? "scheduled" : "sent",
+        scheduled_date: isScheduled ? new Date(scheduled_date).toISOString() : undefined,
+        sent_count: isScheduled ? 0 : targetUsers.length,
         read_count: 0,
+        conversion_count: 0,
       });
+
+      // If scheduled, skip sending now — the workflow will process it automatically
+      if (isScheduled) {
+        toast({ title: "Campagne programmée !", description: `Envoi automatique prévu le ${new Date(scheduled_date).toLocaleString("fr-FR")} vers ${targetUsers.length} utilisateur(s).` });
+        setShowCampaignForm(false);
+        setCampaignForm({ title: "", content: "", audience_type: "all", audience_group: "all", userSearch: "", selectedUsers: [], schedule_mode: "now", scheduled_date: "" });
+        loadData("campaigns");
+        setSendingCampaign(false);
+        return;
+      }
 
       // Create conversations + initial messages for each user
       const batchSize = 20;
@@ -172,12 +190,26 @@ export default function MessagesAdmin() {
 
       toast({ title: "Campagne envoyée !", description: `${targetUsers.length} utilisateur(s) ciblé(s).` });
       setShowCampaignForm(false);
-      setCampaignForm({ title: "", content: "", audience_type: "all", audience_group: "all", userSearch: "", selectedUsers: [] });
+      setCampaignForm({ title: "", content: "", audience_type: "all", audience_group: "all", userSearch: "", selectedUsers: [], schedule_mode: "now", scheduled_date: "" });
       loadData("campaigns");
     } catch {
       toast({ title: "Erreur", description: "Impossible d'envoyer la campagne.", variant: "destructive" });
     }
     setSendingCampaign(false);
+  };
+
+  const quickScheduleInactive = () => {
+    setCampaignForm({
+      title: "Relance - Utilisateurs inactifs",
+      content: "Bonjour ! Cela fait un moment que nous ne vous avons pas vu sur Story221. Vos diamants vous attendent pour créer de nouveaux contenus. Revenez profiter de nos dernières fonctionnalités !",
+      audience_type: "group",
+      audience_group: "inactive_30",
+      userSearch: "",
+      selectedUsers: [],
+      schedule_mode: "schedule",
+      scheduled_date: "",
+    });
+    setShowCampaignForm(true);
   };
 
   const handleCreatePoll = async () => {
@@ -337,14 +369,22 @@ export default function MessagesAdmin() {
           {/* CAMPAIGNS TAB */}
           {tab === "campaigns" && (
             <div>
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <p className="text-sm text-muted-foreground">Envoyez des annonces à vos utilisateurs</p>
-                <button
-                  onClick={() => setShowCampaignForm(true)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium"
-                >
-                  <Plus className="w-4 h-4" />Nouvelle campagne
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={quickScheduleInactive}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary text-white text-sm font-medium border border-border"
+                  >
+                    <Clock className="w-4 h-4" />Relance inactifs 30j
+                  </button>
+                  <button
+                    onClick={() => setShowCampaignForm(true)}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium"
+                  >
+                    <Plus className="w-4 h-4" />Nouvelle campagne
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -370,9 +410,15 @@ export default function MessagesAdmin() {
                             </span>
                           </div>
                           <p className="text-sm text-muted-foreground line-clamp-2">{c.content}</p>
-                          <div className="flex items-center gap-3 mt-2 text-[11px] text-muted-foreground">
+                          <div className="flex items-center gap-3 mt-2 text-[11px] text-muted-foreground flex-wrap">
                             <span><Users className="w-3 h-3 inline mr-1" />{c.sent_count || 0} destinataires</span>
                             <span><CheckCircle className="w-3 h-3 inline mr-1" />{c.read_count || 0} lus</span>
+                            {c.status === "sent" && (
+                              <span className="text-primary font-medium"><TrendingUp className="w-3 h-3 inline mr-1" />{c.conversion_count || 0} conversions ({c.sent_count > 0 ? Math.round(((c.conversion_count || 0) / c.sent_count) * 100) : 0}%)</span>
+                            )}
+                            {c.status === "scheduled" && c.scheduled_date && (
+                              <span className="text-yellow-400 font-medium"><Clock className="w-3 h-3 inline mr-1" />Programmée: {new Date(c.scheduled_date).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                            )}
                             <span><Clock className="w-3 h-3 inline mr-1" />{new Date(c.created_date).toLocaleDateString("fr-FR")}</span>
                           </div>
                         </div>
@@ -516,6 +562,22 @@ export default function MessagesAdmin() {
                 <textarea value={campaignForm.content} onChange={(e) => setCampaignForm({ ...campaignForm, content: e.target.value })} placeholder="Contenu du message..." rows={4} className="w-full rounded-lg bg-secondary border border-border px-3 py-2.5 text-sm text-white resize-none outline-none" />
               </div>
 
+              {/* Schedule mode */}
+              <div>
+                <label className="text-xs text-muted-foreground mb-1.5 block">Mode d'envoi</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button type="button" onClick={() => setCampaignForm({ ...campaignForm, schedule_mode: "now" })} className={`h-9 rounded-lg text-xs font-medium transition-colors ${campaignForm.schedule_mode === "now" ? "bg-primary text-white" : "bg-secondary text-muted-foreground"}`}>
+                    Envoyer maintenant
+                  </button>
+                  <button type="button" onClick={() => setCampaignForm({ ...campaignForm, schedule_mode: "schedule" })} className={`h-9 rounded-lg text-xs font-medium transition-colors ${campaignForm.schedule_mode === "schedule" ? "bg-primary text-white" : "bg-secondary text-muted-foreground"}`}>
+                    Programmer l'envoi
+                  </button>
+                </div>
+                {campaignForm.schedule_mode === "schedule" && (
+                  <input type="datetime-local" value={campaignForm.scheduled_date} onChange={(e) => setCampaignForm({ ...campaignForm, scheduled_date: e.target.value })} className="w-full h-10 mt-2 rounded-lg bg-secondary border border-border px-3 text-sm text-white" />
+                )}
+              </div>
+
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">Audience</label>
                 <div className="grid grid-cols-3 gap-2">
@@ -637,9 +699,9 @@ export default function MessagesAdmin() {
                 </span>
               </div>
 
-              <button onClick={handleSendCampaign} disabled={!campaignForm.title.trim() || !campaignForm.content.trim() || sendingCampaign} className="w-full h-11 rounded-xl bg-primary text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-40">
-                {sendingCampaign ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                Envoyer la campagne
+              <button onClick={handleSendCampaign} disabled={!campaignForm.title.trim() || !campaignForm.content.trim() || (campaignForm.schedule_mode === "schedule" && !campaignForm.scheduled_date) || sendingCampaign} className="w-full h-11 rounded-xl bg-primary text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-40">
+                {sendingCampaign ? <Loader2 className="w-4 h-4 animate-spin" /> : campaignForm.schedule_mode === "schedule" ? <Clock className="w-4 h-4" /> : <Send className="w-4 h-4" />}
+                {campaignForm.schedule_mode === "schedule" ? "Programmer la campagne" : "Envoyer la campagne"}
               </button>
             </div>
           </div>
