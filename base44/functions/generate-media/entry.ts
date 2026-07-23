@@ -4,6 +4,7 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 import { calculateCost, deductCredits, refundCredits, sendNotification } from "../../shared/credit-service.ts";
 import { runGenerationPipeline } from "../../shared/ai-orchestrator.ts";
+import { sendDiscordAlert } from "../../shared/discord-notify.ts";
 
 Deno.serve(async (req) => {
   try {
@@ -99,6 +100,17 @@ Deno.serve(async (req) => {
         `Une erreur est survenue. Vos ${cost} diamants ont été remboursés.`,
         "system"
       );
+
+      // Discord alert for immediate production monitoring
+      await sendDiscordAlert({
+        title: "Échec de génération",
+        message: `**Type:** ${type}\n**Erreur:** ${error.message}`,
+        fields: [
+          { name: "Utilisateur", value: user.email || user.id, inline: true },
+          { name: "Coût", value: `${cost} 💎`, inline: true },
+          { name: "Prompt", value: (prompt || "").substring(0, 200) || "—", inline: false },
+        ],
+      });
 
       return Response.json(
         { error: error.message, refunded: true, cost },
