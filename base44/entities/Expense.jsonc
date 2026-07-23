@@ -5,6 +5,10 @@
     "category": {
       "type": "string",
       "enum": [
+        "facebook_ads",
+        "tiktok_ads",
+        "influencer",
+        "server",
         "api_ia",
         "hosting",
         "marketing",

@@ -7,9 +7,13 @@ import { base44 } from "@/api/base44Client";
 const formatFCFA = (n) => (n || 0).toLocaleString("fr-FR").replace(/\u00A0/g, " ") + " FCFA";
 
 const CATEGORY_LABELS = {
+  facebook_ads: "Facebook Ads",
+  tiktok_ads: "TikTok Ads",
+  influencer: "Influenceurs",
+  server: "Serveurs",
   api_ia: "API IA",
   hosting: "Hébergement",
-  marketing: "Marketing",
+  marketing: "Marketing (autre)",
   salaries: "Salaires",
   tools: "Outils",
   payment_fees: "Frais de paiement",
@@ -17,11 +21,15 @@ const CATEGORY_LABELS = {
 };
 
 const CATEGORY_COLORS = {
-  api_ia: "bg-purple-500/10 text-purple-400",
-  hosting: "bg-blue-500/10 text-blue-400",
+  facebook_ads: "bg-blue-500/10 text-blue-400",
+  tiktok_ads: "bg-pink-500/10 text-pink-400",
+  influencer: "bg-purple-500/10 text-purple-400",
+  server: "bg-cyan-500/10 text-cyan-400",
+  api_ia: "bg-indigo-500/10 text-indigo-400",
+  hosting: "bg-teal-500/10 text-teal-400",
   marketing: "bg-orange-500/10 text-orange-400",
   salaries: "bg-green-500/10 text-green-400",
-  tools: "bg-cyan-500/10 text-cyan-400",
+  tools: "bg-amber-500/10 text-amber-400",
   payment_fees: "bg-yellow-500/10 text-yellow-400",
   other: "bg-gray-500/10 text-gray-400",
 };
@@ -30,7 +38,7 @@ export default function FinanceTab({ transactions, packs, expenses, onAddExpense
   const [search, setSearch] = useState("");
   const [periodFilter, setPeriodFilter] = useState("all");
   const [showAddExpense, setShowAddExpense] = useState(false);
-  const [newExpense, setNewExpense] = useState({ category: "api_ia", description: "", amount_fcfa: 0, date: new Date().toISOString().split("T")[0], recurring: false });
+  const [newExpense, setNewExpense] = useState({ category: "facebook_ads", description: "", amount_fcfa: 0, date: new Date().toISOString().split("T")[0], recurring: false });
 
   const packPriceMap = useMemo(() => {
     const map = {};
@@ -145,7 +153,7 @@ export default function FinanceTab({ transactions, packs, expenses, onAddExpense
     try {
       await base44.entities.Expense.create(newExpense);
       onAddExpense();
-      setNewExpense({ category: "api_ia", description: "", amount_fcfa: 0, date: new Date().toISOString().split("T")[0], recurring: false });
+      setNewExpense({ category: "facebook_ads", description: "", amount_fcfa: 0, date: new Date().toISOString().split("T")[0], recurring: false });
       setShowAddExpense(false);
       toast({ title: "Dépense ajoutée" });
     } catch {
@@ -298,6 +306,54 @@ export default function FinanceTab({ transactions, packs, expenses, onAddExpense
             </div>
           </div>
         )}
+      </div>
+
+      {/* Transparency breakdown */}
+      <div className="rounded-2xl bg-card border border-border p-5 mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Receipt className="w-4 h-4 text-primary" />
+          <h3 className="text-sm font-semibold text-white">Tableau de transparence</h3>
+          <span className="text-[10px] text-muted-foreground ml-auto">Calcul détaillé du profit</span>
+        </div>
+        <div className="space-y-2">
+          {/* Revenue line */}
+          <div className="flex items-center justify-between py-2 border-b border-border">
+            <span className="flex items-center gap-2 text-sm text-white">
+              <span className="w-2 h-2 rounded-full bg-green-500" />
+              Revenus (achats de crédits)
+            </span>
+            <span className="text-sm font-bold text-green-400">+ {formatFCFA(totalRevenueFCFA)}</span>
+          </div>
+          {/* Each expense category */}
+          {expensesByCategory.length > 0 ? (
+            expensesByCategory.map(([cat, amount]) => (
+              <div key={cat} className="flex items-center justify-between py-2 border-b border-border/50">
+                <span className="flex items-center gap-2 text-sm text-white">
+                  <span className="w-2 h-2 rounded-full bg-red-500" />
+                  {CATEGORY_LABELS[cat] || cat}
+                </span>
+                <span className="text-sm font-semibold text-red-400">- {formatFCFA(amount)}</span>
+              </div>
+            ))
+          ) : (
+            <p className="text-xs text-muted-foreground text-center py-2">Aucune dépense enregistrée pour cette période.</p>
+          )}
+          {/* Net profit */}
+          <div className={`flex items-center justify-between py-3 mt-2 rounded-lg px-3 ${netProfit >= 0 ? "bg-green-500/10" : "bg-red-500/10"}`}>
+            <span className="flex items-center gap-2 text-sm font-bold text-white">
+              <DollarSign className="w-4 h-4" />
+              Profit net = Revenus - Dépenses
+            </span>
+            <span className={`text-base font-bold ${netProfit >= 0 ? "text-green-400" : "text-red-400"}`}>
+              {netProfit >= 0 ? "+ " : "- "}{formatFCFA(Math.abs(netProfit))}
+            </span>
+          </div>
+          {/* Margin */}
+          <div className="flex items-center justify-between py-2 px-3">
+            <span className="text-xs text-muted-foreground">Marge bénéficiaire</span>
+            <span className={`text-xs font-bold ${margin >= 0 ? "text-green-400" : "text-red-400"}`}>{margin}%</span>
+          </div>
+        </div>
       </div>
 
       {/* Search & filter */}
