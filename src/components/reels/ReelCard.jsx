@@ -5,6 +5,7 @@ import { Image } from "@/components/ui/image";
 import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/use-toast";
 import ShareModal from "@/components/share/ShareModal";
+import QuickShareButtons from "@/components/share/QuickShareButtons";
 
 export default function ReelCard({ reel, currentUser, isActive }) {
   const videoRef = useRef(null);
@@ -222,6 +223,11 @@ export default function ReelCard({ reel, currentUser, isActive }) {
         </div>
         <p className="text-sm text-white line-clamp-2">{reel.title}</p>
         <p className="text-xs text-white/50 mt-0.5">{reel.views || 0} vues</p>
+        <QuickShareButtons
+          url={`${window.location.origin}/app/reels`}
+          title={reel.title || "Reel Story221"}
+          className="mt-3"
+        />
       </div>
 
       {/* Report menu */}

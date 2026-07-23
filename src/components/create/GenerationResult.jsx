@@ -3,6 +3,7 @@ import { Download, Share2, Clapperboard, Loader2, Lock, Megaphone, Clapperboard 
 import { useState } from "react";
 import { Image } from "@/components/ui/image";
 import ShareModal from "@/components/share/ShareModal";
+import QuickShareButtons from "@/components/share/QuickShareButtons";
 
 const SUBTITLE_COLORS = [
   { id: "white", label: "Blanc", value: "#ffffff" },
@@ -63,6 +64,16 @@ export default function GenerationResult({ generation, result, onPublish, onNew,
       {result?.resultUrl && result.resultType === "audio" && (
         <div className="rounded-2xl bg-card border border-border p-6 mb-6">
           <audio src={result.resultUrl} controls className="w-full" />
+        </div>
+      )}
+
+      {/* Quick share buttons */}
+      {result?.resultUrl && (
+        <div className="mb-6 p-3 rounded-xl bg-card border border-border">
+          <QuickShareButtons
+            url={result.resultUrl}
+            title={result?.title || generation?.title || "Ma création Story221"}
+          />
         </div>
       )}
 
