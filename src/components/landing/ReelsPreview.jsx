@@ -4,8 +4,8 @@ import { Heart, MessageCircle, Share2, Bookmark, Music2 } from "lucide-react";
 
 const reelPreviews = [
   {
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/46edf3fe8_Mariage_Fruits_Totaux.mp4",
-    title: "Mariage 100% fruits 🥭🍓❤️",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/2792d78aa_Mariage_Peau_de_Fruits.mp4",
+    title: "Mariage peau de fruits 🥭🍓❤️",
     author: "@studio221",
     likes: "124.5K",
     comments: "3.2K",
