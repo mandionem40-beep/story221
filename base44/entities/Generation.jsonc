@@ -16,11 +16,15 @@
         "story",
         "music_clip",
         "voice",
-        "character"
+        "character",
+        "influencer"
       ],
       "default": "video"
     },
     "title": {
+      "type": "string"
+    },
+    "synopsis": {
       "type": "string"
     },
     "prompt": {
@@ -32,7 +36,39 @@
     "scenes": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "integer"
+          },
+          "description": {
+            "type": "string"
+          },
+          "camera_angle": {
+            "type": "string"
+          },
+          "camera_movement": {
+            "type": "string"
+          },
+          "lighting": {
+            "type": "string"
+          },
+          "color_grade": {
+            "type": "string"
+          },
+          "duration_seconds": {
+            "type": "integer"
+          },
+          "dialogue": {
+            "type": "string"
+          },
+          "emotion": {
+            "type": "string"
+          },
+          "transition": {
+            "type": "string"
+          }
+        }
       }
     },
     "characters": {
@@ -45,9 +81,87 @@
           },
           "description": {
             "type": "string"
+          },
+          "appearance": {
+            "type": "string"
+          },
+          "voice": {
+            "type": "string"
+          },
+          "personality": {
+            "type": "string"
+          },
+          "clothing": {
+            "type": "string"
+          },
+          "age": {
+            "type": "string"
+          },
+          "emotions": {
+            "type": "string"
+          },
+          "speech_style": {
+            "type": "string"
+          },
+          "image_url": {
+            "type": "string"
           }
         }
       }
+    },
+    "storyboard": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "shot": {
+            "type": "integer"
+          },
+          "description": {
+            "type": "string"
+          },
+          "visual": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "dialogues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "scene": {
+            "type": "string"
+          },
+          "character": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "emotion": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "subtitles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "continuity_notes": {
+      "type": "string"
     },
     "status": {
       "type": "string",
@@ -92,6 +206,9 @@
     "result_url": {
       "type": "string"
     },
+    "voice_url": {
+      "type": "string"
+    },
     "result_type": {
       "type": "string",
       "enum": [
@@ -114,6 +231,15 @@
       "type": "string"
     },
     "ad_colors": {
+      "type": "string"
+    },
+    "ad_concept": {
+      "type": "string"
+    },
+    "ad_slogan": {
+      "type": "string"
+    },
+    "ad_cta": {
       "type": "string"
     },
     "ad_private_use": {

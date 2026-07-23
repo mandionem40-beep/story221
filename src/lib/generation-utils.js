@@ -16,6 +16,7 @@ export const contentTypes = [
   { id: "music_clip", label: "Clip musical", icon: Music, costType: "per_minute", baseCost: 10, color: "from-purple-500/20 to-pink-500/20" },
   { id: "voice", label: "Voix IA", icon: Mic, costType: "per_minute", baseCost: 3, color: "from-teal-500/20 to-cyan-500/20" },
   { id: "character", label: "Personnage IA", icon: UserCircle, costType: "flat", baseCost: 5, color: "from-orange-500/20 to-red-500/20" },
+  { id: "influencer", label: "Influenceur IA", icon: UserCircle, costType: "per_minute", baseCost: 12, color: "from-fuchsia-500/20 to-pink-500/20" },
 ];
 
 export function calculateCost(typeId, duration = 1) {
@@ -73,7 +74,18 @@ export function getPipelineSteps(typeId) {
       { id: "dialogues", label: "Génération des dialogues", icon: "💬" },
       { id: "voice", label: "Synthèse vocale", icon: "🎙️" },
       { id: "video", label: "Génération de la vidéo", icon: "🎥" },
+      { id: "subtitles", label: "Sous-titres", icon: "📝" },
       { id: "final", label: "Montage final", icon: "🎞️" },
+    ];
+  }
+  if (typeId === "influencer") {
+    return [
+      { id: "script", label: "Identité de l'influenceur", icon: "✍️" },
+      { id: "characters", label: "Génération du personnage", icon: "🎨" },
+      { id: "voice", label: "Synthèse vocale", icon: "🎙️" },
+      { id: "video", label: "Génération de la vidéo", icon: "🎥" },
+      { id: "subtitles", label: "Sous-titres", icon: "📝" },
+      { id: "final", label: "Finalisation", icon: "✨" },
     ];
   }
   if (typeId === "image" || typeId === "character") {

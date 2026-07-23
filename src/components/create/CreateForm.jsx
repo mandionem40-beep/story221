@@ -100,7 +100,7 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit, initial
           onChange={(e) => onTypeChange(e.target.value)}
           className="w-full h-11 rounded-xl bg-card border border-border px-3 text-sm text-white"
         >
-          {["video","image","film","serie","anime","cartoon","ad","storyboard","story","music_clip","voice","character"].map(t => {
+          {["video","image","film","serie","anime","cartoon","ad","storyboard","story","music_clip","voice","character","influencer"].map(t => {
             const c = getContentType(t);
             return <option key={t} value={t}>{c.label}</option>;
           })}

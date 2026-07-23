@@ -1,74 +1,218 @@
-// Creative Director Service - Claude/Gemini creative direction logic
-// Extrait de la fonction claude-director pour réutilisation par l'orchestrateur
+// Creative Director Service - Robust multi-provider AI creative direction
+// Tries 3 methods in order: InvokeLLM (platform) → Gemini API (direct) → Anthropic API (direct)
+// This ensures the pipeline works as soon as ANY provider becomes available
 
-const SYSTEM_PROMPT = `Tu es le Directeur Créatif IA (Creative Director) et Chef de Projet de Story221, le premier studio IA social d'Afrique. Tu es le chef d'orchestre de chaque projet: tu analyses, enrichis, structures, coordonnes et valides la création avant son envoi aux moteurs de génération (vidéo, image, voix, musique, effets sonores).
+const SYSTEM_PROMPT = `Tu es le Directeur Créatif IA (Creative Director) et Chef d'Orchestre de Story221, le studio IA social d'Afrique. Tu es un réalisateur professionnel qui pilote chaque projet de A à Z: tu analyses, enrichis, structures, coordonnes et valides la création avant son envoi aux moteurs de génération (vidéo, image, voix, musique).
 
-## Tes missions principales
+## TES MISSIONS
 
-### 1. Compréhension du contexte
-Tu comprends le sens réel du prompt. Tu identifies les références culturelles, géographiques, historiques. Le résultat doit être fidèle au contexte demandé.
+### 1. Compréhension intelligente du prompt
+Tu comprends le sens réel du prompt, pas seulement les mots. Tu identifies:
+- L'intention réelle de l'utilisateur (raconter une histoire, faire rire, promouvoir, informer)
+- Le ton (humour, dramatique, romantique, éducatif, promotionnel)
+- Le style visuel demandé (cinématique, anime, réaliste, cartoon, 3D)
+- Le type de contenu (film, série, publicité, anime, dessin animé, documentaire, clip musical, court-métrage, influenceur IA)
+Tu corriges les fautes du prompt sans modifier l'idée originale. Tu enrichis avec des détails cinématographiques pertinents.
 
-### 2. Référence visuelle (Image Lock)
+### 2. Références verrouillées (Image Lock)
 Quand des images de référence sont fournies par l'utilisateur, tu les analyses avec une précision extrême. Tu extrais:
-- L'apparence exacte des personnages (visage, coiffure, couleur de peau, vêtements, proportions, accessoires)
+- L'apparence EXACTE des personnages (visage, coiffure, couleur de peau, vêtements, proportions, accessoires)
 - Les décors et environnements
 - Les objets, véhicules, bâtiments, logos
 - Les couleurs, textures et styles
-
-Pendant toute la génération, l'IA DOIT respecter ces références. Le personnage ne doit JAMAIS changer de visage, coiffure, couleur de peau, vêtements (sauf si demandé), proportions ou identité.
+Pendant toute la génération, l'IA DOIT respecter ces références. Le personnage ne doit JAMAIS changer de visage, coiffure, couleur de peau, vêtements (sauf si demandé), proportions ou identité. Décris chaque référence en détail dans les engine_prompts et dans l'apparence des personnages.
 
 ### 3. Verrouillage des personnages
-Chaque personnage possède une identité unique et permanente: apparence fixe, voix constante, personnalité définie, expressions caractéristiques.
+Chaque personnage possède une identité unique et permanente: apparence fixe, voix constante, personnalité définie, expressions caractéristiques. Un personnage créé dans l'épisode 1 garde EXACTEMENT la même apparence dans l'épisode 2, 3, et la saison 2.
 
-### 4. Continuité parfaite
-Une vidéo ne doit jamais donner l'impression que chaque scène a été générée séparément. Toutes les scènes respectent: continuité des personnages, lumière, décor, météo, heure, objets, vêtements.
+### 4. Continuité parfaite entre scènes
+Une vidéo ne doit jamais donner l'impression que chaque scène a été générée séparément. Toutes les scènes respectent: continuité des personnages, lumière, décor, météo, heure, objets, vêtements. L'ambiance visuelle doit être cohérente du début à la fin.
 
 ### 5. Continuation de projet (mode "continue")
-Tu récupères le scénario précédent, les personnages, les décors, l'historique, les dialogues et les relations, puis tu écris la suite NATURELLE sans aucune perte de mémoire.
+Tu récupères le scénario précédent, les personnages, les décors, l'historique, les dialogues et les relations, puis tu écris la suite NATURELLE sans aucune perte de mémoire. Les personnages gardent leur apparence, leur voix et leur personnalité. L'histoire progresse logiquement.
 
 ### 6. Publicités Premium (type "ad")
-Pour le type "ad", tu produis: scénario marketing, storyboard, narration, mise en scène, éclairage, plans cinématographiques, design sonore, musique, voix.
+Pour le type "ad", tu deviens directeur artistique et tu produis: concept marketing, scénario publicitaire, slogan percutant, storytelling émotionnel, voix off persuasive, scènes cinématographiques, mouvements de caméra, appel à l'action (CTA) clair. Le résultat doit être suffisamment professionnel pour des entreprises réelles (électroménager, télécom, transfert d'argent, communication, transport).
 
-### 7. Réalisation cinématographique
-Pour chaque vidéo, tu choisis automatiquement les meilleurs angles de caméra, mouvements, rythme du montage, transitions, éclairage, profondeur de champ et colorimétrie.
+### 7. Influenceur IA (type "influencer")
+Tu construis une identité virtuelle complète: nom, personnalité, style, voix, façon de parler, expressions caractéristiques, histoire de fond. Toutes les vidéos impliquant cet influenceur doivent conserver EXACTEMENT le même personnage (même logique de fidélité que la continuité des personnages).
 
-### 8. Contrôle qualité
-Avant la génération finale, tu vérifies: scénario, logique, continuité, personnages, dialogues, décors, durée, rythme. Toute incohérence est corrigée automatiquement.
+### 8. Réalisation cinématographique
+Pour chaque scène, tu choisis automatiquement les meilleurs: angles de caméra, mouvements, rythme du montage, transitions, éclairage, profondeur de champ et colorimétrie. Tu précises ces éléments pour chaque scène.
 
-## Format de réponse
-Tu réponds UNIQUEMENT avec un objet JSON valide (aucun texte autour, aucun markdown, aucune explication).
+### 9. Recherche contextuelle intelligente
+Quand le prompt mentionne un monument, un pays, une ville, une personnalité publique ou un événement historique, tu enrichis le scénario avec des informations fiables et cohérentes. Pour les personnes réelles, utilise UNIQUEMENT les images fournies par l'utilisateur — jamais de récupération automatique d'images protégées.
 
-## Règles
+### 10. Découpage en scènes avec durée
+Tu découpes l'histoire en scènes. Chaque scène a: description visuelle, dialogue, émotion dominante, angle de caméra, mouvement de caméra, éclairage, colorimétrie, durée en secondes, transition vers la scène suivante. La somme des durées des scènes doit correspondre à la durée totale demandée.
+
+### 11. Sous-titres synchronisés
+Tu génères des sous-titres pour chaque scène, avec un timestamp (format MM:SS) correspondant au début de la scène. Les sous-titres reflètent les dialogues ou la narration de chaque scène.
+
+### 12. Contrôle qualité
+Avant de finaliser, tu vérifies: scénario logique, continuité des personnages, cohérence des décors, durée totale correcte, rythme approprié. Toute incohérence est corrigée automatiquement.
+
+## FORMAT DE RÉPONSE
+Tu réponds UNIQUEMENT avec un objet JSON valide. Aucun texte autour, aucun markdown, aucune explication.
+
+## RÈGLES
 - Tout le contenu doit être dans la langue demandée (par défaut Français).
+- Le Wolof doit être traité avec le même niveau de qualité que les autres langues.
 - Sois précis, créatif et professionnel.
 - Garde l'identité des personnages constante tout au long du projet.
 - Le champ enhanced_script doit contenir le script narratif complet.
 - Les engine_prompts doivent être concis, optimisés et adaptés à chaque moteur.
-- Quand des images de référence sont fournies, décris chaque référence en détail dans les engine_prompts et dans l'apparence des personnages.
-- Les scenes doivent inclure camera_angle, camera_movement, lighting et color_grade.`;
+- Les scenes doivent inclure camera_angle, camera_movement, lighting, color_grade, duration_seconds.
+- Pour le type "ad", remplis ad_concept, ad_slogan, ad_cta.
+- Pour le type "influencer", crée un personnage principal avec une identité forte et mémorable.
+
+## SCHÉMA JSON DE RÉPONSE
+{
+  "title": "string",
+  "synopsis": "string",
+  "content_type_detected": "string",
+  "enhanced_script": "string (script narratif complet)",
+  "characters": [{ "name": "string", "description": "string", "appearance": "string", "voice": "string", "personality": "string", "clothing": "string", "age": "string", "emotions": "string", "speech_style": "string" }],
+  "scenes": [{ "number": "integer", "description": "string", "camera_angle": "string", "camera_movement": "string", "lighting": "string", "color_grade": "string", "duration_seconds": "integer", "dialogue": "string", "emotion": "string", "transition": "string" }],
+  "dialogues": [{ "scene": "string", "character": "string", "text": "string", "emotion": "string" }],
+  "storyboard": [{ "shot": "integer", "description": "string", "visual": "string" }],
+  "engine_prompts": { "image": "string", "video": "string", "voice": "string", "music": "string" },
+  "continuity_notes": "string",
+  "subtitles": [{ "timestamp": "MM:SS", "text": "string" }],
+  "ad_concept": "string",
+  "ad_slogan": "string",
+  "ad_cta": "string"
+}`;
+
+const RESPONSE_SCHEMA = {
+  type: "object",
+  properties: {
+    title: { type: "string" },
+    synopsis: { type: "string" },
+    content_type_detected: { type: "string" },
+    enhanced_script: { type: "string" },
+    characters: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          description: { type: "string" },
+          appearance: { type: "string" },
+          voice: { type: "string" },
+          personality: { type: "string" },
+          clothing: { type: "string" },
+          age: { type: "string" },
+          emotions: { type: "string" },
+          speech_style: { type: "string" }
+        },
+        required: ["name", "description"]
+      }
+    },
+    scenes: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          number: { type: "integer" },
+          description: { type: "string" },
+          camera_angle: { type: "string" },
+          camera_movement: { type: "string" },
+          lighting: { type: "string" },
+          color_grade: { type: "string" },
+          duration_seconds: { type: "integer" },
+          dialogue: { type: "string" },
+          emotion: { type: "string" },
+          transition: { type: "string" }
+        },
+        required: ["description"]
+      }
+    },
+    dialogues: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          scene: { type: "string" },
+          character: { type: "string" },
+          text: { type: "string" },
+          emotion: { type: "string" }
+        }
+      }
+    },
+    storyboard: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          shot: { type: "integer" },
+          description: { type: "string" },
+          visual: { type: "string" }
+        }
+      }
+    },
+    engine_prompts: {
+      type: "object",
+      properties: {
+        image: { type: "string" },
+        video: { type: "string" },
+        voice: { type: "string" },
+        music: { type: "string" }
+      }
+    },
+    continuity_notes: { type: "string" },
+    subtitles: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          timestamp: { type: "string" },
+          text: { type: "string" }
+        }
+      }
+    },
+    ad_concept: { type: "string" },
+    ad_slogan: { type: "string" },
+    ad_cta: { type: "string" }
+  },
+  required: ["title", "enhanced_script", "characters", "scenes"]
+};
 
 function buildUserMessage(payload) {
   const { prompt, type, options, mode, previousGeneration } = payload;
   const opts = options || {};
-  let msg = `Projet Story221\nType de contenu: ${type}\nPrompt utilisateur: "${prompt}"\n`;
-  msg += `Style: ${opts.style || "Cinématique"}\nDurée: ${opts.duration || 1} minute(s)\nLangue: ${opts.language || "Français"}\n`;
+  let msg = `Type de contenu: ${type}\n`;
+  msg += `Prompt utilisateur: "${prompt}"\n`;
+  msg += `Style visuel: ${opts.style || "Cinématique"}\n`;
+  msg += `Durée demandée: ${opts.duration || 1} minute(s)\n`;
+  msg += `Langue: ${opts.language || "Français"}\n`;
+  msg += `Format: ${opts.format || "vertical"}\n`;
   if (opts.voice) msg += `Voix: ${opts.voice}\n`;
   if (opts.music && opts.music !== "Aucune") msg += `Ambiance musicale: ${opts.music}\n`;
+  if (opts.resolution) msg += `Résolution: ${opts.resolution}\n`;
+
   if (type === "ad") {
     if (opts.ad_sector) msg += `Secteur publicitaire: ${opts.ad_sector}\n`;
     if (opts.ad_brand_name) msg += `Marque: ${opts.ad_brand_name}\n`;
     if (opts.ad_message) msg += `Message: ${opts.ad_message}\n`;
     if (opts.ad_logo_url) msg += `Logo URL: ${opts.ad_logo_url}\n`;
     if (opts.ad_colors) msg += `Couleurs de marque: ${opts.ad_colors}\n`;
+    msg += `MODE PUBLICITÉ PREMIUM: produit un concept marketing, un slogan, un CTA et un scénario publicitaire professionnel.\n`;
   }
+
+  if (type === "influencer") {
+    msg += `MODE INFLUENCEUR IA: crée une identité virtuelle complète avec nom, personnalité, style, voix, façon de parler, expressions et histoire de fond.\n`;
+  }
+
   if (mode === "continue" && previousGeneration) {
-    msg += `\nMODE CONTINUATION: écris la suite naturelle de l'histoire précédente. Garde les mêmes personnages et la même cohérence.\n`;
+    msg += `\nMODE CONTINUATION: écris la suite naturelle de l'histoire précédente. Garde les MÊMES personnages (apparence, voix, personnalité) et la MÊME cohérence visuelle.\n`;
     msg += `Titre précédent: ${previousGeneration.title || ""}\n`;
-    msg += `Script précédent: ${(previousGeneration.enhanced_script || "").substring(0, 3000)}\n`;
-    msg += `Personnages précédents: ${JSON.stringify((previousGeneration.characters || []).map((c) => ({ name: c.name, description: c.description, appearance: c.appearance })))}\n`;
-    msg += `Scènes précédentes: ${JSON.stringify((previousGeneration.scenes || []).slice(0, 8))}\n`;
+    msg += `Script précédent: ${(previousGeneration.enhanced_script || "").substring(0, 4000)}\n`;
+    msg += `Personnages précédents: ${JSON.stringify((previousGeneration.characters || []).map((c) => ({ name: c.name, description: c.description, appearance: c.appearance, voice: c.voice, personality: c.personality })))}\n`;
+    msg += `Notes de continuité précédentes: ${previousGeneration.continuity_notes || ""}\n`;
   }
-  msg += `\nRéponds UNIQUEMENT avec l'objet JSON décrit.`;
+
+  msg += `\nAnalyse ce prompt, enrichis-le, crée un scénario professionnel, découpe en scènes, définis les personnages, les dialogues, les mouvements de caméra, et prépare les engine_prompts optimisés. Réponds UNIQUEMENT avec l'objet JSON.`;
   return msg;
 }
 
@@ -83,95 +227,172 @@ function extractJson(text) {
   return JSON.parse(t);
 }
 
-export async function runCreativeDirection(payload) {
-  const geminiKey = Deno.env.get("gemini-2.5-pro");
-  const anthropicKey = Deno.env.get("Anthropic");
+function validateResult(result) {
+  if (!result || typeof result !== "object") return false;
+  if (typeof result === "string") {
+    try { extractJson(result); return true; } catch { return false; }
+  }
+  return result.title && result.enhanced_script;
+}
 
-  if (!geminiKey && !anthropicKey) {
-    throw new Error("Aucune clé API (Gemini ou Anthropic) configurée. Vérifiez vos secrets.");
+function normalizeResult(result) {
+  if (typeof result === "string") return extractJson(result);
+  return result;
+}
+
+// ---- Method 1: InvokeLLM (platform integration - preferred) ----
+async function tryInvokeLLM(base44, fullPrompt, fileUrls) {
+  // Try Gemini 3.1 Pro with web search + vision
+  try {
+    const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
+      prompt: fullPrompt,
+      model: "gemini_3_1_pro",
+      add_context_from_internet: true,
+      file_urls: fileUrls,
+      response_json_schema: RESPONSE_SCHEMA,
+    });
+    if (validateResult(result)) return normalizeResult(result);
+    throw new Error("Réponse invalide");
+  } catch (e) {
+    if (e.message?.includes("limit of integrations")) throw e; // Don't retry other models if limit reached
   }
 
+  // Try Claude Sonnet with vision
+  try {
+    const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
+      prompt: fullPrompt,
+      model: "claude_sonnet_4_6",
+      file_urls: fileUrls,
+      response_json_schema: RESPONSE_SCHEMA,
+    });
+    if (validateResult(result)) return normalizeResult(result);
+    throw new Error("Réponse invalide");
+  } catch (e) {
+    if (e.message?.includes("limit of integrations")) throw e;
+  }
+
+  // Try automatic model
+  try {
+    const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
+      prompt: fullPrompt,
+      file_urls: fileUrls,
+      response_json_schema: RESPONSE_SCHEMA,
+    });
+    if (validateResult(result)) return normalizeResult(result);
+    throw new Error("Réponse invalide");
+  } catch (e) {
+    throw e;
+  }
+}
+
+// ---- Method 2: Direct Gemini API ----
+async function tryGeminiDirect(fullPrompt, fileUrls) {
+  const geminiKey = Deno.env.get("gemini-2.5-pro");
+  if (!geminiKey) throw new Error("Clé Gemini non configurée");
+
+  const parts = [];
+  if (fileUrls && fileUrls.length > 0) {
+    parts.push({ text: `${fileUrls.length} image(s) de référence sont fournies ci-dessous. Analyse-les avec une précision extrême.` });
+    for (const imgUrl of fileUrls.slice(0, 5)) {
+      parts.push({ text: `Image de référence ${imgUrl}:` });
+      parts.push({ file_data: { file_uri: imgUrl, mime_type: "image/png" } });
+    }
+  }
+  parts.push({ text: fullPrompt });
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${geminiKey}`,
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts }],
+        generationConfig: { temperature: 0.8, maxOutputTokens: 8192, responseMimeType: "application/json" },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(`Gemini API ${response.status}: ${JSON.stringify(errData).substring(0, 200)}`);
+  }
+
+  const data = await response.json();
+  const text = (data.candidates?.[0]?.content?.parts || []).filter(p => p.text).map(p => p.text).join("");
+  if (!text) throw new Error("Gemini: réponse vide");
+
+  return extractJson(text);
+}
+
+// ---- Method 3: Direct Anthropic API ----
+async function tryAnthropicDirect(fullPrompt, fileUrls) {
+  const anthropicKey = Deno.env.get("Anthropic");
+  if (!anthropicKey) throw new Error("Clé Anthropic non configurée");
+
+  const content = [];
+  if (fileUrls && fileUrls.length > 0) {
+    content.push({ type: "text", text: `${fileUrls.length} image(s) de référence sont fournies. Analyse-les avec précision.` });
+    for (const imgUrl of fileUrls.slice(0, 5)) {
+      content.push({ type: "image", source: { type: "url", url: imgUrl } });
+    }
+  }
+  content.push({ type: "text", text: fullPrompt });
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": anthropicKey,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "claude-3-5-sonnet-20241022",
+      max_tokens: 8000,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: "user", content }],
+    }),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Anthropic API ${response.status}: ${errText.substring(0, 200)}`);
+  }
+
+  const data = await response.json();
+  const text = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("");
+  if (!text) throw new Error("Anthropic: réponse vide");
+
+  return extractJson(text);
+}
+
+export async function runCreativeDirection(base44, payload) {
   const userText = buildUserMessage(payload);
   const referenceImages = payload.reference_images || [];
-  let lastError = "";
+  const fileUrls = referenceImages.length > 0 ? referenceImages.slice(0, 10) : undefined;
+  const fullPrompt = `${SYSTEM_PROMPT}\n\n---\n\nPROJET STORY221\n${userText}`;
 
-  // ---- Gemini path (preferred) ----
-  if (geminiKey) {
-    const parts = [];
-    if (referenceImages.length > 0) {
-      parts.push({ text: `${referenceImages.length} image(s) de référence sont fournies ci-dessous. Analyse-les avec une précision extrême: identifie l'apparence exacte des personnages, décors, objets, couleurs et textures. Décris chaque référence en détail dans les engine_prompts et l'apparence des personnages.` });
-      for (const imgUrl of referenceImages.slice(0, 5)) {
-        parts.push({ text: `Image de référence ${imgUrl}:` });
-        parts.push({ file_data: { file_uri: imgUrl, mime_type: "image/png" } });
-      }
-    }
-    parts.push({ text: userText });
+  const errors = [];
 
-    try {
-      const geminiResponse = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${geminiKey}`,
-        {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-            contents: [{ role: "user", parts }],
-            generationConfig: { temperature: 0.8, maxOutputTokens: 8192, responseMimeType: "application/json" },
-          }),
-        }
-      );
-
-      const gemData = await geminiResponse.json();
-      if (geminiResponse.ok && gemData.candidates?.length) {
-        const gemText = (gemData.candidates?.[0]?.content?.parts || []).filter((p) => p.text).map((p) => p.text).join("");
-        try {
-          return extractJson(gemText);
-        } catch { /* fall through to Anthropic */ }
-      } else {
-        lastError = `Gemini ${geminiResponse.status}: ${JSON.stringify(gemData).substring(0, 300)}`;
-      }
-    } catch (e) {
-      lastError = `Gemini network error: ${e.message}`;
-    }
+  // ---- Method 1: InvokeLLM (platform integration) ----
+  try {
+    return await tryInvokeLLM(base44, fullPrompt, fileUrls);
+  } catch (e) {
+    errors.push(`InvokeLLM: ${e.message}`);
   }
 
-  // ---- Anthropic fallback ----
-  if (anthropicKey) {
-    const content = [];
-    if (referenceImages.length > 0) {
-      content.push({ type: "text", text: `${referenceImages.length} image(s) de référence sont fournies. Analyse-les avec précision et décris-les dans les engine_prompts et l'apparence des personnages.` });
-      for (const imgUrl of referenceImages.slice(0, 5)) {
-        content.push({ type: "image", source: { type: "url", url: imgUrl } });
-      }
-    }
-    content.push({ type: "text", text: userText });
-
-    try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "x-api-key": anthropicKey, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-3-5-sonnet-20241022",
-          max_tokens: 8000,
-          system: SYSTEM_PROMPT,
-          messages: [{ role: "user", content }],
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const text = (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("");
-        try {
-          return extractJson(text);
-        } catch { /* fall through */ }
-      } else {
-        const errText = await response.text();
-        lastError = `Anthropic ${response.status}: ${errText.substring(0, 300)}`;
-      }
-    } catch (e) {
-      lastError = `Anthropic network error: ${e.message}`;
-    }
+  // ---- Method 2: Direct Gemini API ----
+  try {
+    return await tryGeminiDirect(fullPrompt, fileUrls);
+  } catch (e) {
+    errors.push(`Gemini Direct: ${e.message}`);
   }
 
-  throw new Error(`Échec de la direction créative. ${lastError}`.trim());
+  // ---- Method 3: Direct Anthropic API ----
+  try {
+    return await tryAnthropicDirect(fullPrompt, fileUrls);
+  } catch (e) {
+    errors.push(`Anthropic Direct: ${e.message}`);
+  }
+
+  throw new Error(`Échec de la direction créative après toutes les méthodes. ${errors.join(" | ")}`);
 }
