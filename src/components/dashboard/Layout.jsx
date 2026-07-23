@@ -12,7 +12,6 @@ const navItems = [
   { label: "Reels", icon: Clapperboard, path: "/app/reels" },
   { label: "Messages", icon: MessageSquare, path: "/app/messages" },
   { label: "Diamants", icon: Diamond, path: "/app/diamonds" },
-  { label: "Profil", icon: User, path: "/app/profile" },
 ];
 
 export default function Layout() {
@@ -116,11 +115,15 @@ export default function Layout() {
           <Logo size="sm" />
         </Link>
         <Link
-          to="/app/diamonds"
+          to="/app/profile"
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary border border-border"
         >
-          <Diamond className="w-4 h-4 text-primary" fill="currentColor" />
-          <span className="text-sm font-semibold text-white">{diamonds}</span>
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="" className="w-5 h-5 rounded-full object-cover" />
+          ) : (
+            <User className="w-4 h-4 text-primary" />
+          )}
+          <span className="text-sm font-semibold text-white max-w-[80px] truncate">{username}</span>
         </Link>
       </header>
 
