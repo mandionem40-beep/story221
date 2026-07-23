@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Heart, MessageCircle, Share2, Bookmark, Music2 } from "lucide-react";
 
@@ -61,6 +61,7 @@ const reelPreviews = [
 
 function ReelFeed() {
   const [index, setIndex] = useState(0);
+  const videoRefs = useRef([]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -69,34 +70,41 @@ function ReelFeed() {
     return () => clearInterval(timer);
   }, []);
 
+  // Only play the active video — pause all others to avoid browser limits
+  useEffect(() => {
+    videoRefs.current.forEach((video, i) => {
+      if (!video) return;
+      if (i === index) {
+        video.play().catch(() => {});
+      } else {
+        video.pause();
+      }
+    });
+  }, [index]);
+
   const reel = reelPreviews[index];
 
   return (
     <div className="relative w-[260px] sm:w-[300px] h-[520px] rounded-[2.5rem] bg-card border-2 border-border p-2 overflow-hidden">
       <div className="w-full h-full rounded-[2rem] bg-black overflow-hidden relative">
         {reelPreviews.map((r, i) => (
-          <motion.div
+          <div
             key={i}
-            initial={false}
-            animate={{
-              opacity: i === index ? 1 : 0,
-              scale: i === index ? 1 : 1.04,
-            }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-            className="absolute inset-0"
+            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+              i === index ? "opacity-100" : "opacity-0"
+            }`}
           >
             <video
+              ref={(el) => (videoRefs.current[i] = el)}
               src={r.video_url}
-              autoPlay
               loop
               muted
               playsInline
               preload="auto"
-              style={{ willChange: "opacity" }}
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
-          </motion.div>
+          </div>
         ))}
 
         {/* Right action rail */}

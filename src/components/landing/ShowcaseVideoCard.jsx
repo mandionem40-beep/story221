@@ -1,12 +1,35 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function ShowcaseVideoCard({ video }) {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState(false);
+  const [visible, setVisible] = useState(false);
   const videoRef = useRef(null);
 
   const hasVideo = !!video.video_url && !error;
   const thumb = video.thumbnail_url;
+
+  // Only play videos that are visible in the viewport
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      ([entry]) => setVisible(entry.isIntersecting),
+      { threshold: 0.25 }
+    );
+    const el = videoRef.current;
+    if (el) obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  // Play / pause based on visibility — avoids too many concurrent videos
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || !hasVideo) return;
+    if (visible) {
+      v.play().catch(() => {});
+    } else {
+      v.pause();
+    }
+  }, [visible, hasVideo]);
 
   return (
     <div className="group relative rounded-2xl overflow-hidden bg-card border border-border transition-all duration-300 hover:border-primary/60">
@@ -34,14 +57,12 @@ export default function ShowcaseVideoCard({ video }) {
             ref={videoRef}
             src={video.video_url}
             poster={thumb || undefined}
-            autoPlay
             loop
             muted
             playsInline
             preload="auto"
             onCanPlay={() => setReady(true)}
             onError={() => setError(true)}
-            style={{ willChange: "opacity" }}
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 group-hover:scale-105 ${
               ready ? "opacity-100" : "opacity-0"
             }`}
