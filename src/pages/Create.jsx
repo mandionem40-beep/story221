@@ -34,6 +34,22 @@ export default function Create() {
     }
   }, [continueId]);
 
+  // Subscribe to Generation entity for real-time pipeline progress
+  useEffect(() => {
+    if (!generation || phase !== "pipeline") return;
+    const pipelineSteps = getPipelineSteps(type);
+    const unsubscribe = base44.entities.Generation.subscribe((event) => {
+      if (event.id === generation.id && event.type === "update") {
+        const step = event.data?.pipeline_step;
+        if (step) {
+          const stepIdx = pipelineSteps.findIndex(s => s.id === step);
+          if (stepIdx >= 0) setCurrentStep(stepIdx);
+        }
+      }
+    });
+    return unsubscribe;
+  }, [generation, phase, type]);
+
   const steps = getPipelineSteps(type);
 
   const handleTypeChange = (newType) => {
@@ -78,23 +94,7 @@ export default function Create() {
     });
     setGeneration(gen);
 
-    // Deduct diamonds
-    const newBalance = useFreeTrial ? user.diamonds : user.diamonds - cost;
-    await base44.auth.updateMe({
-      diamonds: newBalance,
-      free_trial_used: useFreeTrial ? true : user.free_trial_used,
-    });
-    await base44.entities.Transaction.create({
-      type: useFreeTrial ? "free_trial" : "generation",
-      amount: -cost,
-      description: `Génération ${getContentType(genType).label}: ${prompt.substring(0, 50)}`,
-      reference: `gen_${gen.id}`,
-      balance_after: newBalance,
-      related_generation_id: gen.id,
-    });
-    refreshUser();
-
-    // Run pipeline
+    // Run pipeline (credit deduction handled securely by backend)
     setPhase("pipeline");
     setCurrentStep(0);
     setPipelineError(null);
@@ -111,28 +111,10 @@ export default function Create() {
         onError: (error) => {
           setPipelineError(error);
           setPhase("error");
-          // Refund
-          refundDiamonds(gen.id, user, useFreeTrial, cost);
           refreshUser();
         },
       }
     );
-  };
-
-  const refundDiamonds = async (genId, user, usedFreeTrial, cost) => {
-    try {
-      await base44.auth.updateMe({
-        diamonds: user.diamonds,
-        free_trial_used: usedFreeTrial ? false : user.free_trial_used,
-      });
-      await base44.entities.Transaction.create({
-        type: "admin_adjustment",
-        amount: cost,
-        description: `Remboursement: génération échouée`,
-        reference: `refund_${genId}`,
-        balance_after: user.diamonds,
-      });
-    } catch { /* ignore */ }
   };
 
   const handlePublish = async () => {
@@ -191,14 +173,6 @@ export default function Create() {
       reference_images: continueGen.reference_images || [],
     });
     setGeneration(gen);
-    const newBalance = useFreeTrial ? user.diamonds : user.diamonds - cost;
-    await base44.auth.updateMe({ diamonds: newBalance, free_trial_used: useFreeTrial ? true : user.free_trial_used });
-    await base44.entities.Transaction.create({
-      type: useFreeTrial ? "free_trial" : "generation", amount: -cost,
-      description: `Continuation: ${prompt.substring(0, 50)}`, reference: `gen_${gen.id}`,
-      balance_after: newBalance, related_generation_id: gen.id,
-    });
-    refreshUser();
     setPhase("pipeline");
     setCurrentStep(0);
     setPipelineError(null);
@@ -207,7 +181,7 @@ export default function Create() {
       {
         onStep: (stepIdx) => setCurrentStep(stepIdx),
         onComplete: (res) => { setResult(res); setPhase("result"); refreshUser(); },
-        onError: (error) => { setPipelineError(error); setPhase("error"); refundDiamonds(gen.id, user, useFreeTrial, cost); refreshUser(); },
+        onError: (error) => { setPipelineError(error); setPhase("error"); refreshUser(); },
       }
     );
   };
