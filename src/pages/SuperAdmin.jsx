@@ -210,6 +210,18 @@ export default function SuperAdmin() {
     toast({ title: "Pack mis à jour", description: "Les changements sont immédiatement effectifs." });
   };
 
+  const handleDeletePack = async (pack) => {
+    if (!confirm(`Supprimer le pack "${pack.name}" ?`)) return;
+    try {
+      await base44.entities.DiamondPack.delete(pack.id);
+      logAction("delete_pack", `Pack ${pack.name} supprimé`);
+      loadTabData("packs");
+      toast({ title: "Pack supprimé" });
+    } catch {
+      toast({ title: "Erreur", variant: "destructive" });
+    }
+  };
+
   const handleAddPack = async () => {
     if (!newPack.name || !newPack.diamonds || !newPack.price_fcfa) return;
     await base44.entities.DiamondPack.create({
@@ -383,7 +395,7 @@ export default function SuperAdmin() {
                 <h2 className="text-xl font-bold text-white mb-6">Gestion des packs</h2>
                 <div className="space-y-3 mb-6">
                   {(data.packs || []).map(pack => (
-                    <PackEditor key={pack.id} pack={pack} onSave={handleSavePack} />
+                    <PackEditor key={pack.id} pack={pack} onSave={handleSavePack} onDelete={handleDeletePack} />
                   ))}
                 </div>
                 {/* Add new pack */}
@@ -673,7 +685,7 @@ export default function SuperAdmin() {
   );
 }
 
-function PackEditor({ pack, onSave }) {
+function PackEditor({ pack, onSave, onDelete }) {
   const [edited, setEdited] = useState(pack);
   const [changed, setChanged] = useState(false);
 
@@ -703,6 +715,12 @@ function PackEditor({ pack, onSave }) {
         className="px-3 py-2 rounded-lg bg-primary text-white text-xs font-semibold flex items-center gap-1 disabled:opacity-30"
       >
         <Save className="w-3.5 h-3.5" />Enregistrer
+      </button>
+      <button
+        onClick={() => onDelete(pack)}
+        className="w-9 h-9 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center"
+      >
+        <Trash2 className="w-3.5 h-3.5" />
       </button>
     </div>
   );

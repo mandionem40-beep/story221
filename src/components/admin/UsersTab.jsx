@@ -104,7 +104,7 @@ export default function UsersTab({ users, onAdjust, onStatus, onDelete, onRoleCh
                     </div>
                     <div>
                       <p className="text-muted-foreground">Téléphone</p>
-                      <p className="text-white">{u.phone_number || "—"}</p>
+                      <p className="text-white">{u.phone || "—"}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Pays</p>
