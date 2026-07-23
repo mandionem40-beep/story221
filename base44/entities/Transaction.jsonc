@@ -26,6 +26,12 @@
     },
     "related_generation_id": {
       "type": "string"
+    },
+    "price_fcfa": {
+      "type": "integer"
+    },
+    "pack_name": {
+      "type": "string"
     }
   },
   "required": [
@@ -43,14 +49,47 @@
           "user_condition": {
             "role": "super_admin"
           }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
         }
       ]
     },
     "update": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }
