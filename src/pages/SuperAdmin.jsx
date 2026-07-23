@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
-import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video, Share2, Mail, Cpu, Gift, Building2 } from "lucide-react";
+import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video, Share2, Mail, Cpu, Gift, Building2, MessageCircle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import AnalyticsTab from "@/components/admin/AnalyticsTab";
 import AdjustCreditsDialog from "@/components/admin/AdjustCreditsDialog";
@@ -12,6 +12,7 @@ import AIManagementTab from "@/components/admin/AIManagementTab";
 import GeneralSettingsTab from "@/components/admin/GeneralSettingsTab";
 import ReferralTab from "@/components/admin/ReferralTab";
 import UsersTab from "@/components/admin/UsersTab";
+import TransactionsTab from "@/components/admin/TransactionsTab";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: BarChart3 },
@@ -85,7 +86,11 @@ export default function SuperAdmin() {
       } else if (tab === "showcase") {
         result = { showcases: await base44.entities.ShowcaseVideo.list("display_order", 200) };
       } else if (tab === "reports") {
-        result = { reports: await base44.entities.Report.list("-created_date", 200) };
+        const [reports, comments] = await Promise.all([
+          base44.entities.Report.list("-created_date", 200),
+          base44.entities.Comment.list("-created_date", 200),
+        ]);
+        result = { reports: reports || [], comments: comments || [] };
       } else if (tab === "logs") {
         result = { logs: await base44.entities.AdminLog.list("-created_date", 200) };
       } else if (tab === "analytics") {
@@ -175,6 +180,21 @@ export default function SuperAdmin() {
     logAction("resolve_report", `Signalement ${reportId} résolu`);
     loadTabData("reports");
     toast({ title: "Signalement résolu" });
+  };
+
+  const handleDismissReport = async (reportId) => {
+    await base44.entities.Report.update(reportId, { status: "dismissed" });
+    logAction("dismiss_report", `Signalement ${reportId} rejeté`);
+    loadTabData("reports");
+    toast({ title: "Signalement rejeté" });
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!confirm("Supprimer ce commentaire ?")) return;
+    await base44.entities.Comment.delete(commentId);
+    logAction("delete_comment", `Commentaire ${commentId} supprimé`);
+    loadTabData("reports");
+    toast({ title: "Commentaire supprimé" });
   };
 
   const handleSavePack = async (pack) => {
@@ -383,22 +403,7 @@ export default function SuperAdmin() {
 
             {/* Transactions tab */}
             {activeTab === "transactions" && (
-              <div>
-                <h2 className="text-xl font-bold text-white mb-6">Transactions</h2>
-                <div className="space-y-2">
-                  {(data.transactions || []).map(tx => (
-                    <div key={tx.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-white truncate">{tx.description}</p>
-                        <p className="text-xs text-muted-foreground">{new Date(tx.created_date).toLocaleDateString("fr-FR")} · {tx.type}</p>
-                      </div>
-                      <p className={`text-sm font-semibold ${tx.amount > 0 ? "text-green-500" : "text-destructive"}`}>
-                        {tx.amount > 0 ? "+" : ""}{tx.amount} 💎
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <TransactionsTab transactions={data.transactions || []} />
             )}
 
             {/* Reels tab */}
@@ -501,30 +506,75 @@ export default function SuperAdmin() {
               </div>
             )}
 
-            {/* Reports tab */}
+            {/* Reports / Moderation tab */}
             {activeTab === "reports" && (
-              <div>
-                <h2 className="text-xl font-bold text-white mb-6">Signalements</h2>
-                {(data.reports || []).length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-12">Aucun signalement.</p>
-                ) : (
-                  <div className="space-y-2">
-                    {(data.reports || []).map(r => (
-                      <div key={r.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
-                        <Flag className="w-4 h-4 text-yellow-500 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-white">{r.reason}</p>
-                          <p className="text-xs text-muted-foreground">{r.status} · {new Date(r.created_date).toLocaleDateString("fr-FR")}</p>
-                        </div>
-                        {r.status === "pending" && (
-                          <button onClick={() => handleResolveReport(r.id)} className="px-3 py-1.5 rounded-lg bg-green-500/20 text-green-500 text-xs font-medium flex items-center gap-1">
-                            <CheckCircle className="w-3.5 h-3.5" />Résoudre
-                          </button>
-                        )}
-                      </div>
-                    ))}
+              <div className="space-y-6">
+                <h2 className="text-xl font-bold text-white">Modération</h2>
+
+                {/* Reports */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Flag className="w-4 h-4 text-yellow-500" />
+                    <h3 className="text-sm font-semibold text-white">Signalements ({(data.reports || []).length})</h3>
                   </div>
-                )}
+                  {(data.reports || []).length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-6">Aucun signalement.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {(data.reports || []).map(r => (
+                        <div key={r.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
+                          <Flag className="w-4 h-4 text-yellow-500 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-white">{r.reason}</p>
+                            <p className="text-xs text-muted-foreground">
+                              <span className={`font-medium ${r.status === "pending" ? "text-yellow-400" : r.status === "resolved" ? "text-green-400" : "text-muted-foreground"}`}>{r.status}</span>
+                              {" · "}
+                              {new Date(r.created_date).toLocaleDateString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                              {r.reel_id && ` · Reel: ${r.reel_id.substring(0, 8)}...`}
+                              {r.comment_id && ` · Commentaire: ${r.comment_id.substring(0, 8)}...`}
+                            </p>
+                          </div>
+                          {r.status === "pending" && (
+                            <div className="flex gap-1.5">
+                              <button onClick={() => handleResolveReport(r.id)} className="px-3 py-1.5 rounded-lg bg-green-500/20 text-green-400 text-xs font-medium flex items-center gap-1">
+                                <CheckCircle className="w-3.5 h-3.5" />Résoudre
+                              </button>
+                              <button onClick={() => handleDismissReport(r.id)} className="px-3 py-1.5 rounded-lg bg-secondary text-muted-foreground text-xs font-medium">
+                                Rejeter
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Comments moderation */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <MessageCircle className="w-4 h-4 text-primary" />
+                    <h3 className="text-sm font-semibold text-white">Commentaires récents ({(data.comments || []).length})</h3>
+                  </div>
+                  {(data.comments || []).length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-6">Aucun commentaire.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {(data.comments || []).slice(0, 30).map(c => (
+                        <div key={c.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
+                          <MessageCircle className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-white truncate">{c.content}</p>
+                            <p className="text-xs text-muted-foreground">Reel: {c.reel_id?.substring(0, 8)}... · {new Date(c.created_date).toLocaleDateString("fr-FR")}</p>
+                          </div>
+                          <button onClick={() => handleDeleteComment(c.id)} className="w-8 h-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 

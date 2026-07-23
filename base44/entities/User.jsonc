@@ -24,9 +24,19 @@
       "type": "string",
       "enum": [
         "user",
+        "admin",
         "super_admin"
       ],
       "default": "user"
+    },
+    "account_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "suspended",
+        "banned"
+      ],
+      "default": "active"
     },
     "diamonds": {
       "type": "integer",
