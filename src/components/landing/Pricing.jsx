@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { Check, Diamond } from "lucide-react";
+import { Check } from "lucide-react";
 import { Link } from "react-router-dom";
+import DiamondIcon from "@/components/DiamondIcon";
 
 const packs = [
   { name: "Découverte", diamonds: 50, price: "2 500", popular: false },
@@ -46,7 +47,7 @@ export default function Pricing() {
               <div className="text-center">
                 <h3 className="text-lg font-semibold text-white">{pack.name}</h3>
                 <div className="mt-4 flex items-center justify-center gap-2">
-                  <Diamond className="w-8 h-8 text-primary" fill="currentColor" />
+                  <DiamondIcon className="w-8 h-8" filled />
                   <span className="text-4xl font-bold text-white">{pack.diamonds}</span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">diamants</p>
