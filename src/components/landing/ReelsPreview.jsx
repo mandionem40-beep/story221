@@ -4,8 +4,8 @@ import { Heart, MessageCircle, Share2, Bookmark, Music2 } from "lucide-react";
 
 const reelPreviews = [
   {
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/2e2bfe7df_Mariage_Mangue_Fraise.mp4",
-    title: "Mangue & fraise se marient 🥭🍓❤️",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/46edf3fe8_Mariage_Fruits_Totaux.mp4",
+    title: "Mariage 100% fruits 🥭🍓❤️",
     author: "@studio221",
     likes: "124.5K",
     comments: "3.2K",
@@ -13,8 +13,8 @@ const reelPreviews = [
     song: "Romance AI - Story221",
   },
   {
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/88193005f_Air_Sngal_dcollage_htesses.mp4",
-    title: "Air Sénégal ✈️ décollage & hôtesses",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/d9b4cc8ea_Dubai_Jetski_Couple.mp4",
+    title: "Vacances à Dubai 🏝️ jetski & couple",
     author: "@studio221",
     likes: "211.8K",
     comments: "5.4K",
