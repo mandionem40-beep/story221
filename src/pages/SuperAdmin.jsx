@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
-import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video, Share2, Mail, Cpu, Gift, Building2, MessageCircle, MousePointerClick, Zap } from "lucide-react";
+import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video, Share2, Mail, Cpu, Gift, Building2, MessageCircle, MousePointerClick, Zap, Wallet } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import AnalyticsTab from "@/components/admin/AnalyticsTab";
 import AdjustCreditsDialog from "@/components/admin/AdjustCreditsDialog";
@@ -16,7 +16,6 @@ import TransactionsTab from "@/components/admin/TransactionsTab";
 import PixelsTab from "@/components/admin/PixelsTab";
 import SocialPublishingTab from "@/components/admin/SocialPublishingTab";
 import FinanceTab from "@/components/admin/FinanceTab";
-import { Wallet } from "lucide-react";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: BarChart3 },
@@ -89,11 +88,12 @@ export default function SuperAdmin() {
       } else if (tab === "transactions") {
         result = { transactions: await base44.entities.Transaction.list("-created_date", 200) };
       } else if (tab === "finance") {
-        const [txs, packs] = await Promise.all([
+        const [txs, packs, expenses] = await Promise.all([
           base44.entities.Transaction.list("-created_date", 500),
           base44.entities.DiamondPack.list(),
+          base44.entities.Expense.list("-date", 200),
         ]);
-        result = { transactions: txs || [], packs: packs || [] };
+        result = { transactions: txs || [], packs: packs || [], expenses: expenses || [] };
       } else if (tab === "reels") {
         result = { reels: await base44.entities.Reel.list("-created_date", 200) };
       } else if (tab === "showcase") {
@@ -437,7 +437,21 @@ export default function SuperAdmin() {
 
             {/* Finance tab */}
             {activeTab === "finance" && (
-              <FinanceTab transactions={data.transactions || []} packs={data.packs || []} />
+              <FinanceTab
+                transactions={data.transactions || []}
+                packs={data.packs || []}
+                expenses={data.expenses || []}
+                onAddExpense={() => loadTabData("finance")}
+                onDeleteExpense={async (id) => {
+                  try {
+                    await base44.entities.Expense.delete(id);
+                    loadTabData("finance");
+                    toast({ title: "Dépense supprimée" });
+                  } catch {
+                    toast({ title: "Erreur", variant: "destructive" });
+                  }
+                }}
+              />
             )}
 
             {/* Reels tab */}

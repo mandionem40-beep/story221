@@ -1,23 +1,43 @@
 import { useState, useMemo } from "react";
-import { Search, Download, TrendingUp, DollarSign, Wallet, ShoppingBag, Calendar } from "lucide-react";
+import { Search, Download, TrendingUp, TrendingDown, DollarSign, Wallet, ShoppingBag, Calendar, Plus, Trash2, Receipt, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import DiamondIcon from "@/components/DiamondIcon";
+import { toast } from "@/components/ui/use-toast";
+import { base44 } from "@/api/base44Client";
 
 const formatFCFA = (n) => (n || 0).toLocaleString("fr-FR").replace(/\u00A0/g, " ") + " FCFA";
 
-export default function FinanceTab({ transactions, packs }) {
+const CATEGORY_LABELS = {
+  api_ia: "API IA",
+  hosting: "Hébergement",
+  marketing: "Marketing",
+  salaries: "Salaires",
+  tools: "Outils",
+  payment_fees: "Frais de paiement",
+  other: "Autre",
+};
+
+const CATEGORY_COLORS = {
+  api_ia: "bg-purple-500/10 text-purple-400",
+  hosting: "bg-blue-500/10 text-blue-400",
+  marketing: "bg-orange-500/10 text-orange-400",
+  salaries: "bg-green-500/10 text-green-400",
+  tools: "bg-cyan-500/10 text-cyan-400",
+  payment_fees: "bg-yellow-500/10 text-yellow-400",
+  other: "bg-gray-500/10 text-gray-400",
+};
+
+export default function FinanceTab({ transactions, packs, expenses, onAddExpense, onDeleteExpense }) {
   const [search, setSearch] = useState("");
   const [periodFilter, setPeriodFilter] = useState("all");
+  const [showAddExpense, setShowAddExpense] = useState(false);
+  const [newExpense, setNewExpense] = useState({ category: "api_ia", description: "", amount_fcfa: 0, date: new Date().toISOString().split("T")[0], recurring: false });
 
-  // Build a lookup: diamonds -> price_fcfa from packs
   const packPriceMap = useMemo(() => {
     const map = {};
-    (packs || []).forEach((p) => {
-      if (p.diamonds) map[p.diamonds] = p.price_fcfa;
-    });
+    (packs || []).forEach((p) => { if (p.diamonds) map[p.diamonds] = p.price_fcfa; });
     return map;
   }, [packs]);
 
-  // Only credit purchases
   const purchases = useMemo(() => {
     return (transactions || []).filter((t) => t.type === "purchase");
   }, [transactions]);
@@ -28,65 +48,85 @@ export default function FinanceTab({ transactions, packs }) {
     return 0;
   };
 
-  const filtered = useMemo(() => {
+  const filteredPurchases = useMemo(() => {
     return purchases.filter((t) => {
       const q = search.toLowerCase();
       const matchesSearch = !q ||
         (t.description || "").toLowerCase().includes(q) ||
         (t.reference || "").toLowerCase().includes(q) ||
         (t.pack_name || "").toLowerCase().includes(q);
-
       if (!matchesSearch) return false;
-      if (periodFilter === "all") return true;
-
-      const txDate = new Date(t.created_date);
-      const now = new Date();
-      if (periodFilter === "today") {
-        return txDate.toDateString() === now.toDateString();
-      }
-      if (periodFilter === "week") {
-        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        return txDate >= weekAgo;
-      }
-      if (periodFilter === "month") {
-        return txDate.getMonth() === now.getMonth() && txDate.getFullYear() === now.getFullYear();
-      }
-      return true;
+      return periodFilter === "all" || isInPeriod(t.created_date, periodFilter);
     });
   }, [purchases, search, periodFilter]);
 
-  const totalRevenueFCFA = filtered.reduce((sum, t) => sum + getTransactionPrice(t), 0);
-  const totalDiamondsSold = filtered.reduce((sum, t) => sum + (t.amount || 0), 0);
-  const avgBasket = filtered.length > 0 ? Math.round(totalRevenueFCFA / filtered.length) : 0;
+  const filteredExpenses = useMemo(() => {
+    return (expenses || []).filter((e) => {
+      const q = search.toLowerCase();
+      const matchesSearch = !q ||
+        (e.description || "").toLowerCase().includes(q) ||
+        (CATEGORY_LABELS[e.category] || "").toLowerCase().includes(q);
+      if (!matchesSearch) return false;
+      return periodFilter === "all" || isInPeriod(e.date, periodFilter);
+    });
+  }, [expenses, search, periodFilter]);
 
-  // Monthly breakdown
+  const totalRevenueFCFA = filteredPurchases.reduce((sum, t) => sum + getTransactionPrice(t), 0);
+  const totalExpensesFCFA = filteredExpenses.reduce((sum, e) => sum + (e.amount_fcfa || 0), 0);
+  const netProfit = totalRevenueFCFA - totalExpensesFCFA;
+  const totalDiamondsSold = filteredPurchases.reduce((sum, t) => sum + (t.amount || 0), 0);
+  const margin = totalRevenueFCFA > 0 ? Math.round((netProfit / totalRevenueFCFA) * 100) : 0;
+
+  // Monthly breakdown (revenue vs expenses)
   const monthlyData = useMemo(() => {
     const months = {};
     purchases.forEach((t) => {
       const d = new Date(t.created_date);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      if (!months[key]) months[key] = { revenue: 0, count: 0, diamonds: 0 };
+      if (!months[key]) months[key] = { revenue: 0, expenses: 0 };
       months[key].revenue += getTransactionPrice(t);
-      months[key].count += 1;
-      months[key].diamonds += t.amount || 0;
     });
-    return Object.entries(months)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .slice(-6);
-  }, [purchases]);
+    (expenses || []).forEach((e) => {
+      const d = new Date(e.date);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      if (!months[key]) months[key] = { revenue: 0, expenses: 0 };
+      months[key].expenses += e.amount_fcfa || 0;
+    });
+    return Object.entries(months).sort(([a], [b]) => a.localeCompare(b)).slice(-6);
+  }, [purchases, expenses]);
 
-  const maxRevenue = Math.max(...monthlyData.map(([, v]) => v.revenue), 1);
+  const maxValue = Math.max(...monthlyData.map(([, v]) => Math.max(v.revenue, v.expenses)), 1);
+
+  // Expenses by category
+  const expensesByCategory = useMemo(() => {
+    const cats = {};
+    (expenses || []).forEach((e) => {
+      if (!cats[e.category]) cats[e.category] = 0;
+      cats[e.category] += e.amount_fcfa || 0;
+    });
+    return Object.entries(cats).sort(([, a], [, b]) => b - a);
+  }, [expenses]);
 
   const exportCSV = () => {
-    const headers = ["Date", "Pack", "Description", "Diamants", "Prix FCFA", "Référence"];
-    const rows = filtered.map((t) => [
-      new Date(t.created_date).toLocaleString("fr-FR"),
-      t.pack_name || "",
-      (t.description || "").replace(/"/g, "'"),
-      t.amount || 0,
-      getTransactionPrice(t),
-      t.reference || "",
-    ]);
+    const headers = ["Date", "Type", "Catégorie/Pack", "Description", "Montant FCFA", "Référence"];
+    const rows = [
+      ...filteredPurchases.map((t) => [
+        new Date(t.created_date).toLocaleString("fr-FR"),
+        "Revenu",
+        t.pack_name || "Achat",
+        (t.description || "").replace(/"/g, "'"),
+        getTransactionPrice(t),
+        t.reference || "",
+      ]),
+      ...filteredExpenses.map((e) => [
+        new Date(e.date).toLocaleString("fr-FR"),
+        "Dépense",
+        CATEGORY_LABELS[e.category] || e.category,
+        (e.description || "").replace(/"/g, "'"),
+        -(e.amount_fcfa || 0),
+        "",
+      ]),
+    ];
     const csv = [headers, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -97,32 +137,48 @@ export default function FinanceTab({ transactions, packs }) {
     URL.revokeObjectURL(url);
   };
 
+  const handleAddExpense = async () => {
+    if (!newExpense.amount_fcfa || newExpense.amount_fcfa <= 0) {
+      toast({ title: "Erreur", description: "Entrez un montant valide.", variant: "destructive" });
+      return;
+    }
+    try {
+      await base44.entities.Expense.create(newExpense);
+      onAddExpense();
+      setNewExpense({ category: "api_ia", description: "", amount_fcfa: 0, date: new Date().toISOString().split("T")[0], recurring: false });
+      setShowAddExpense(false);
+      toast({ title: "Dépense ajoutée" });
+    } catch {
+      toast({ title: "Erreur", description: "Impossible d'ajouter la dépense.", variant: "destructive" });
+    }
+  };
+
   const stats = [
     {
-      icon: DollarSign,
-      label: "Revenus totaux",
+      icon: ArrowUpRight,
+      label: "Revenus",
       value: formatFCFA(totalRevenueFCFA),
       color: "bg-green-500/10",
       iconColor: "text-green-400",
     },
     {
-      icon: ShoppingBag,
-      label: "Achats de crédits",
-      value: filtered.length,
-      color: "bg-blue-500/10",
-      iconColor: "text-blue-400",
+      icon: ArrowDownRight,
+      label: "Dépenses",
+      value: formatFCFA(totalExpensesFCFA),
+      color: "bg-red-500/10",
+      iconColor: "text-red-400",
     },
     {
-      icon: DiamondIcon,
-      label: "Diamants vendus",
-      value: totalDiamondsSold,
-      color: "bg-primary/10",
-      iconColor: "text-primary",
+      icon: DollarSign,
+      label: "Profit net",
+      value: formatFCFA(netProfit),
+      color: netProfit >= 0 ? "bg-primary/10" : "bg-red-500/10",
+      iconColor: netProfit >= 0 ? "text-primary" : "text-red-400",
     },
     {
       icon: TrendingUp,
-      label: "Panier moyen",
-      value: formatFCFA(avgBasket),
+      label: "Marge",
+      value: `${margin}%`,
       color: "bg-purple-500/10",
       iconColor: "text-purple-400",
     },
@@ -134,10 +190,41 @@ export default function FinanceTab({ transactions, packs }) {
         <h2 className="text-xl font-bold text-white flex items-center gap-2">
           <Wallet className="w-5 h-5 text-primary" /> Finance
         </h2>
-        <button onClick={exportCSV} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-white text-sm font-semibold">
-          <Download className="w-4 h-4" /> Export CSV
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => setShowAddExpense(!showAddExpense)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary text-white text-sm font-semibold border border-border">
+            <Plus className="w-4 h-4" /> Dépense
+          </button>
+          <button onClick={exportCSV} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-white text-sm font-semibold">
+            <Download className="w-4 h-4" /> Export
+          </button>
+        </div>
       </div>
+
+      {/* Add expense form */}
+      {showAddExpense && (
+        <div className="rounded-2xl bg-card border border-border p-4 mb-6">
+          <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+            <Receipt className="w-4 h-4 text-primary" /> Nouvelle dépense
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <select value={newExpense.category} onChange={(e) => setNewExpense({ ...newExpense, category: e.target.value })} className="h-10 rounded-lg bg-background border border-border px-3 text-sm text-white">
+              {Object.entries(CATEGORY_LABELS).map(([val, label]) => (
+                <option key={val} value={val}>{label}</option>
+              ))}
+            </select>
+            <input value={newExpense.description} onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })} placeholder="Description (ex: Veo 3 API)" className="h-10 rounded-lg bg-background border border-border px-3 text-sm text-white" />
+            <input type="number" value={newExpense.amount_fcfa || ""} onChange={(e) => setNewExpense({ ...newExpense, amount_fcfa: parseInt(e.target.value) || 0 })} placeholder="Montant FCFA" className="h-10 rounded-lg bg-background border border-border px-3 text-sm text-white" />
+            <input type="date" value={newExpense.date} onChange={(e) => setNewExpense({ ...newExpense, date: e.target.value })} className="h-10 rounded-lg bg-background border border-border px-3 text-sm text-white" />
+          </div>
+          <div className="flex items-center gap-3 mt-3">
+            <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <input type="checkbox" checked={newExpense.recurring} onChange={(e) => setNewExpense({ ...newExpense, recurring: e.target.checked })} className="accent-primary" />
+              Récurrent (mensuel)
+            </label>
+            <button onClick={handleAddExpense} className="ml-auto px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold">Ajouter</button>
+          </div>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
@@ -154,48 +241,72 @@ export default function FinanceTab({ transactions, packs }) {
         ))}
       </div>
 
-      {/* Monthly revenue chart */}
-      {monthlyData.length > 0 && (
-        <div className="rounded-2xl bg-card border border-border p-5 mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Calendar className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-semibold text-white">Revenus mensuels</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        {/* Monthly revenue vs expenses chart */}
+        {monthlyData.length > 0 && (
+          <div className="rounded-2xl bg-card border border-border p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Calendar className="w-4 h-4 text-primary" />
+              <h3 className="text-sm font-semibold text-white">Revenus vs Dépenses</h3>
+            </div>
+            <div className="flex items-end gap-3 h-32">
+              {monthlyData.map(([month, data]) => {
+                const [year, mon] = month.split("-");
+                const label = new Date(year, parseInt(mon) - 1).toLocaleDateString("fr-FR", { month: "short" });
+                const revHeight = Math.max(2, (data.revenue / maxValue) * 100);
+                const expHeight = Math.max(2, (data.expenses / maxValue) * 100);
+                return (
+                  <div key={month} className="flex-1 flex flex-col items-center gap-1">
+                    <div className="w-full flex items-end gap-1 h-28">
+                      <div className="flex-1 rounded-t bg-green-500/70 transition-all" style={{ height: `${revHeight}%` }} title={`Revenus: ${formatFCFA(data.revenue)}`} />
+                      <div className="flex-1 rounded-t bg-red-500/70 transition-all" style={{ height: `${expHeight}%` }} title={`Dépenses: ${formatFCFA(data.expenses)}`} />
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">{label}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex gap-4 mt-3 justify-center">
+              <span className="flex items-center gap-1 text-[10px] text-muted-foreground"><span className="w-2 h-2 rounded bg-green-500/70" />Revenus</span>
+              <span className="flex items-center gap-1 text-[10px] text-muted-foreground"><span className="w-2 h-2 rounded bg-red-500/70" />Dépenses</span>
+            </div>
           </div>
-          <div className="flex items-end gap-3 h-40">
-            {monthlyData.map(([month, data]) => {
-              const [year, mon] = month.split("-");
-              const label = new Date(year, parseInt(mon) - 1).toLocaleDateString("fr-FR", { month: "short" });
-              const height = Math.max(4, (data.revenue / maxRevenue) * 100);
-              return (
-                <div key={month} className="flex-1 flex flex-col items-center gap-2">
-                  <span className="text-[10px] text-muted-foreground font-medium">
-                    {data.revenue > 0 ? Math.round(data.revenue / 1000) + "k" : "0"}
-                  </span>
-                  <div className="w-full rounded-t-lg bg-gradient-to-t from-primary to-primary/60 transition-all" style={{ height: `${height}%` }} />
-                  <span className="text-[10px] text-muted-foreground">{label}</span>
-                </div>
-              );
-            })}
+        )}
+
+        {/* Expenses by category */}
+        {expensesByCategory.length > 0 && (
+          <div className="rounded-2xl bg-card border border-border p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Receipt className="w-4 h-4 text-primary" />
+              <h3 className="text-sm font-semibold text-white">Dépenses par catégorie</h3>
+            </div>
+            <div className="space-y-3">
+              {expensesByCategory.map(([cat, amount]) => {
+                const pct = totalExpensesFCFA > 0 ? Math.round((amount / totalExpensesFCFA) * 100) : 0;
+                return (
+                  <div key={cat}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={`text-xs px-2 py-0.5 rounded ${CATEGORY_COLORS[cat]}`}>{CATEGORY_LABELS[cat]}</span>
+                      <span className="text-xs font-semibold text-white">{formatFCFA(amount)} · {pct}%</span>
+                    </div>
+                    <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
+                      <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Search & filter */}
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher un achat..."
-            className="w-full h-10 pl-10 pr-4 rounded-lg bg-card border border-border text-sm text-white"
-          />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher..." className="w-full h-10 pl-10 pr-4 rounded-lg bg-card border border-border text-sm text-white" />
         </div>
-        <select
-          value={periodFilter}
-          onChange={(e) => setPeriodFilter(e.target.value)}
-          className="h-10 px-3 rounded-lg bg-card border border-border text-sm text-white"
-        >
+        <select value={periodFilter} onChange={(e) => setPeriodFilter(e.target.value)} className="h-10 px-3 rounded-lg bg-card border border-border text-sm text-white">
           <option value="all">Toute la période</option>
           <option value="today">Aujourd'hui</option>
           <option value="week">7 derniers jours</option>
@@ -203,39 +314,84 @@ export default function FinanceTab({ transactions, packs }) {
         </select>
       </div>
 
-      <p className="text-xs text-muted-foreground mb-3">{filtered.length} achat(s) de crédits</p>
-
-      {/* List */}
-      <div className="space-y-2">
-        {filtered.map((tx) => {
-          const price = getTransactionPrice(tx);
-          return (
-            <div key={tx.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
-              <div className="w-9 h-9 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
-                <DiamondIcon className="w-4 h-4" filled />
+      {/* Expenses list */}
+      <div className="mb-6">
+        <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+          <Receipt className="w-4 h-4 text-red-400" /> Dépenses ({filteredExpenses.length})
+        </h3>
+        <div className="space-y-2">
+          {filteredExpenses.map((e) => (
+            <div key={e.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${CATEGORY_COLORS[e.category]}`}>
+                <Receipt className="w-4 h-4" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-white truncate">
-                  {tx.pack_name || tx.description || "Achat de crédits"}
-                </p>
+                <p className="text-sm text-white truncate">{e.description || CATEGORY_LABELS[e.category]}</p>
                 <p className="text-xs text-muted-foreground">
-                  {new Date(tx.created_date).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-                  {tx.reference && ` · ${tx.reference.substring(0, 16)}`}
+                  <span className={`px-1.5 py-0.5 rounded ${CATEGORY_COLORS[e.category]}`}>{CATEGORY_LABELS[e.category]}</span>
+                  {" · "}
+                  {new Date(e.date).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}
+                  {e.recurring && " · Récurrent"}
                 </p>
               </div>
-              <div className="text-right flex-shrink-0">
-                <p className="text-sm font-bold text-green-400">{formatFCFA(price)}</p>
-                <p className="text-xs text-muted-foreground flex items-center justify-end gap-1">
-                  <DiamondIcon className="w-3 h-3" filled /> {tx.amount || 0}
-                </p>
-              </div>
+              <p className="text-sm font-bold text-red-400 flex-shrink-0">-{formatFCFA(e.amount_fcfa)}</p>
+              <button onClick={() => onDeleteExpense(e.id)} className="w-8 h-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center flex-shrink-0">
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
             </div>
-          );
-        })}
-        {filtered.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-12">Aucun achat de crédits pour cette période.</p>
-        )}
+          ))}
+          {filteredExpenses.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-6">Aucune dépense enregistrée.</p>
+          )}
+        </div>
+      </div>
+
+      {/* Purchases list */}
+      <div>
+        <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+          <ShoppingBag className="w-4 h-4 text-green-400" /> Achats de crédits ({filteredPurchases.length})
+        </h3>
+        <div className="space-y-2">
+          {filteredPurchases.map((tx) => {
+            const price = getTransactionPrice(tx);
+            return (
+              <div key={tx.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
+                <div className="w-9 h-9 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                  <DiamondIcon className="w-4 h-4" filled />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-white truncate">{tx.pack_name || tx.description || "Achat de crédits"}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(tx.created_date).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    {tx.reference && ` · ${tx.reference.substring(0, 16)}`}
+                  </p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className="text-sm font-bold text-green-400">{formatFCFA(price)}</p>
+                  <p className="text-xs text-muted-foreground flex items-center justify-end gap-1">
+                    <DiamondIcon className="w-3 h-3" filled /> {tx.amount || 0}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+          {filteredPurchases.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-6">Aucun achat de crédits pour cette période.</p>
+          )}
+        </div>
       </div>
     </div>
   );
+}
+
+function isInPeriod(dateStr, period) {
+  const d = new Date(dateStr);
+  const now = new Date();
+  if (period === "today") return d.toDateString() === now.toDateString();
+  if (period === "week") {
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    return d >= weekAgo;
+  }
+  if (period === "month") return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  return true;
 }
