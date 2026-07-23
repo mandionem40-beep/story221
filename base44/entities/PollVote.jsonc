@@ -1,0 +1,28 @@
+{
+  "name": "PollVote",
+  "type": "object",
+  "properties": {
+    "poll_id": {
+      "type": "string"
+    },
+    "option_index": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "poll_id",
+    "option_index"
+  ],
+  "rls": {
+    "create": true,
+    "read": true,
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

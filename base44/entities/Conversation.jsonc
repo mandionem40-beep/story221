@@ -1,0 +1,92 @@
+{
+  "name": "Conversation",
+  "type": "object",
+  "properties": {
+    "subject": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "support",
+        "billing",
+        "suggestion",
+        "bug",
+        "feature_request",
+        "other"
+      ],
+      "default": "support"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "direct",
+        "campaign"
+      ],
+      "default": "direct"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "closed"
+      ],
+      "default": "open"
+    },
+    "campaign_id": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "last_message_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "unread_count": {
+      "type": "integer",
+      "default": 0
+    }
+  },
+  "required": [
+    "subject"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "$or": [
+        {
+          "data.owner_id": "{{user.id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.owner_id": "{{user.id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "super_admin"
+      }
+    }
+  }
+}

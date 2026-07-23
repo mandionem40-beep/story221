@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
-import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video, Share2 } from "lucide-react";
+import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video, Share2, Mail } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import AnalyticsTab from "@/components/admin/AnalyticsTab";
 import AdjustCreditsDialog from "@/components/admin/AdjustCreditsDialog";
+import MessagesAdmin from "@/components/admin/MessagesAdmin";
 
 const tabs = [
   { id: "stats", label: "Statistiques", icon: BarChart3 },
@@ -18,6 +19,7 @@ const tabs = [
   { id: "logs", label: "Logs", icon: ScrollText },
   { id: "analytics", label: "Analytics", icon: TrendingUp },
   { id: "settings", label: "Réseaux", icon: Share2 },
+  { id: "messages", label: "Messagerie", icon: Mail },
 ];
 
 export default function SuperAdmin() {
@@ -79,6 +81,8 @@ export default function SuperAdmin() {
         result = { users: users || [], generations: gens || [], transactions: txs || [], reels: reels || [], likes: likes || [], comments: comments || [], follows: follows || [] };
       } else if (tab === "settings") {
         result = { socialLinks: await base44.entities.SocialLink.list("display_order", 50) };
+      } else if (tab === "messages") {
+        result = {};  // MessagesAdmin loads its own data
       }
       setData(result);
     } catch { /* ignore */ }
@@ -507,6 +511,11 @@ export default function SuperAdmin() {
                   </div>
                 )}
               </div>
+            )}
+
+            {/* Messages tab */}
+            {activeTab === "messages" && (
+              <MessagesAdmin />
             )}
 
             {/* Settings tab */}

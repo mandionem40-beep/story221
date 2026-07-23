@@ -20,6 +20,7 @@ import Library from '@/pages/Library';
 import Reels from '@/pages/Reels';
 import Diamonds from '@/pages/Diamonds';
 import Profile from '@/pages/Profile';
+import Messages from '@/pages/Messages';
 import SuperAdmin from '@/pages/SuperAdmin';
 
 const AuthenticatedApp = () => {
@@ -61,6 +62,7 @@ const AuthenticatedApp = () => {
           <Route path="/app/reels" element={<Reels />} />
           <Route path="/app/diamonds" element={<Diamonds />} />
           <Route path="/app/profile" element={<Profile />} />
+          <Route path="/app/messages" element={<Messages />} />
         </Route>
         <Route path="/admin" element={<SuperAdmin />} />
       </Route>
