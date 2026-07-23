@@ -21,7 +21,8 @@ export default function Login() {
     setLoading(true);
     try {
       await base44.auth.loginViaEmailPassword(email, password);
-      window.location.href = "/app";
+      const me = await base44.auth.me();
+      window.location.href = me?.role === "super_admin" || me?.role === "admin" ? "/admin" : "/app";
     } catch (err) {
       setError(err.message || "Email ou mot de passe incorrect");
     } finally {
