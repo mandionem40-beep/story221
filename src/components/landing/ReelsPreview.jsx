@@ -4,8 +4,8 @@ import { Heart, MessageCircle, Share2, Bookmark, Music2 } from "lucide-react";
 
 const reelPreviews = [
   {
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/1750b2ea1_Mariage_Fruits_Mrs_Mbaye.mp4",
-    title: "Mariage Fruits Mrs Mbaye 🍓🍌❤️",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/ee9accb58_Infrastructures_Sngal.mp4",
+    title: "Infrastructures du Sénégal 🇸🇳✨",
     author: "@studio221",
     likes: "124.5K",
     comments: "3.2K",
