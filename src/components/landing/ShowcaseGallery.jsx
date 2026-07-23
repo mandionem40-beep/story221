@@ -43,8 +43,10 @@ export default function ShowcaseGallery() {
             {videos.map((video) => (
               <div
                 key={video.id}
-                className="rounded-2xl overflow-hidden bg-card border border-border"
+                className="group relative rounded-2xl overflow-hidden bg-card border border-border transition-all duration-300 hover:border-primary/60"
               >
+                {/* Glow effect on hover */}
+                <div className="pointer-events-none absolute -inset-2 rounded-3xl bg-primary/0 blur-xl transition-all duration-500 group-hover:bg-primary/25 group-hover:shadow-[0_0_40px_rgba(255,0,51,0.35)]" />
                 <div className="relative aspect-[9/16] overflow-hidden">
                   {video.video_url ? (
                     <video
@@ -55,13 +57,13 @@ export default function ShowcaseGallery() {
                       muted
                       playsInline
                       preload="auto"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : video.thumbnail_url ? (
                     <img
                       src={video.thumbnail_url}
                       alt=""
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary" />
