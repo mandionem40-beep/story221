@@ -41,7 +41,7 @@ export default function Layout() {
   const diamonds = currentUser?.diamonds ?? 0;
   const username = currentUser?.username || currentUser?.full_name || currentUser?.email?.split("@")[0] || "Utilisateur";
   const avatarUrl = currentUser?.avatar_url;
-  const isAdmin = currentUser?.role === "super_admin";
+  const isAdmin = currentUser?.role === "super_admin" || currentUser?.role === "admin";
 
   const isActive = (path) => {
     if (path === "/app") return location.pathname === "/app";

@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
     }
 
     const newBalance = (user.diamonds || 0) + diamonds;
-    await base44.asServiceRole.entities.User.update(userId, { diamonds: newBalance });
+    await base44.asServiceRole.entities.User.update(userId, { diamonds: newBalance, has_purchased: true });
 
     // Create transaction record
     await base44.asServiceRole.entities.Transaction.create({

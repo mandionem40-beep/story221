@@ -98,6 +98,8 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
       setAuthChecked(true);
+      // Track last login for campaign audience filtering (active/inactive)
+      try { await base44.auth.updateMe({ last_login: new Date().toISOString() }); } catch { /* non-critical */ }
     } catch (error) {
       console.error('User auth check failed:', error);
       setIsLoadingAuth(false);
