@@ -38,13 +38,13 @@ export default function Navbar() {
             <Logo size="md" />
           </a>
 
-          {/* Nav links — always visible, scrollable on mobile */}
-          <div className="flex items-center gap-3 sm:gap-6 overflow-x-auto scrollbar-hide flex-1 justify-center">
+          {/* Nav links — desktop only */}
+          <div className="hidden lg:flex items-center gap-6 flex-1 justify-center">
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
-                className="text-xs sm:text-sm text-muted-foreground hover:text-white transition-colors duration-200 relative group whitespace-nowrap"
+                className="text-sm text-muted-foreground hover:text-white transition-colors duration-200 relative group whitespace-nowrap"
               >
                 {link.label}
                 <span className="absolute -bottom-1 left-0 w-0 h-px bg-primary transition-all duration-300 group-hover:w-full" />
