@@ -202,16 +202,20 @@ export default function SuperAdmin() {
   };
 
   const handleSavePack = async (pack) => {
-    await base44.entities.DiamondPack.update(pack.id, {
-      name: pack.name,
-      diamonds: pack.diamonds,
-      price_fcfa: pack.price_fcfa,
-      popular: pack.popular,
-      active: pack.active,
-    });
-    logAction("update_pack", `Pack ${pack.name} modifié`);
-    loadTabData("packs");
-    toast({ title: "Pack mis à jour", description: "Les changements sont immédiatement effectifs." });
+    try {
+      await base44.entities.DiamondPack.update(pack.id, {
+        name: pack.name,
+        diamonds: pack.diamonds,
+        price_fcfa: pack.price_fcfa,
+        popular: pack.popular,
+        active: pack.active,
+      });
+      logAction("update_pack", `Pack ${pack.name} modifié`);
+      loadTabData("packs");
+      toast({ title: "Pack mis à jour", description: "Les changements sont immédiatement effectifs." });
+    } catch {
+      toast({ title: "Erreur", description: "Impossible d'enregistrer le pack.", variant: "destructive" });
+    }
   };
 
   const handleDeletePack = async (pack) => {
