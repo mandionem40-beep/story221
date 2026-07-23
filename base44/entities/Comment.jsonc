@@ -23,7 +23,21 @@
     "create": true,
     "read": true,
     "update": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
       "$or": [
@@ -33,6 +47,11 @@
         {
           "user_condition": {
             "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
           }
         }
       ]
