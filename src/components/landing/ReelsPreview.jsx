@@ -49,8 +49,8 @@ const reelPreviews = [
     song: "Allez les Lions - Viral Mix",
   },
   {
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/6d1996c8c_Kankourang_vole_raliste.mp4",
-    title: "Le Kankourang vole dans la nuit 🔴",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/7bf0160d6_Scne_Quartier.mp4",
+    title: "Quartier & Teranga au coucher du soleil 🌅",
     author: "@aisha_creates",
     likes: "156.7K",
     comments: "4.2K",
