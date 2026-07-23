@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useOutletContext, Link } from "react-router-dom";
-import { Send, Settings, Diamond, Gift, Sparkles, ChevronDown } from "lucide-react";
+import { Send, Settings, Diamond, Gift, Sparkles, ChevronDown, ImagePlus, X, Loader2 } from "lucide-react";
 import { contentTypes, calculateCost, styles, languages } from "@/lib/generation-utils";
 import { base44 } from "@/api/base44Client";
 import { Image } from "@/components/ui/image";
+
+const MAX_IMAGES = 10;
 
 export default function Home() {
   const { currentUser } = useOutletContext();
@@ -15,6 +17,8 @@ export default function Home() {
   const [style, setStyle] = useState(styles[0]);
   const [showSettings, setShowSettings] = useState(false);
   const [recentGens, setRecentGens] = useState([]);
+  const [uploadedImages, setUploadedImages] = useState([]);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const loadRecent = async () => {
@@ -35,6 +39,27 @@ export default function Home() {
   const diamonds = currentUser?.diamonds ?? 0;
   const freeTrialAvailable = !currentUser?.free_trial_used;
 
+  const handleImageUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    const remaining = MAX_IMAGES - uploadedImages.length;
+    if (remaining <= 0) return;
+    const toUpload = files.slice(0, remaining);
+    setUploading(true);
+    try {
+      const results = await Promise.all(
+        toUpload.map((file) => base44.integrations.Core.UploadFile({ file }))
+      );
+      setUploadedImages((prev) => [...prev, ...results.map((r) => r.file_url)]);
+    } catch { /* ignore */ }
+    setUploading(false);
+    e.target.value = "";
+  };
+
+  const handleRemoveImage = (idx) => {
+    setUploadedImages((prev) => prev.filter((_, i) => i !== idx));
+  };
+
   const handleGenerate = () => {
     if (!prompt.trim()) return;
     const params = new URLSearchParams();
@@ -43,6 +68,11 @@ export default function Home() {
     if (config.costType === "per_minute") params.set("duration", duration);
     params.set("style", style);
     params.set("language", language);
+    if (uploadedImages.length > 0) {
+      sessionStorage.setItem("pending_reference_images", JSON.stringify(uploadedImages));
+    } else {
+      sessionStorage.removeItem("pending_reference_images");
+    }
     navigate(`/app/create?${params.toString()}`);
   };
 
@@ -87,6 +117,23 @@ export default function Home() {
           className="w-full min-h-[120px] bg-transparent p-4 text-sm text-white placeholder:text-muted-foreground/50 resize-none border-none outline-none"
           autoFocus
         />
+
+        {/* Uploaded images preview */}
+        {uploadedImages.length > 0 && (
+          <div className="flex gap-2 px-3 pt-3 overflow-x-auto scrollbar-hide">
+            {uploadedImages.map((url, idx) => (
+              <div key={idx} className="relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border border-border group">
+                <Image src={url} fittingType="fill" className="w-full h-full" />
+                <button
+                  onClick={() => handleRemoveImage(idx)}
+                  className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="w-3 h-3 text-white" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Settings bar */}
         <div className="flex items-center gap-2 px-3 py-2.5 border-t border-border overflow-x-auto scrollbar-hide">
@@ -143,6 +190,26 @@ export default function Home() {
             <Settings className="w-3.5 h-3.5" />
             <span className="text-xs font-medium">Réglages</span>
           </button>
+
+          {/* Image upload */}
+          <label className={`flex items-center gap-1.5 h-9 px-3 rounded-lg border transition-colors flex-shrink-0 cursor-pointer ${
+            uploadedImages.length >= MAX_IMAGES ? "bg-secondary border-border text-muted-foreground/50 cursor-not-allowed" : "bg-secondary border-border text-muted-foreground hover:text-white"
+          }`}>
+            {uploading ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <ImagePlus className="w-3.5 h-3.5" />
+            )}
+            <span className="text-xs font-medium">{uploadedImages.length}/{MAX_IMAGES}</span>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageUpload}
+              disabled={uploading || uploadedImages.length >= MAX_IMAGES}
+              className="hidden"
+            />
+          </label>
 
           {/* Cost indicator */}
           <div className="flex items-center gap-1 ml-auto flex-shrink-0">

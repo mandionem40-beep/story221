@@ -24,7 +24,16 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit, initial
   const [adColors, setAdColors] = useState("");
   const [adPrivateUse, setAdPrivateUse] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [referenceImages, setReferenceImages] = useState([]);
+  const [referenceImages, setReferenceImages] = useState(() => {
+    try {
+      const pending = sessionStorage.getItem("pending_reference_images");
+      if (pending) {
+        sessionStorage.removeItem("pending_reference_images");
+        return JSON.parse(pending);
+      }
+    } catch { /* ignore */ }
+    return [];
+  });
   const [submitting, setSubmitting] = useState(false);
 
   const config = getContentType(type);
