@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useOutletContext, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Upload, Users, Heart, Eye, Sparkles, Loader2, Edit, Save, X } from "lucide-react";
+import DiamondIcon from "@/components/DiamondIcon";
 import { Image } from "@/components/ui/image";
 import { toast } from "@/components/ui/use-toast";
 import ReferralDashboard from "@/components/referral/ReferralDashboard";
@@ -180,11 +181,14 @@ export default function Profile() {
       <div className="rounded-2xl bg-gradient-to-r from-primary/20 to-transparent border border-primary/20 p-5 mb-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-            <span className="text-lg">💎</span>
+            <DiamondIcon className="w-6 h-6" />
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Diamants</p>
-            <p className="text-lg font-bold text-white">{diamonds}</p>
+            <p className="text-lg font-bold text-white flex items-center gap-1">
+              {diamonds}
+              <DiamondIcon className="w-4 h-4" />
+            </p>
           </div>
         </div>
         <Link to="/app/diamonds" className="text-sm text-primary hover:underline">Acheter</Link>

@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
 import { Home, Library, Clapperboard, Diamond, User, LogOut, Bell, MessageSquare } from "lucide-react";
+import DiamondIcon from "@/components/DiamondIcon";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
 
@@ -11,7 +12,7 @@ const navItems = [
   { label: "Bibliothèque", icon: Library, path: "/app/library" },
   { label: "Reels", icon: Clapperboard, path: "/app/reels" },
   { label: "Messages", icon: MessageSquare, path: "/app/messages" },
-  { label: "Diamants", icon: Diamond, path: "/app/diamonds" },
+  { label: "Diamants", icon: DiamondIcon, path: "/app/diamonds" },
 ];
 
 export default function Layout() {
@@ -96,7 +97,10 @@ export default function Layout() {
             )}
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white truncate">{username}</p>
-              <p className="text-xs text-muted-foreground">{diamonds} 💎</p>
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                {diamonds}
+                <DiamondIcon className="w-3 h-3" />
+              </p>
             </div>
           </Link>
           <button

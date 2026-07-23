@@ -3,7 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Diamond, Plus, Minus } from "lucide-react";
+import { Plus, Minus } from "lucide-react";
+import DiamondIcon from "@/components/DiamondIcon";
 
 export default function AdjustCreditsDialog({ user, open, onClose, onConfirm }) {
   const [amount, setAmount] = useState(0);
@@ -40,7 +41,10 @@ export default function AdjustCreditsDialog({ user, open, onClose, onConfirm }) 
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm text-white truncate">@{user?.username || user?.email?.split("@")[0]}</p>
-              <p className="text-xs text-muted-foreground">Solde actuel: {currentDiamonds} 💎</p>
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+              Solde actuel: {currentDiamonds}
+              <DiamondIcon className="w-3 h-3" />
+            </p>
             </div>
           </div>
 
@@ -94,7 +98,7 @@ export default function AdjustCreditsDialog({ user, open, onClose, onConfirm }) 
             <span className="text-sm text-muted-foreground">Nouveau solde</span>
             <span className="text-lg font-bold text-white flex items-center gap-1">
               {newBalance}
-              <Diamond className="w-4 h-4 text-primary" fill="currentColor" />
+              <DiamondIcon className="w-4 h-4" />
             </span>
           </div>
         </div>

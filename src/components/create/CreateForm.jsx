@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Upload, Loader2, Diamond, Gift, AlertCircle, X } from "lucide-react";
+import { Upload, Loader2, Gift, AlertCircle, X } from "lucide-react";
+import DiamondIcon from "@/components/DiamondIcon";
 import { styles, formats, voices, musics, resolutions, languages, adSectors, calculateCost, getContentType } from "@/lib/generation-utils";
 import { base44 } from "@/api/base44Client";
 import { toast } from "@/components/ui/use-toast";
@@ -295,13 +296,16 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit, initial
         <div className="flex items-center justify-between mb-3">
           <span className="text-sm text-muted-foreground">Coût</span>
           <div className="flex items-center gap-1.5">
-            <Diamond className="w-4 h-4 text-primary" fill="currentColor" />
+            <DiamondIcon className="w-4 h-4" />
             <span className="text-lg font-bold text-white">{cost}</span>
           </div>
         </div>
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Votre solde</span>
-          <span className={`font-semibold ${canAfford ? "text-white" : "text-destructive"}`}>{diamonds} 💎</span>
+          <span className={`font-semibold flex items-center gap-1 ${canAfford ? "text-white" : "text-destructive"}`}>
+            {diamonds}
+            <DiamondIcon className="w-3.5 h-3.5" />
+          </span>
         </div>
         {canUseFreeTrial && (
           <div className="mt-3 flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/20">
@@ -326,7 +330,7 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit, initial
         {submitting ? (
           <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Lancement...</>
         ) : (
-          `Générer (${cost} 💎)`
+          <><DiamondIcon className="w-4 h-4 mr-1.5" />Générer ({cost})</>
         )}
       </Button>
     </div>

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Diamond, TrendingUp, TrendingDown, Sparkles, Loader2 } from "lucide-react";
+import { TrendingUp, TrendingDown, Sparkles, Loader2 } from "lucide-react";
+import DiamondIcon from "@/components/DiamondIcon";
 import { toast } from "@/components/ui/use-toast";
 
 export default function Diamonds() {
@@ -74,11 +75,14 @@ export default function Diamonds() {
       {/* Balance */}
       <div className="rounded-2xl bg-gradient-to-r from-primary/20 to-transparent border border-primary/20 p-5 mb-8 flex items-center gap-4">
         <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-          <Diamond className="w-6 h-6 text-primary" fill="currentColor" />
+          <DiamondIcon className="w-7 h-7" />
         </div>
         <div>
           <p className="text-xs text-muted-foreground">Solde actuel</p>
-          <p className="text-2xl font-bold text-white">{diamonds} 💎</p>
+          <p className="text-2xl font-bold text-white flex items-center gap-1.5">
+            {diamonds}
+            <DiamondIcon className="w-5 h-5" />
+          </p>
         </div>
       </div>
 
@@ -99,7 +103,7 @@ export default function Diamonds() {
             )}
             <div className="text-center">
               <div className="flex items-center justify-center gap-1.5 mb-2">
-                <Diamond className="w-6 h-6 text-primary" fill="currentColor" />
+                <DiamondIcon className="w-7 h-7" />
                 <span className="text-3xl font-bold text-white">{pack.diamonds}</span>
               </div>
               <p className="text-sm text-muted-foreground mb-4">{pack.name}</p>
@@ -143,10 +147,14 @@ export default function Diamonds() {
                 </p>
               </div>
               <div className="text-right">
-                <p className={`text-sm font-semibold ${tx.amount > 0 ? "text-green-500" : "text-destructive"}`}>
-                  {tx.amount > 0 ? "+" : ""}{tx.amount} 💎
+                <p className={`text-sm font-semibold flex items-center gap-1 ${tx.amount > 0 ? "text-green-500" : "text-destructive"}`}>
+                  {tx.amount > 0 ? "+" : ""}{tx.amount}
+                  <DiamondIcon className="w-3.5 h-3.5" />
                 </p>
-                <p className="text-xs text-muted-foreground">Solde: {tx.balance_after ?? "—"} 💎</p>
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  Solde: {tx.balance_after ?? "—"}
+                  <DiamondIcon className="w-3 h-3" />
+                </p>
               </div>
             </div>
           ))}

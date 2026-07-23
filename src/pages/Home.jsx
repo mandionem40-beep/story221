@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useOutletContext, Link } from "react-router-dom";
-import { Send, Settings, Diamond, Gift, Sparkles, ChevronDown, ImagePlus, X, Loader2 } from "lucide-react";
+import { Send, Settings, Gift, Sparkles, ChevronDown, ImagePlus, X, Loader2 } from "lucide-react";
+import DiamondIcon from "@/components/DiamondIcon";
 import { contentTypes, calculateCost, styles, languages } from "@/lib/generation-utils";
 import { base44 } from "@/api/base44Client";
 import { Image } from "@/components/ui/image";
@@ -96,7 +97,7 @@ export default function Home() {
       {/* Balance badges */}
       <div className="flex items-center gap-2 mb-5">
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-border">
-          <Diamond className="w-4 h-4 text-primary" fill="currentColor" />
+          <DiamondIcon className="w-4 h-4" />
           <span className="text-sm font-semibold text-white">{diamonds}</span>
         </div>
         {freeTrialAvailable && (
@@ -218,7 +219,7 @@ export default function Home() {
 
           {/* Cost indicator */}
           <div className="flex items-center gap-1 ml-auto flex-shrink-0">
-            <Diamond className="w-4 h-4 text-primary" fill="currentColor" />
+            <DiamondIcon className="w-4 h-4" />
             <span className="text-sm font-bold text-white">{cost}</span>
           </div>
         </div>
@@ -241,7 +242,7 @@ export default function Home() {
         className="w-full h-12 rounded-2xl bg-primary text-white font-semibold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed glow-red-sm"
       >
         <Send className="w-4 h-4" />
-        {prompt.trim() ? `Générer (${cost} 💎)` : "Tapez votre idée..."}
+        {prompt.trim() ? <span className="flex items-center gap-1.5">Générer ({cost}) <DiamondIcon className="w-4 h-4" /></span> : "Tapez votre idée..."}
       </button>
 
       {/* Quick type grid */}

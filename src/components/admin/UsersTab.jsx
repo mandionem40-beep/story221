@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
-import { Search, Diamond, Ban, Pause, Play, Trash2, ChevronDown, ChevronUp, Shield, UserCog } from "lucide-react";
+import { Search, Ban, Pause, Play, Trash2, ChevronDown, ChevronUp, Shield, UserCog } from "lucide-react";
+import DiamondIcon from "@/components/DiamondIcon";
 
 const STATUS_COLORS = {
   active: "bg-green-500/20 text-green-400",
@@ -78,8 +79,8 @@ export default function UsersTab({ users, onAdjust, onStatus, onDelete, onRoleCh
                 </div>
                 <div className="text-right hidden sm:block">
                   <p className="text-sm text-white flex items-center gap-1 justify-end">
-                    <Diamond className="w-3 h-3 text-primary" fill="currentColor" />
                     {u.diamonds || 0}
+                    <DiamondIcon className="w-3 h-3" />
                   </p>
                   <p className="text-xs text-muted-foreground">{u.role || "user"}</p>
                 </div>
@@ -137,7 +138,7 @@ export default function UsersTab({ users, onAdjust, onStatus, onDelete, onRoleCh
                       onClick={() => onAdjust(u)}
                       className="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold flex items-center gap-1.5"
                     >
-                      <Diamond className="w-3.5 h-3.5" /> Ajuster crédits
+                      <DiamondIcon className="w-3.5 h-3.5" /> Ajuster crédits
                     </button>
                     {status !== "suspended" ? (
                       <button
