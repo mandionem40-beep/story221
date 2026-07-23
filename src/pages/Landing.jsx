@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { base44 } from "@/api/base44Client";
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
 import Features from "@/components/landing/Features";
@@ -11,6 +13,17 @@ import FinalCTA from "@/components/landing/FinalCTA";
 import Footer from "@/components/landing/Footer";
 
 export default function Landing() {
+  useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get("ref");
+    if (ref) {
+      base44.functions.invoke("process-referral", {
+        action: "track_click",
+        referral_code: ref,
+        source: "landing",
+      }).catch(() => {});
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <Navbar />

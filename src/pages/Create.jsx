@@ -159,18 +159,7 @@ export default function Create() {
 
   const checkReferralReward = async () => {
     try {
-      const me = await base44.auth.me();
-      if (me.referred_by && !me.referral_rewarded) {
-        // Find referrer by referral_code
-        const referrers = await base44.entities.User.filter({ referral_code: me.referred_by });
-        if (referrers && referrers.length > 0) {
-          const referrer = referrers[0];
-          // Mark as rewarded
-          await base44.auth.updateMe({ referral_rewarded: true });
-          // Credit referrer (requires admin — will work if current user is admin, otherwise just log)
-          // In production this would be a backend function
-        }
-      }
+      await base44.functions.invoke("process-referral", { action: "process_reward" });
     } catch { /* ignore */ }
   };
 

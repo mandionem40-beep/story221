@@ -1,0 +1,44 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "referral_signup",
+        "referral_published",
+        "referral_reward",
+        "system"
+      ],
+      "default": "system"
+    },
+    "read": {
+      "type": "boolean",
+      "default": false
+    },
+    "data": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

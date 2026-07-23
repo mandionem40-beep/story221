@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useOutletContext, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Upload, Copy, Check, Users, Heart, Eye, Sparkles, Loader2, Edit, Save, X } from "lucide-react";
+import { Upload, Users, Heart, Eye, Sparkles, Loader2, Edit, Save, X } from "lucide-react";
 import { Image } from "@/components/ui/image";
 import { toast } from "@/components/ui/use-toast";
+import ReferralDashboard from "@/components/referral/ReferralDashboard";
 
 export default function Profile() {
   const { currentUser, refreshUser } = useOutletContext();
@@ -15,7 +16,6 @@ export default function Profile() {
   const [avatarUrl, setAvatarUrl] = useState(currentUser?.avatar_url || "");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     loadStats();
@@ -84,16 +84,6 @@ export default function Profile() {
       toast({ title: "Erreur", description: "Impossible de mettre à jour.", variant: "destructive" });
     }
     setSaving(false);
-  };
-
-  const referralCode = currentUser?.referral_code || "—";
-  const referralLink = `${window.location.origin}/register?ref=${referralCode}`;
-
-  const copyLink = () => {
-    navigator.clipboard?.writeText(referralLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-    toast({ title: "Lien copié !", description: "Partagez-le avec vos amis." });
   };
 
   const diamonds = currentUser?.diamonds ?? 0;
@@ -200,34 +190,8 @@ export default function Profile() {
         <Link to="/app/diamonds" className="text-sm text-primary hover:underline">Acheter</Link>
       </div>
 
-      {/* Referral */}
-      <div className="rounded-2xl bg-card border border-border p-5">
-        <h2 className="text-base font-semibold text-white mb-1">Parrainage</h2>
-        <p className="text-sm text-muted-foreground mb-4">Invitez vos amis et gagnez 5 💎 pour chaque filleul qui publie son premier projet.</p>
-
-        <div className="flex items-center gap-2 p-3 rounded-xl bg-background border border-border">
-          <input
-            value={referralLink}
-            readOnly
-            className="flex-1 bg-transparent text-sm text-white truncate outline-none"
-          />
-          <button onClick={copyLink} className="px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-medium flex items-center gap-1.5">
-            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-            {copied ? "Copié" : "Copier"}
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 mt-4">
-          <div className="p-3 rounded-xl bg-background border border-border text-center">
-            <p className="text-2xl font-bold text-white">{currentUser?.referred_by ? "1" : "0"}</p>
-            <p className="text-xs text-muted-foreground">Filleuls</p>
-          </div>
-          <div className="p-3 rounded-xl bg-background border border-border text-center">
-            <p className="text-2xl font-bold text-white">{currentUser?.referral_rewarded ? "5" : "0"}</p>
-            <p className="text-xs text-muted-foreground">Diamants gagnés</p>
-          </div>
-        </div>
-      </div>
+      {/* Referral Dashboard */}
+      <ReferralDashboard currentUser={currentUser} />
     </div>
   );
 }
