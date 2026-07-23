@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { toast } from "@/components/ui/use-toast";
-import { Plus, Send, Loader2, Trash2, Users, Megaphone, BarChart3, Star, Mail, Clock, CheckCircle, X, Search } from "lucide-react";
+import { Plus, Send, Loader2, Trash2, Users, Megaphone, BarChart3, Star, Mail, Clock, CheckCircle, X, Search, UserPlus } from "lucide-react";
 import MessageThread from "@/components/messages/MessageThread";
 import PollCard from "@/components/messages/PollCard";
+import ContactsTab from "@/components/admin/ContactsTab";
 
 const audienceGroups = [
   { id: "all", label: "Tous les utilisateurs" },
@@ -16,7 +17,7 @@ const audienceGroups = [
 ];
 
 export default function MessagesAdmin() {
-  const [tab, setTab] = useState("conversations");
+  const [tab, setTab] = useState("contacts");
   const [loading, setLoading] = useState(true);
 
   // Conversations
@@ -47,7 +48,10 @@ export default function MessagesAdmin() {
   const loadData = async (tab) => {
     setLoading(true);
     try {
-      if (tab === "conversations") {
+      if (tab === "contacts") {
+        const users = await base44.entities.User.list("-created_date", 500);
+        setAllUsers(users || []);
+      } else if (tab === "conversations") {
         const [convs, users] = await Promise.all([
           base44.entities.Conversation.list("-last_message_at", 200),
           base44.entities.User.list("-created_date", 500),
@@ -222,6 +226,7 @@ export default function MessagesAdmin() {
   });
 
   const tabs = [
+    { id: "contacts", label: "Contacts & Relance", icon: UserPlus },
     { id: "conversations", label: "Conversations", icon: Mail },
     { id: "campaigns", label: "Campagnes", icon: Megaphone },
     { id: "polls", label: "Sondages", icon: BarChart3 },
@@ -252,6 +257,11 @@ export default function MessagesAdmin() {
         <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>
       ) : (
         <>
+          {/* CONTACTS TAB */}
+          {tab === "contacts" && (
+            <ContactsTab allUsers={allUsers} onRefresh={() => loadData("contacts")} />
+          )}
+
           {/* CONVERSATIONS TAB */}
           {tab === "conversations" && (
             <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4 h-[600px]">
