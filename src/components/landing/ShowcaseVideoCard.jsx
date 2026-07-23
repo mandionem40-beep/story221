@@ -28,7 +28,7 @@ export default function ShowcaseVideoCard({ video }) {
           <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-primary/20 to-secondary" />
         )}
 
-        {/* Video layer — fades in once ready */}
+        {/* Video layer — fades in once ready to play */}
         {hasVideo && (
           <video
             ref={videoRef}
@@ -39,11 +39,12 @@ export default function ShowcaseVideoCard({ video }) {
             muted
             playsInline
             preload="auto"
-            onLoadedData={() => setReady(true)}
+            onCanPlay={() => setReady(true)}
             onError={() => setError(true)}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+            style={{ willChange: "opacity" }}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 group-hover:scale-105 ${
               ready ? "opacity-100" : "opacity-0"
-            } group-hover:scale-105 transition-transform`}
+            }`}
           />
         )}
 

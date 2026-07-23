@@ -92,6 +92,7 @@ function ReelFeed() {
               muted
               playsInline
               preload="auto"
+              style={{ willChange: "opacity" }}
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
