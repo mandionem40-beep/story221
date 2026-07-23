@@ -22,6 +22,7 @@ import Diamonds from '@/pages/Diamonds';
 import Profile from '@/pages/Profile';
 import Messages from '@/pages/Messages';
 import SuperAdmin from '@/pages/SuperAdmin';
+import PixelTracker from '@/components/PixelTracker';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -79,6 +80,7 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <ScrollToTop />
+          <PixelTracker />
           <AuthenticatedApp />
         </Router>
         <Toaster />

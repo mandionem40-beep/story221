@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
-import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video, Share2, Mail, Cpu, Gift, Building2, MessageCircle } from "lucide-react";
+import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video, Share2, Mail, Cpu, Gift, Building2, MessageCircle, MousePointerClick, Zap } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import AnalyticsTab from "@/components/admin/AnalyticsTab";
 import AdjustCreditsDialog from "@/components/admin/AdjustCreditsDialog";
@@ -13,6 +13,8 @@ import GeneralSettingsTab from "@/components/admin/GeneralSettingsTab";
 import ReferralTab from "@/components/admin/ReferralTab";
 import UsersTab from "@/components/admin/UsersTab";
 import TransactionsTab from "@/components/admin/TransactionsTab";
+import PixelsTab from "@/components/admin/PixelsTab";
+import SocialPublishingTab from "@/components/admin/SocialPublishingTab";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: BarChart3 },
@@ -28,6 +30,8 @@ const tabs = [
   { id: "analytics", label: "Analytics", icon: TrendingUp },
   { id: "settings", label: "Réseaux", icon: Share2 },
   { id: "params", label: "Paramètres", icon: Building2 },
+  { id: "pixels", label: "Pixels", icon: MousePointerClick },
+  { id: "social_pub", label: "Publication Auto", icon: Zap },
   { id: "messages", label: "Messagerie", icon: Mail },
 ];
 
@@ -106,7 +110,7 @@ export default function SuperAdmin() {
         result = { users: users || [], generations: gens || [], transactions: txs || [], reels: reels || [], likes: likes || [], comments: comments || [], follows: follows || [] };
       } else if (tab === "settings") {
         result = { socialLinks: await base44.entities.SocialLink.list("display_order", 50) };
-      } else if (tab === "params" || tab === "ai" || tab === "referral") {
+      } else if (tab === "params" || tab === "ai" || tab === "referral" || tab === "pixels" || tab === "social_pub") {
         result = {};  // these tabs load their own data
       } else if (tab === "messages") {
         result = {};  // MessagesAdmin loads its own data
@@ -603,6 +607,16 @@ export default function SuperAdmin() {
             {/* General Settings tab */}
             {activeTab === "params" && (
               <GeneralSettingsTab />
+            )}
+
+            {/* Pixels tab */}
+            {activeTab === "pixels" && (
+              <PixelsTab />
+            )}
+
+            {/* Social Auto-Publish tab */}
+            {activeTab === "social_pub" && (
+              <SocialPublishingTab />
             )}
 
             {/* Analytics tab */}

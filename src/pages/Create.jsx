@@ -135,6 +135,13 @@ export default function Create() {
     setGeneration({ ...generation, is_published: true, reel_id: reel.id });
     toast({ title: "Publié !", description: "Votre création est maintenant dans les Reels." });
 
+    // Publication automatique sur les réseaux sociaux de la plateforme (non-bloquant)
+    base44.functions.invoke("publish-to-socials", {
+      videoUrl: reel.video_url,
+      caption: reel.title,
+      mediaType: reel.type === "image" ? "image" : "video",
+    }).catch(() => {});
+
     // Check referral reward
     checkReferralReward();
   };
