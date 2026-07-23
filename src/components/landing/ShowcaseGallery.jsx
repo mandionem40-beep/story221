@@ -49,11 +49,12 @@ export default function ShowcaseGallery() {
                   {video.video_url ? (
                     <video
                       src={video.video_url}
+                      poster={video.thumbnail_url || undefined}
                       autoPlay
                       loop
                       muted
                       playsInline
-                      preload="metadata"
+                      preload="auto"
                       className="w-full h-full object-cover"
                     />
                   ) : video.thumbnail_url ? (
