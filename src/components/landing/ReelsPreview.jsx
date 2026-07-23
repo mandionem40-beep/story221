@@ -4,7 +4,7 @@ import { Heart, MessageCircle, Share2, Bookmark, Music2 } from "lucide-react";
 
 const reelPreviews = [
   {
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/ce83f3a5f_Fruits_amoureux_clins.mp4",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/bbd5e8256_Mariage_Fruits_MRS_MBAYE.mp4",
     title: "Fraise & banane amoureuses 🍓🍌❤️",
     author: "@studio221",
     likes: "124.5K",
