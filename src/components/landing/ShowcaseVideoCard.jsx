@@ -13,19 +13,23 @@ export default function ShowcaseVideoCard({ video }) {
   useEffect(() => {
     const obs = new IntersectionObserver(
       ([entry]) => setVisible(entry.isIntersecting),
-      { threshold: 0.25 }
+      { threshold: 0.1 }
     );
     const el = videoRef.current;
     if (el) obs.observe(el);
     return () => obs.disconnect();
   }, []);
 
-  // Play / pause based on visibility — avoids too many concurrent videos
+  // Play / pause based on visibility — with retry for autoplay
   useEffect(() => {
     const v = videoRef.current;
     if (!v || !hasVideo) return;
     if (visible) {
-      v.play().catch(() => {});
+      v.play().catch(() => {
+        // Retry once the video is actually ready
+        const onReady = () => { v.play().catch(() => {}); };
+        v.addEventListener("canplay", onReady, { once: true });
+      });
     } else {
       v.pause();
     }
@@ -60,10 +64,13 @@ export default function ShowcaseVideoCard({ video }) {
             loop
             muted
             playsInline
+            autoPlay
             preload="auto"
             onCanPlay={() => setReady(true)}
+            onLoadedData={() => setReady(true)}
+            onPlaying={() => setReady(true)}
             onError={() => setError(true)}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 group-hover:scale-105 ${
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:scale-105 ${
               ready ? "opacity-100" : "opacity-0"
             }`}
           />

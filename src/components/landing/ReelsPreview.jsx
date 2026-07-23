@@ -61,25 +61,28 @@ const reelPreviews = [
 
 function ReelFeed() {
   const [index, setIndex] = useState(0);
-  const videoRefs = useRef([]);
+  const [loaded, setLoaded] = useState(false);
+  const videoRef = useRef(null);
+  const timerRef = useRef(null);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % reelPreviews.length);
-    }, 7000);
-    return () => clearInterval(timer);
-  }, []);
+  const next = () => setIndex((prev) => (prev + 1) % reelPreviews.length);
+  const prev = () => setIndex((p) => (p - 1 + reelPreviews.length) % reelPreviews.length);
 
-  // Only play the active video — pause all others to avoid browser limits
+  // Auto-advance — restarts whenever the current video actually starts playing
+  const startTimer = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => next(), 7000);
+  };
+
+  // Play current video on index change
   useEffect(() => {
-    videoRefs.current.forEach((video, i) => {
-      if (!video) return;
-      if (i === index) {
-        video.play().catch(() => {});
-      } else {
-        video.pause();
-      }
-    });
+    const v = videoRef.current;
+    if (!v) return;
+    setLoaded(false);
+    v.load();
+    v.play().catch(() => {});
+    startTimer();
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [index]);
 
   const reel = reelPreviews[index];
@@ -87,25 +90,22 @@ function ReelFeed() {
   return (
     <div className="relative w-[260px] sm:w-[300px] h-[520px] rounded-[2.5rem] bg-card border-2 border-border p-2 overflow-hidden">
       <div className="w-full h-full rounded-[2rem] bg-black overflow-hidden relative">
-        {reelPreviews.map((r, i) => (
-          <div
-            key={i}
-            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-              i === index ? "opacity-100" : "opacity-0"
-            }`}
-          >
-            <video
-              ref={(el) => (videoRefs.current[i] = el)}
-              src={r.video_url}
-              loop
-              muted
-              playsInline
-              preload="auto"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
-          </div>
-        ))}
+        <div className="absolute inset-0 transition-opacity duration-500">
+          <video
+            ref={videoRef}
+            src={reel.video_url}
+            loop
+            muted
+            playsInline
+            autoPlay
+            preload="auto"
+            onPlaying={() => { setLoaded(true); startTimer(); }}
+            onLoadedData={() => setLoaded(true)}
+            onClick={next}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20 pointer-events-none" />
+        </div>
 
         {/* Right action rail */}
         <div className="absolute right-2 bottom-20 flex flex-col items-center gap-5 z-10">
@@ -139,15 +139,24 @@ function ReelFeed() {
           </div>
         </div>
 
-        {/* Progress dots */}
+        {/* Progress dots — clickable */}
         <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1 z-10">
           {reelPreviews.map((_, i) => (
-            <div
+            <button
               key={i}
-              className={`h-0.5 rounded-full transition-all ${i === index ? "w-6 bg-white" : "w-2 bg-white/40"}`}
+              onClick={() => setIndex(i)}
+              className={`h-0.5 rounded-full transition-all ${i === index ? "w-6 bg-white" : "w-2 bg-white/40 hover:bg-white/70"}`}
             />
           ))}
         </div>
+
+        {/* Navigation arrows */}
+        <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center z-10 text-white">
+          <span className="text-lg">‹</span>
+        </button>
+        <button onClick={next} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center z-10 text-white">
+          <span className="text-lg">›</span>
+        </button>
       </div>
     </div>
   );
