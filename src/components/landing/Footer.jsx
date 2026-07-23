@@ -11,7 +11,7 @@ const footerLinks = {
 export default function Footer() {
   return (
     <footer className="relative border-t border-border bg-card/30">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Logo + description */}
           <div className="col-span-2">
@@ -43,7 +43,7 @@ export default function Footer() {
           )}
         </div>
 
-        <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mt-6 pt-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">
             © 2026 Story221. Tous droits réservés.
           </p>
