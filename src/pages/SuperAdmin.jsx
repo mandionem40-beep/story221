@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
-import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video } from "lucide-react";
+import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video, Share2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import AnalyticsTab from "@/components/admin/AnalyticsTab";
 import AdjustCreditsDialog from "@/components/admin/AdjustCreditsDialog";
@@ -17,6 +17,7 @@ const tabs = [
   { id: "reports", label: "Signalements", icon: Flag },
   { id: "logs", label: "Logs", icon: ScrollText },
   { id: "analytics", label: "Analytics", icon: TrendingUp },
+  { id: "settings", label: "Réseaux", icon: Share2 },
 ];
 
 export default function SuperAdmin() {
@@ -28,6 +29,7 @@ export default function SuperAdmin() {
   const [newShowcase, setNewShowcase] = useState({ title: "", subtitle: "", tags: "", video_url: "", thumbnail_url: "" });
   const [adjustUser, setAdjustUser] = useState(null);
   const [showAdjust, setShowAdjust] = useState(false);
+  const [socialLinks, setSocialLinks] = useState({ social_tiktok: "", social_instagram: "", social_facebook: "", social_youtube: "" });
 
   useEffect(() => {
     if (user && user.role !== "admin" && user.role !== "super_admin") {
@@ -35,6 +37,10 @@ export default function SuperAdmin() {
     }
     loadTabData(activeTab);
   }, [user, activeTab]);
+
+  useEffect(() => {
+    if (data.socialLinks) setSocialLinks(data.socialLinks);
+  }, [data.socialLinks]);
 
   const loadTabData = async (tab) => {
     setLoading(true);
@@ -75,6 +81,11 @@ export default function SuperAdmin() {
           base44.entities.Follow.list("-created_date", 200),
         ]);
         result = { users: users || [], generations: gens || [], transactions: txs || [], reels: reels || [], likes: likes || [], comments: comments || [], follows: follows || [] };
+      } else if (tab === "settings") {
+        const settings = await base44.entities.AppSetting.list();
+        const map = { social_tiktok: "", social_instagram: "", social_facebook: "", social_youtube: "" };
+        (settings || []).forEach(s => { if (s.key in map) map[s.key] = s.value; });
+        result = { socialLinks: map };
       }
       setData(result);
     } catch { /* ignore */ }
@@ -179,6 +190,24 @@ export default function SuperAdmin() {
       toast({ title: "Solde ajusté", description: `Nouveau solde: ${newBalance} 💎` });
     } catch {
       toast({ title: "Erreur", description: "Action non autorisée.", variant: "destructive" });
+    }
+  };
+
+  const handleSaveSocialLinks = async () => {
+    try {
+      const allSettings = await base44.entities.AppSetting.list();
+      for (const key of Object.keys(socialLinks)) {
+        const existing = (allSettings || []).find(s => s.key === key);
+        if (existing) {
+          await base44.entities.AppSetting.update(existing.id, { value: socialLinks[key] });
+        } else {
+          await base44.entities.AppSetting.create({ key, value: socialLinks[key], description: "Lien réseau social" });
+        }
+      }
+      logAction("update_social_links", "Liens réseaux sociaux mis à jour");
+      toast({ title: "Liens enregistrés", description: "Les boutons du footer redirigeront automatiquement." });
+    } catch {
+      toast({ title: "Erreur", description: "Impossible d'enregistrer les liens.", variant: "destructive" });
     }
   };
 
@@ -466,6 +495,35 @@ export default function SuperAdmin() {
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Settings tab */}
+            {activeTab === "settings" && (
+              <div>
+                <h2 className="text-xl font-bold text-white mb-2">Liens des réseaux sociaux</h2>
+                <p className="text-sm text-muted-foreground mb-6">Configurez les liens de vos réseaux sociaux. Une fois enregistrés, les boutons du footer redirigeront automatiquement vers ces pages.</p>
+                <div className="rounded-2xl bg-card border border-border p-5 space-y-4 max-w-lg">
+                  {[
+                    { key: "social_tiktok", label: "TikTok", placeholder: "https://tiktok.com/@story221" },
+                    { key: "social_instagram", label: "Instagram", placeholder: "https://instagram.com/story221" },
+                    { key: "social_facebook", label: "Facebook", placeholder: "https://facebook.com/story221" },
+                    { key: "social_youtube", label: "YouTube", placeholder: "https://youtube.com/@story221" },
+                  ].map(item => (
+                    <div key={item.key}>
+                      <label className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5 block">{item.label}</label>
+                      <input
+                        value={socialLinks[item.key] || ""}
+                        onChange={e => setSocialLinks({ ...socialLinks, [item.key]: e.target.value })}
+                        placeholder={item.placeholder}
+                        className="w-full h-11 rounded-xl bg-background border border-border px-3 text-sm text-white"
+                      />
+                    </div>
+                  ))}
+                  <button onClick={handleSaveSocialLinks} className="w-full py-2.5 rounded-xl bg-primary text-white text-sm font-semibold flex items-center justify-center gap-1.5">
+                    <Save className="w-4 h-4" />Enregistrer les liens
+                  </button>
+                </div>
               </div>
             )}
           </>
