@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
-import { Search, Download, TrendingUp, TrendingDown, DollarSign, Wallet, ShoppingBag, Calendar, Plus, Trash2, Receipt, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Search, Download, TrendingUp, TrendingDown, DollarSign, Wallet, ShoppingBag, Calendar, Plus, Trash2, Receipt, ArrowUpRight, ArrowDownRight, PiggyBank } from "lucide-react";
 import DiamondIcon from "@/components/DiamondIcon";
 import { toast } from "@/components/ui/use-toast";
 import { base44 } from "@/api/base44Client";
+import { ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 
 const formatFCFA = (n) => (n || 0).toLocaleString("fr-FR").replace(/\u00A0/g, " ") + " FCFA";
 
@@ -249,64 +250,108 @@ export default function FinanceTab({ transactions, packs, expenses, onAddExpense
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        {/* Monthly revenue vs expenses chart */}
-        {monthlyData.length > 0 && (
-          <div className="rounded-2xl bg-card border border-border p-5">
-            <div className="flex items-center gap-2 mb-4">
+      {/* Monthly evolution chart - full width */}
+      {monthlyData.length > 0 && (
+        <div className="rounded-2xl bg-card border border-border p-5 mb-6">
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-primary" />
-              <h3 className="text-sm font-semibold text-white">Revenus vs Dépenses</h3>
+              <h3 className="text-sm font-semibold text-white">Évolution mensuelle : Revenus vs Dépenses</h3>
             </div>
-            <div className="flex items-end gap-3 h-32">
-              {monthlyData.map(([month, data]) => {
-                const [year, mon] = month.split("-");
-                const label = new Date(year, parseInt(mon) - 1).toLocaleDateString("fr-FR", { month: "short" });
-                const revHeight = Math.max(2, (data.revenue / maxValue) * 100);
-                const expHeight = Math.max(2, (data.expenses / maxValue) * 100);
-                return (
-                  <div key={month} className="flex-1 flex flex-col items-center gap-1">
-                    <div className="w-full flex items-end gap-1 h-28">
-                      <div className="flex-1 rounded-t bg-green-500/70 transition-all" style={{ height: `${revHeight}%` }} title={`Revenus: ${formatFCFA(data.revenue)}`} />
-                      <div className="flex-1 rounded-t bg-red-500/70 transition-all" style={{ height: `${expHeight}%` }} title={`Dépenses: ${formatFCFA(data.expenses)}`} />
-                    </div>
-                    <span className="text-[10px] text-muted-foreground">{label}</span>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="flex gap-4 mt-3 justify-center">
-              <span className="flex items-center gap-1 text-[10px] text-muted-foreground"><span className="w-2 h-2 rounded bg-green-500/70" />Revenus</span>
-              <span className="flex items-center gap-1 text-[10px] text-muted-foreground"><span className="w-2 h-2 rounded bg-red-500/70" />Dépenses</span>
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><span className="w-2.5 h-2.5 rounded bg-green-500" />Revenus</span>
+              <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><span className="w-2.5 h-2.5 rounded bg-red-500" />Dépenses</span>
+              <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><span className="w-3 h-0.5 bg-primary" />Marge nette</span>
             </div>
           </div>
-        )}
+          <ResponsiveContainer width="100%" height={280}>
+            <ComposedChart data={monthlyData.map(([month, data]) => {
+              const [year, mon] = month.split("-");
+              const label = new Date(year, parseInt(mon) - 1).toLocaleDateString("fr-FR", { month: "short", year: "2-digit" });
+              return { month: label, revenus: data.revenue, depenses: data.expenses, marge: data.revenue - data.expenses };
+            })} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+              <XAxis dataKey="month" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={{ stroke: "hsl(var(--border))" }} tickLine={false} />
+              <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : v >= 1000 ? `${Math.round(v / 1000)}k` : v} />
+              <Tooltip
+                contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", fontSize: "12px" }}
+                labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
+                formatter={(value, name) => [formatFCFA(value), name]}
+              />
+              <Bar dataKey="revenus" name="Revenus" fill="#22c55e" radius={[4, 4, 0, 0]} maxBarSize={36} />
+              <Bar dataKey="depenses" name="Dépenses" fill="#ef4444" radius={[4, 4, 0, 0]} maxBarSize={36} />
+              <Line dataKey="marge" name="Marge nette" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ fill: "hsl(var(--primary))", r: 3 }} activeDot={{ r: 5 }} />
+            </ComposedChart>
+          </ResponsiveContainer>
+          {/* Current net margin summary */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-border">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+                <ArrowUpRight className="w-4 h-4 text-green-400" />
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground">Revenus (mois)</p>
+                <p className="text-sm font-bold text-green-400">{formatFCFA(monthlyData[monthlyData.length - 1]?.[1]?.revenue || 0)}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
+                <ArrowDownRight className="w-4 h-4 text-red-400" />
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground">Dépenses (mois)</p>
+                <p className="text-sm font-bold text-red-400">{formatFCFA(monthlyData[monthlyData.length - 1]?.[1]?.expenses || 0)}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <PiggyBank className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground">Marge nette (mois)</p>
+                <p className={`text-sm font-bold ${((monthlyData[monthlyData.length - 1]?.[1]?.revenue || 0) - (monthlyData[monthlyData.length - 1]?.[1]?.expenses || 0)) >= 0 ? "text-primary" : "text-red-400"}`}>
+                  {formatFCFA((monthlyData[monthlyData.length - 1]?.[1]?.revenue || 0) - (monthlyData[monthlyData.length - 1]?.[1]?.expenses || 0))}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-purple-400" />
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground">Marge globale</p>
+                <p className={`text-sm font-bold ${margin >= 0 ? "text-purple-400" : "text-red-400"}`}>{margin}%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-        {/* Expenses by category */}
-        {expensesByCategory.length > 0 && (
-          <div className="rounded-2xl bg-card border border-border p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <Receipt className="w-4 h-4 text-primary" />
-              <h3 className="text-sm font-semibold text-white">Dépenses par catégorie</h3>
-            </div>
-            <div className="space-y-3">
-              {expensesByCategory.map(([cat, amount]) => {
-                const pct = totalExpensesFCFA > 0 ? Math.round((amount / totalExpensesFCFA) * 100) : 0;
-                return (
-                  <div key={cat}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className={`text-xs px-2 py-0.5 rounded ${CATEGORY_COLORS[cat]}`}>{CATEGORY_LABELS[cat]}</span>
-                      <span className="text-xs font-semibold text-white">{formatFCFA(amount)} · {pct}%</span>
-                    </div>
-                    <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
-                      <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+      {/* Expenses by category */}
+      {expensesByCategory.length > 0 && (
+        <div className="rounded-2xl bg-card border border-border p-5 mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Receipt className="w-4 h-4 text-primary" />
+            <h3 className="text-sm font-semibold text-white">Dépenses par catégorie</h3>
           </div>
-        )}
-      </div>
+          <div className="space-y-3">
+            {expensesByCategory.map(([cat, amount]) => {
+              const pct = totalExpensesFCFA > 0 ? Math.round((amount / totalExpensesFCFA) * 100) : 0;
+              return (
+                <div key={cat}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className={`text-xs px-2 py-0.5 rounded ${CATEGORY_COLORS[cat]}`}>{CATEGORY_LABELS[cat]}</span>
+                    <span className="text-xs font-semibold text-white">{formatFCFA(amount)} · {pct}%</span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
+                    <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Transparency breakdown */}
       <div className="rounded-2xl bg-card border border-border p-5 mb-6">
