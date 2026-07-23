@@ -54,6 +54,7 @@
   ],
   "rls": {
     "create": true,
+    "read": true,
     "update": {
       "$or": [
         {
@@ -62,6 +63,11 @@
         {
           "user_condition": {
             "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
           }
         }
       ]
@@ -74,6 +80,11 @@
         {
           "user_condition": {
             "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
           }
         }
       ]
