@@ -11,6 +11,7 @@ import Pricing from "@/components/landing/Pricing";
 import FAQ from "@/components/landing/FAQ";
 import FinalCTA from "@/components/landing/FinalCTA";
 import Footer from "@/components/landing/Footer";
+import InstallBanner from "@/components/InstallBanner";
 
 export default function Landing() {
   useEffect(() => {
@@ -39,6 +40,7 @@ export default function Landing() {
         <FinalCTA />
       </main>
       <Footer />
+      <InstallBanner />
     </div>
   );
 }
