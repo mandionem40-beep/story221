@@ -206,6 +206,17 @@ export default function MessagesAdmin() {
     toast({ title: "Sondage clôturé" });
   };
 
+  const handleDeleteCampaign = async (campaignId) => {
+    if (!confirm("Supprimer cette campagne ? Les conversations envoyées ne seront pas supprimées.")) return;
+    try {
+      await base44.entities.Campaign.delete(campaignId);
+      loadData("campaigns");
+      toast({ title: "Campagne supprimée" });
+    } catch {
+      toast({ title: "Erreur", description: "Impossible de supprimer la campagne.", variant: "destructive" });
+    }
+  };
+
   const handleDeletePoll = async (pollId) => {
     if (!confirm("Supprimer ce sondage ?")) return;
     await base44.entities.Poll.delete(pollId);
@@ -354,6 +365,9 @@ export default function MessagesAdmin() {
                               c.status === "scheduled" ? "bg-yellow-500/20 text-yellow-400" :
                               "bg-secondary text-muted-foreground"
                             }`}>{c.status}</span>
+                            <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-secondary text-muted-foreground">
+                              {c.audience_type === "all" ? "Tous" : c.audience_type === "group" ? "Groupe" : "Spécifique"}
+                            </span>
                           </div>
                           <p className="text-sm text-muted-foreground line-clamp-2">{c.content}</p>
                           <div className="flex items-center gap-3 mt-2 text-[11px] text-muted-foreground">
@@ -362,6 +376,9 @@ export default function MessagesAdmin() {
                             <span><Clock className="w-3 h-3 inline mr-1" />{new Date(c.created_date).toLocaleDateString("fr-FR")}</span>
                           </div>
                         </div>
+                        <button onClick={() => handleDeleteCampaign(c.id)} className="flex-shrink-0 w-8 h-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
                   ))
@@ -522,31 +539,65 @@ export default function MessagesAdmin() {
 
               {campaignForm.audience_type === "specific" && (
                 <div>
-                  <label className="text-xs text-muted-foreground mb-1.5 block">Rechercher des utilisateurs</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs text-muted-foreground">Rechercher des utilisateurs</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const allFilteredIds = filteredUsers.map((u) => u.id);
+                        const allSelected = allFilteredIds.every((id) => campaignForm.selectedUsers.includes(id));
+                        setCampaignForm({
+                          ...campaignForm,
+                          selectedUsers: allSelected
+                            ? campaignForm.selectedUsers.filter((id) => !allFilteredIds.includes(id))
+                            : [...new Set([...campaignForm.selectedUsers, ...allFilteredIds])],
+                        });
+                      }}
+                      className="text-[11px] text-primary font-medium"
+                    >
+                      {filteredUsers.length > 0 && filteredUsers.every((u) => campaignForm.selectedUsers.includes(u.id)) ? "Tout désélectionner" : "Tout sélectionner"}
+                    </button>
+                  </div>
                   <div className="relative mb-2">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                     <input value={campaignForm.userSearch} onChange={(e) => setCampaignForm({ ...campaignForm, userSearch: e.target.value })} placeholder="Nom ou email..." className="w-full h-9 pl-8 pr-3 rounded-lg bg-secondary text-sm text-white outline-none" />
                   </div>
-                  <div className="max-h-40 overflow-y-auto space-y-1">
-                    {filteredUsers.slice(0, 30).map((u) => (
-                      <label key={u.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-secondary cursor-pointer">
-                        <input type="checkbox" checked={campaignForm.selectedUsers.includes(u.id)} onChange={(e) => {
-                          const checked = e.target.checked;
-                          setCampaignForm({
-                            ...campaignForm,
-                            selectedUsers: checked ? [...campaignForm.selectedUsers, u.id] : campaignForm.selectedUsers.filter((id) => id !== u.id),
-                          });
-                        }} className="accent-primary" />
-                        <span className="text-sm text-white truncate">@{u.username || u.email?.split("@")[0]}</span>
-                        <span className="text-xs text-muted-foreground truncate">{u.email}</span>
-                      </label>
-                    ))}
+                  <div className="max-h-48 overflow-y-auto space-y-1">
+                    {filteredUsers.length === 0 ? (
+                      <p className="text-xs text-muted-foreground text-center py-3">Aucun utilisateur trouvé</p>
+                    ) : (
+                      filteredUsers.map((u) => (
+                        <label key={u.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-secondary cursor-pointer">
+                          <input type="checkbox" checked={campaignForm.selectedUsers.includes(u.id)} onChange={(e) => {
+                            const checked = e.target.checked;
+                            setCampaignForm({
+                              ...campaignForm,
+                              selectedUsers: checked ? [...campaignForm.selectedUsers, u.id] : campaignForm.selectedUsers.filter((id) => id !== u.id),
+                            });
+                          }} className="accent-primary" />
+                          <span className="text-sm text-white truncate">@{u.username || u.email?.split("@")[0]}</span>
+                          <span className="text-xs text-muted-foreground truncate ml-auto">{u.email}</span>
+                        </label>
+                      ))
+                    )}
                   </div>
                   {campaignForm.selectedUsers.length > 0 && (
                     <p className="text-xs text-primary mt-1.5">{campaignForm.selectedUsers.length} utilisateur(s) sélectionné(s)</p>
                   )}
                 </div>
               )}
+
+              {/* Target preview */}
+              <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-primary/10 border border-primary/20">
+                <Users className="w-4 h-4 text-primary flex-shrink-0" />
+                <span className="text-sm text-white">
+                  <span className="font-bold">{(() => {
+                    if (campaignForm.audience_type === "all") return allUsers.length;
+                    if (campaignForm.audience_type === "group") return filterUsersByGroup(campaignForm.audience_group, allUsers).length;
+                    return campaignForm.selectedUsers.length;
+                  })()}</span> destinataire(s)
+                </span>
+              </div>
 
               <button onClick={handleSendCampaign} disabled={!campaignForm.title.trim() || !campaignForm.content.trim() || sendingCampaign} className="w-full h-11 rounded-xl bg-primary text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-40">
                 {sendingCampaign ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
