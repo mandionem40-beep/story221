@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { toast } from "@/components/ui/use-toast";
-import { Plus, Send, Loader2, Trash2, Users, Megaphone, BarChart3, Star, Mail, Clock, CheckCircle, X, Search, UserPlus } from "lucide-react";
+import { Plus, Send, Loader2, Trash2, Users, Megaphone, BarChart3, Star, Mail, Clock, CheckCircle, X, Search, UserPlus, MessageCircle } from "lucide-react";
 import MessageThread from "@/components/messages/MessageThread";
 import PollCard from "@/components/messages/PollCard";
-import ContactsTab from "@/components/admin/ContactsTab";
+import ContactsTab, { buildWhatsAppPhone } from "@/components/admin/ContactsTab";
 
 const audienceGroups = [
   { id: "all", label: "Tous les utilisateurs" },
@@ -534,6 +534,27 @@ export default function MessagesAdmin() {
                     {audienceGroups.map((g) => <option key={g.id} value={g.id}>{g.label}</option>)}
                   </select>
                   <p className="text-xs text-muted-foreground mt-1.5">{filterUsersByGroup(campaignForm.audience_group, allUsers).length} utilisateur(s) ciblé(s)</p>
+                  <div className="max-h-32 overflow-y-auto space-y-1 mt-2">
+                    {filterUsersByGroup(campaignForm.audience_group, allUsers).slice(0, 20).map((u) => {
+                      const waPhone = buildWhatsAppPhone(u);
+                      if (!waPhone) return null;
+                      return (
+                        <div key={u.id} className="flex items-center gap-2 p-1.5 rounded-lg bg-secondary/50">
+                          <span className="text-xs text-white truncate flex-1">@{u.username || u.email?.split("@")[0]}</span>
+                          <span className="text-[10px] text-muted-foreground truncate">{u.phone_country} {u.phone}</span>
+                          <a
+                            href={`https://wa.me/${waPhone}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-shrink-0 w-6 h-6 rounded-lg bg-green-500/10 text-green-400 flex items-center justify-center hover:bg-green-500/20 transition-colors"
+                            title={`WhatsApp: ${u.phone_country || ""} ${u.phone}`}
+                          >
+                            <MessageCircle className="w-3 h-3" />
+                          </a>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
@@ -566,19 +587,36 @@ export default function MessagesAdmin() {
                     {filteredUsers.length === 0 ? (
                       <p className="text-xs text-muted-foreground text-center py-3">Aucun utilisateur trouvé</p>
                     ) : (
-                      filteredUsers.map((u) => (
-                        <label key={u.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-secondary cursor-pointer">
-                          <input type="checkbox" checked={campaignForm.selectedUsers.includes(u.id)} onChange={(e) => {
-                            const checked = e.target.checked;
-                            setCampaignForm({
-                              ...campaignForm,
-                              selectedUsers: checked ? [...campaignForm.selectedUsers, u.id] : campaignForm.selectedUsers.filter((id) => id !== u.id),
-                            });
-                          }} className="accent-primary" />
-                          <span className="text-sm text-white truncate">@{u.username || u.email?.split("@")[0]}</span>
-                          <span className="text-xs text-muted-foreground truncate ml-auto">{u.email}</span>
-                        </label>
-                      ))
+                      filteredUsers.map((u) => {
+                        const waPhone = buildWhatsAppPhone(u);
+                        return (
+                          <div key={u.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-secondary">
+                            <label className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer">
+                              <input type="checkbox" checked={campaignForm.selectedUsers.includes(u.id)} onChange={(e) => {
+                                const checked = e.target.checked;
+                                setCampaignForm({
+                                  ...campaignForm,
+                                  selectedUsers: checked ? [...campaignForm.selectedUsers, u.id] : campaignForm.selectedUsers.filter((id) => id !== u.id),
+                                });
+                              }} className="accent-primary" />
+                              <span className="text-sm text-white truncate">@{u.username || u.email?.split("@")[0]}</span>
+                              {u.phone && <span className="text-[10px] text-muted-foreground truncate">{u.phone_country} {u.phone}</span>}
+                            </label>
+                            {waPhone && (
+                              <a
+                                href={`https://wa.me/${waPhone}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="flex-shrink-0 w-7 h-7 rounded-lg bg-green-500/10 text-green-400 flex items-center justify-center hover:bg-green-500/20 transition-colors"
+                                title={`WhatsApp: ${u.phone_country || ""} ${u.phone}`}
+                              >
+                                <MessageCircle className="w-3.5 h-3.5" />
+                              </a>
+                            )}
+                          </div>
+                        );
+                      })
                     )}
                   </div>
                   {campaignForm.selectedUsers.length > 0 && (
