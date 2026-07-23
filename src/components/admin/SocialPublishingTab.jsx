@@ -23,20 +23,20 @@ const PLATFORMS = [
   {
     id: "tiktok",
     name: "TikTok",
-    desc: "Publication sur le compte TikTok de la plateforme",
+    desc: "Publication via l'API TikTok Content Posting (clés API requises)",
     available: false,
     color: "bg-black border border-white/20",
     icon: "🎵",
-    note: "Le connecteur TikTok ne supporte que la lecture, pas la publication vidéo.",
+    note: "Nécessite des clés API TikTok Content Posting. Configurez les secrets TIKTOK_CLIENT_KEY et TIKTOK_CLIENT_SECRET.",
   },
   {
     id: "youtube",
     name: "YouTube Shorts",
-    desc: "Publication sur la chaîne YouTube de la plateforme",
+    desc: "Publication via l'API YouTube Data v3 (clés Google requises)",
     available: false,
     color: "bg-red-600",
     icon: "▶️",
-    note: "Aucun connecteur YouTube disponible sur la plateforme Base44.",
+    note: "Nécessite des clés API Google OAuth2. Configurez les secrets GOOGLE_CLIENT_ID et GOOGLE_CLIENT_SECRET.",
   },
 ];
 
