@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Heart, MessageCircle, Share2, Bookmark, Music2 } from "lucide-react";
 
 const reelPreviews = [
@@ -74,17 +74,19 @@ function ReelFeed() {
   return (
     <div className="relative w-[260px] sm:w-[300px] h-[520px] rounded-[2.5rem] bg-card border-2 border-border p-2 overflow-hidden">
       <div className="w-full h-full rounded-[2rem] bg-black overflow-hidden relative">
-        <AnimatePresence>
+        {reelPreviews.map((r, i) => (
           <motion.div
-            key={index}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
+            key={i}
+            initial={false}
+            animate={{
+              opacity: i === index ? 1 : 0,
+              scale: i === index ? 1 : 1.04,
+            }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
             className="absolute inset-0"
           >
             <video
-              src={reel.video_url}
+              src={r.video_url}
               autoPlay
               loop
               muted
@@ -94,7 +96,7 @@ function ReelFeed() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
           </motion.div>
-        </AnimatePresence>
+        ))}
 
         {/* Right action rail */}
         <div className="absolute right-2 bottom-20 flex flex-col items-center gap-5 z-10">
