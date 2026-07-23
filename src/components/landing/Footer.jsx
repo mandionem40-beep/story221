@@ -64,16 +64,16 @@ export default function Footer() {
           {/* Link columns */}
           {Object.entries(footerLinks).map(([title, links]) =>
           <div key={title}>
-              <h4 className="text-sm font-semibold text-white mb-4 hidden">{title}</h4>
-              <ul className="space-y-2.5 hidden">
-                {links.map((link) =>
-              <li key={link}>
-                    <a href="#" className="text-sm text-muted-foreground hover:text-white transition-colors">
-                      {link}
-                    </a>
-                  </li>
-              )}
-              </ul>
+              
+              
+
+
+
+
+
+
+
+            
             </div>
           )}
         </div>
