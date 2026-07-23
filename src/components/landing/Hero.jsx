@@ -120,8 +120,6 @@ export default function Hero() {
               )}
             </motion.div>
 
-            {/* Animated chat */}
-            <HeroChat />
           </div>
 
           {/* Right: Animated demo */}
@@ -132,6 +130,11 @@ export default function Hero() {
             className="relative">
             <HeroDemo />
           </motion.div>
+        </div>
+
+        {/* Animated chat — in-flow on mobile, absolute top-right on desktop */}
+        <div className="mt-10 lg:absolute lg:top-24 lg:right-8 lg:mt-0 lg:w-[420px] lg:z-20">
+          <HeroChat />
         </div>
       </div>
     </section>);

@@ -84,7 +84,7 @@ export default function HeroChat() {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, delay: 0.4 }}
-      className="relative mt-8 w-full max-w-xl mx-auto lg:mx-0"
+      className="relative w-full max-w-xl mx-auto lg:mx-0"
     >
       {/* Animated gradient glow behind card */}
       <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-purple-600/10 to-primary/20 rounded-3xl blur-xl opacity-60 animate-pulse" />
