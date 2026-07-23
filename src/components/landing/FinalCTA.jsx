@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Gift } from "lucide-react";
+import SocialBar from "@/components/social/SocialBar";
 
 export default function FinalCTA() {
   return (
@@ -38,6 +39,11 @@ export default function FinalCTA() {
               Créer mon compte
               <ArrowRight className="w-5 h-5" />
             </Link>
+
+            <div className="mt-10 flex flex-col items-center gap-3">
+              <p className="text-xs text-white/50 uppercase tracking-wider">Suivez-nous</p>
+              <SocialBar size="md" />
+            </div>
           </div>
         </motion.div>
       </div>

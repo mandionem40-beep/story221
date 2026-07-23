@@ -29,7 +29,7 @@ export default function SuperAdmin() {
   const [newShowcase, setNewShowcase] = useState({ title: "", subtitle: "", tags: "", video_url: "", thumbnail_url: "" });
   const [adjustUser, setAdjustUser] = useState(null);
   const [showAdjust, setShowAdjust] = useState(false);
-  const [socialLinks, setSocialLinks] = useState({ social_tiktok: "", social_instagram: "", social_facebook: "", social_youtube: "" });
+  const [newSocial, setNewSocial] = useState({ platform: "tiktok", label: "", url: "" });
 
   useEffect(() => {
     if (user && user.role !== "admin" && user.role !== "super_admin") {
@@ -37,10 +37,6 @@ export default function SuperAdmin() {
     }
     loadTabData(activeTab);
   }, [user, activeTab]);
-
-  useEffect(() => {
-    if (data.socialLinks) setSocialLinks(data.socialLinks);
-  }, [data.socialLinks]);
 
   const loadTabData = async (tab) => {
     setLoading(true);
@@ -82,10 +78,7 @@ export default function SuperAdmin() {
         ]);
         result = { users: users || [], generations: gens || [], transactions: txs || [], reels: reels || [], likes: likes || [], comments: comments || [], follows: follows || [] };
       } else if (tab === "settings") {
-        const settings = await base44.entities.AppSetting.list();
-        const map = { social_tiktok: "", social_instagram: "", social_facebook: "", social_youtube: "" };
-        (settings || []).forEach(s => { if (s.key in map) map[s.key] = s.value; });
-        result = { socialLinks: map };
+        result = { socialLinks: await base44.entities.SocialLink.list("display_order", 50) };
       }
       setData(result);
     } catch { /* ignore */ }
@@ -193,22 +186,40 @@ export default function SuperAdmin() {
     }
   };
 
-  const handleSaveSocialLinks = async () => {
-    try {
-      const allSettings = await base44.entities.AppSetting.list();
-      for (const key of Object.keys(socialLinks)) {
-        const existing = (allSettings || []).find(s => s.key === key);
-        if (existing) {
-          await base44.entities.AppSetting.update(existing.id, { value: socialLinks[key] });
-        } else {
-          await base44.entities.AppSetting.create({ key, value: socialLinks[key], description: "Lien réseau social" });
-        }
-      }
-      logAction("update_social_links", "Liens réseaux sociaux mis à jour");
-      toast({ title: "Liens enregistrés", description: "Les boutons du footer redirigeront automatiquement." });
-    } catch {
-      toast({ title: "Erreur", description: "Impossible d'enregistrer les liens.", variant: "destructive" });
-    }
+  const handleAddSocial = async () => {
+    if (!newSocial.url) return;
+    const labels = { tiktok: "TikTok", instagram: "Instagram", youtube: "YouTube", facebook: "Facebook", x: "X (Twitter)", linkedin: "LinkedIn" };
+    await base44.entities.SocialLink.create({
+      platform: newSocial.platform,
+      label: newSocial.label || labels[newSocial.platform],
+      url: newSocial.url,
+      active: true,
+      display_order: (data.socialLinks?.length || 0) + 1,
+    });
+    logAction("add_social", `Réseau ${newSocial.platform} ajouté`);
+    setNewSocial({ platform: "tiktok", label: "", url: "" });
+    loadTabData("settings");
+    toast({ title: "Réseau ajouté", description: "Visible immédiatement sur la plateforme." });
+  };
+
+  const handleToggleSocial = async (item) => {
+    await base44.entities.SocialLink.update(item.id, { active: !item.active });
+    loadTabData("settings");
+  };
+
+  const handleSaveSocial = async (id, edited) => {
+    await base44.entities.SocialLink.update(id, { label: edited.label, url: edited.url });
+    logAction("update_social", `Réseau social ${id} modifié`);
+    loadTabData("settings");
+    toast({ title: "Réseau mis à jour" });
+  };
+
+  const handleDeleteSocial = async (id) => {
+    if (!confirm("Supprimer ce réseau social ?")) return;
+    await base44.entities.SocialLink.delete(id);
+    logAction("delete_social", `Réseau social ${id} supprimé`);
+    loadTabData("settings");
+    toast({ title: "Réseau supprimé" });
   };
 
   if (user && user.role !== "admin" && user.role !== "super_admin") {
@@ -501,28 +512,35 @@ export default function SuperAdmin() {
             {/* Settings tab */}
             {activeTab === "settings" && (
               <div>
-                <h2 className="text-xl font-bold text-white mb-2">Liens des réseaux sociaux</h2>
-                <p className="text-sm text-muted-foreground mb-6">Configurez les liens de vos réseaux sociaux. Une fois enregistrés, les boutons du footer redirigeront automatiquement vers ces pages.</p>
-                <div className="rounded-2xl bg-card border border-border p-5 space-y-4 max-w-lg">
-                  {[
-                    { key: "social_tiktok", label: "TikTok", placeholder: "https://tiktok.com/@story221" },
-                    { key: "social_instagram", label: "Instagram", placeholder: "https://instagram.com/story221" },
-                    { key: "social_facebook", label: "Facebook", placeholder: "https://facebook.com/story221" },
-                    { key: "social_youtube", label: "YouTube", placeholder: "https://youtube.com/@story221" },
-                  ].map(item => (
-                    <div key={item.key}>
-                      <label className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5 block">{item.label}</label>
-                      <input
-                        value={socialLinks[item.key] || ""}
-                        onChange={e => setSocialLinks({ ...socialLinks, [item.key]: e.target.value })}
-                        placeholder={item.placeholder}
-                        className="w-full h-11 rounded-xl bg-background border border-border px-3 text-sm text-white"
-                      />
-                    </div>
-                  ))}
-                  <button onClick={handleSaveSocialLinks} className="w-full py-2.5 rounded-xl bg-primary text-white text-sm font-semibold flex items-center justify-center gap-1.5">
-                    <Save className="w-4 h-4" />Enregistrer les liens
+                <h2 className="text-xl font-bold text-white mb-2">Réseaux sociaux</h2>
+                <p className="text-sm text-muted-foreground mb-6">Gérez les réseaux sociaux affichés sur la landing page et le footer. Les modifications sont appliquées immédiatement sur toute la plateforme.</p>
+
+                <div className="rounded-2xl bg-card border border-border p-4 mb-6 max-w-2xl">
+                  <h3 className="text-sm font-semibold text-white mb-3">Ajouter un réseau</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                    <select value={newSocial.platform} onChange={e => setNewSocial({ ...newSocial, platform: e.target.value })} className="h-10 rounded-lg bg-background border border-border px-3 text-sm text-white">
+                      <option value="tiktok">TikTok</option>
+                      <option value="instagram">Instagram</option>
+                      <option value="youtube">YouTube</option>
+                      <option value="facebook">Facebook</option>
+                      <option value="x">X (Twitter)</option>
+                      <option value="linkedin">LinkedIn</option>
+                    </select>
+                    <input value={newSocial.label} onChange={e => setNewSocial({ ...newSocial, label: e.target.value })} placeholder="Libellé (optionnel)" className="h-10 rounded-lg bg-background border border-border px-3 text-sm text-white" />
+                    <input value={newSocial.url} onChange={e => setNewSocial({ ...newSocial, url: e.target.value })} placeholder="https://..." className="h-10 rounded-lg bg-background border border-border px-3 text-sm text-white" />
+                  </div>
+                  <button onClick={handleAddSocial} className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold flex items-center gap-1.5">
+                    <Plus className="w-4 h-4" />Ajouter
                   </button>
+                </div>
+
+                <div className="space-y-2 max-w-2xl">
+                  {(data.socialLinks || []).map(item => (
+                    <SocialLinkEditor key={item.id} item={item} onSave={handleSaveSocial} onToggle={handleToggleSocial} onDelete={handleDeleteSocial} />
+                  ))}
+                  {(data.socialLinks || []).length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-8">Aucun réseau social configuré. Ajoutez-en un ci-dessus.</p>
+                  )}
                 </div>
               </div>
             )}
@@ -569,6 +587,33 @@ function PackEditor({ pack, onSave }) {
         className="px-3 py-2 rounded-lg bg-primary text-white text-xs font-semibold flex items-center gap-1 disabled:opacity-30"
       >
         <Save className="w-3.5 h-3.5" />Enregistrer
+      </button>
+    </div>
+  );
+}
+
+function SocialLinkEditor({ item, onSave, onToggle, onDelete }) {
+  const [edited, setEdited] = useState({ label: item.label || "", url: item.url || "" });
+  const [changed, setChanged] = useState(false);
+
+  const update = (field, value) => {
+    setEdited(prev => ({ ...prev, [field]: value }));
+    setChanged(true);
+  };
+
+  return (
+    <div className="rounded-2xl bg-card border border-border p-4 flex flex-wrap items-center gap-3">
+      <span className="text-sm font-semibold text-white capitalize min-w-[70px]">{item.platform}</span>
+      <input value={edited.label} onChange={e => update("label", e.target.value)} placeholder="Libellé" className="flex-1 min-w-[80px] h-10 rounded-lg bg-background border border-border px-3 text-sm text-white" />
+      <input value={edited.url} onChange={e => update("url", e.target.value)} placeholder="https://..." className="flex-[2] min-w-[120px] h-10 rounded-lg bg-background border border-border px-3 text-sm text-white" />
+      <button onClick={() => onToggle(item)} className={`px-3 py-2 rounded-lg text-xs font-medium ${item.active ? "bg-green-500/20 text-green-500" : "bg-secondary text-muted-foreground"}`}>
+        {item.active ? "Actif" : "Inactif"}
+      </button>
+      <button onClick={() => { onSave(item.id, edited); setChanged(false); }} disabled={!changed} className="px-3 py-2 rounded-lg bg-primary text-white text-xs font-semibold flex items-center gap-1 disabled:opacity-30">
+        <Save className="w-3.5 h-3.5" />Enregistrer
+      </button>
+      <button onClick={() => onDelete(item.id)} className="w-9 h-9 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center">
+        <Trash2 className="w-3.5 h-3.5" />
       </button>
     </div>
   );
