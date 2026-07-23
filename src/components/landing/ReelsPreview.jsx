@@ -74,13 +74,13 @@ function ReelFeed() {
   return (
     <div className="relative w-[260px] sm:w-[300px] h-[520px] rounded-[2.5rem] bg-card border-2 border-border p-2 overflow-hidden">
       <div className="w-full h-full rounded-[2rem] bg-black overflow-hidden relative">
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           <motion.div
             key={index}
-            initial={{ y: "100%", opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: "-100%", opacity: 0 }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
             className="absolute inset-0"
           >
             <video
