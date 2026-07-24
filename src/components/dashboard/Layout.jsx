@@ -130,17 +130,27 @@ export default function Layout() {
         <Link to="/">
           <Logo size="sm" />
         </Link>
-        <Link
-          to="/app/profile"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary border border-border"
-        >
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="" className="w-5 h-5 rounded-full object-cover" />
-          ) : (
-            <User className="w-4 h-4 text-primary" />
-          )}
-          <span className="text-sm font-semibold text-white max-w-[80px] truncate">{username}</span>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/app/diamonds"
+            className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-card to-secondary border border-primary/30 hover:border-primary/60 transition-all duration-300 active:scale-95 group overflow-hidden"
+          >
+            <span className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/25 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+            <DiamondIcon className="w-4 h-4 relative animate-pulse drop-shadow-[0_0_4px_rgba(255,0,51,0.8)]" />
+            <span className="text-sm font-bold text-white relative tabular-nums">{diamonds}</span>
+            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-primary animate-ping" />
+          </Link>
+          <Link
+            to="/app/profile"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-secondary border border-border active:scale-95 transition-transform"
+          >
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="" className="w-5 h-5 rounded-full object-cover" />
+            ) : (
+              <User className="w-4 h-4 text-primary" />
+            )}
+          </Link>
+        </div>
       </header>
 
       {/* Main Content */}
