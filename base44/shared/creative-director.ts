@@ -58,6 +58,9 @@ Quand l'utilisateur fournit une image de référence (sa propre photo, un produi
 - Décris chaque référence avec une précision extrême dans les engine_prompts et l'apparence des personnages
 - Si tu détectes que la fidélité ne peut pas être garantie pour une scène donnée (angle complexe, mouvement difficile), ajoute une entrée dans fidelity_warnings plutôt que de livrer un résultat qui déforme la référence
 
+### 9d. Bibliothèque de Références IA
+Quand un contexte "BIBLIOTHÈQUE DE RÉFÉRENCES IA" est fourni, tu recherches les références pertinentes (style, composition, ambiance, couleurs) en fonction du prompt utilisateur. Tu utilises ces références comme SOURCE D'INSPIRATION INTERNE pour: conserver un style cohérent, respecter les palettes de couleurs, reproduire une ambiance similaire, améliorer les cadrages, expressions, poses et décors. Tu ne reproduis JAMAIS ces références à l'identique. Les références uploadées par l'utilisateur restent toujours prioritaires sur la bibliothèque.
+
 ### 10. Découpage en scènes avec durée
 Tu découpes l'histoire en scènes. Chaque scène a: description visuelle, dialogue, émotion dominante, angle de caméra, mouvement de caméra, éclairage, colorimétrie, durée en secondes, transition vers la scène suivante. La somme des durées des scènes doit correspondre à la durée totale demandée.
 
@@ -229,6 +232,11 @@ function buildUserMessage(payload) {
   // Inject reference image lock context
   if (reference_lock_context && reference_lock_context.trim()) {
     msg += `\n${reference_lock_context}\n`;
+  }
+
+  // Inject AI Reference Library context
+  if (payload.ai_reference_context && payload.ai_reference_context.trim()) {
+    msg += `\n${payload.ai_reference_context}\n`;
   }
 
   if (type === "ad") {
@@ -431,7 +439,35 @@ ${referenceImages.length} image(s) de référence ont été fournies par l'utili
 - Ces références sont fournies par l'utilisateur pour son propre usage (lui-même, son produit, son personnage) — ne pas appliquer à des tiers non autorisés`;
   }
 
-  const enrichedPayload = { ...payload, place_context: placeContext, reference_lock_context: referenceLockContext };
+  // ==== Fetch AI Reference Library (active references as inspiration) ====
+  let aiReferenceContext = "";
+  try {
+    const references = await base44.asServiceRole.entities.AIReference.filter(
+      { active: true },
+      "display_order",
+      50
+    );
+    if (references && references.length > 0) {
+      const refLines = references.map(r =>
+        `- ${r.name} [${r.category || "général"}]${r.tags?.length ? ` (tags: ${r.tags.join(", ")})` : ""}: ${r.description || ""}`
+      ).join("\n");
+      aiReferenceContext = `## BIBLIOTHÈQUE DE RÉFÉRENCES IA — SOURCE D'INSPIRATION
+Les références ci-dessous proviennent de la Bibliothèque de Références IA (Admin). Utilise-les comme SOURCE D'INSPIRATION INTERNE pour enrichir le scénario et les prompts techniques:
+- Conserve un style cohérent avec les références pertinentes
+- Respecte les palettes de couleurs suggérées
+- Reproduis une ambiance similaire quand pertinent
+- Améliore les cadrages, expressions, poses et décors en t'inspirant de ces références
+- NE REPRODUIS JAMAIS ces références à l'identique ni ne les utilise pour copier des contenus protégés
+PRIORITÉ DES RÉFÉRENCES: 1) Références uploadées par l'utilisateur (verrou absolu), 2) Cette bibliothèque (inspiration), 3) Prompt utilisateur, 4) Connaissances générales.
+
+Références disponibles:
+${refLines}`;
+    }
+  } catch (e) {
+    console.error("AI Reference Library fetch failed (non-blocking):", e.message);
+  }
+
+  const enrichedPayload = { ...payload, place_context: placeContext, reference_lock_context: referenceLockContext, ai_reference_context: aiReferenceContext };
   const userText = buildUserMessage(enrichedPayload);
   const fileUrls = referenceImages.length > 0 ? referenceImages.slice(0, 10) : undefined;
   const fullPrompt = `${SYSTEM_PROMPT}\n\n---\n\nPROJET STORY221\n${userText}`;

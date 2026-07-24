@@ -1,0 +1,100 @@
+{
+  "name": "AIReference",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nom de la r\u00e9f\u00e9rence"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description d\u00e9taill\u00e9e (style, ambiance, composition, couleurs)"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Mots-cl\u00e9s pour la recherche (style, couleur, ambiance)"
+    },
+    "category": {
+      "type": "string",
+      "description": "Cat\u00e9gorie (Personnages, Publicit\u00e9s, Films, Anime, Cartoon, Manga, 3D, R\u00e9aliste, Architecture, D\u00e9cors, Nature, Objets, Costumes, \u00c9clairage, Cam\u00e9ra, Couleurs, Expressions, Mouvement, R\u00e9seaux sociaux, Logos, Produits, ou cat\u00e9gorie personnalis\u00e9e)"
+    },
+    "media_url": {
+      "type": "string",
+      "description": "URL du m\u00e9dia (image ou vid\u00e9o) upload\u00e9"
+    },
+    "media_type": {
+      "type": "string",
+      "enum": [
+        "image",
+        "video"
+      ],
+      "default": "image"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Seules les r\u00e9f\u00e9rences actives sont utilis\u00e9es par le moteur IA"
+    },
+    "display_order": {
+      "type": "integer",
+      "default": 0
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Nom de l'admin ayant ajout\u00e9 la r\u00e9f\u00e9rence"
+    }
+  },
+  "required": [
+    "name",
+    "media_url",
+    "category"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": true,
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

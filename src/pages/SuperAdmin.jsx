@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
-import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video, Share2, Mail, Cpu, Gift, Building2, MessageCircle, MousePointerClick, Zap, Wallet, Film, MapPin } from "lucide-react";
+import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video, Share2, Mail, Cpu, Gift, Building2, MessageCircle, MousePointerClick, Zap, Wallet, Film, MapPin, Library } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import AnalyticsTab from "@/components/admin/AnalyticsTab";
 import AdjustCreditsDialog from "@/components/admin/AdjustCreditsDialog";
@@ -18,6 +18,7 @@ import SocialPublishingTab from "@/components/admin/SocialPublishingTab";
 import FinanceTab from "@/components/admin/FinanceTab";
 import FeedConfigTab from "@/components/admin/FeedConfigTab";
 import PlacesTab from "@/components/admin/PlacesTab";
+import AiReferencesTab from "@/components/admin/AiReferencesTab";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: BarChart3 },
@@ -38,6 +39,7 @@ const tabs = [
   { id: "social_pub", label: "Publication Auto", icon: Zap },
   { id: "feed", label: "Fil Reels", icon: Film },
   { id: "places", label: "Lieux Réels", icon: MapPin },
+  { id: "ai_refs", label: "Biblio. Réf. IA", icon: Library },
   { id: "messages", label: "Messagerie", icon: Mail },
 ];
 
@@ -127,6 +129,8 @@ export default function SuperAdmin() {
         result = {};  // these tabs load their own data
       } else if (tab === "messages") {
         result = {};  // MessagesAdmin loads its own data
+      } else if (tab === "ai_refs") {
+        result = {};  // AiReferencesTab loads its own data
       }
       setData(result);
     } catch { /* ignore */ }
@@ -661,6 +665,10 @@ export default function SuperAdmin() {
 
             {activeTab === "places" && (
               <PlacesTab />
+            )}
+
+            {activeTab === "ai_refs" && (
+              <AiReferencesTab />
             )}
 
             {/* Analytics tab */}
