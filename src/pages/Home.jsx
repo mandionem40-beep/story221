@@ -85,16 +85,7 @@ export default function Home() {
         onSelect={handleSelectCategory}
       />
 
-      {/* Quick Create button — at the bottom */}
-      <div className="mt-8 mb-4">
-        <button
-          onClick={() => navigate("/app/quick-create")}
-          className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors glow-red-sm"
-        >
-          <Zap className="w-5 h-5" />
-          Création Rapide
-        </button>
-      </div>
+
 
       {/* Recent creations */}
       {recentGens.length > 0 && (
