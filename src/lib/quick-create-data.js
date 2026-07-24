@@ -1,7 +1,7 @@
 export const characterCategories = [
   {
-    id: "animal", label: "Animal", emoji: "🐾", desc: "Crée des histoires avec des personnages animaux pleins de vie.",
-    image: "https://images.unsplash.com/photo-1546975490-e8b92a360b24?w=200&q=80",
+    id: "animal", label: "Animaux", emoji: "🐾", desc: "Personnages animaux animés style 3D.",
+    image: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/656a1b063_image.png",
     appearances: [
       { emoji: "🦁", label: "Lion" }, { emoji: "🐘", label: "Éléphant" }, { emoji: "🐒", label: "Singe" },
       { emoji: "🐱", label: "Chat" }, { emoji: "🐶", label: "Chien" }, { emoji: "🦅", label: "Aigle" },
@@ -10,8 +10,8 @@ export const characterCategories = [
     ],
   },
   {
-    id: "fruit", label: "Fruit / Aliment", emoji: "🍓", desc: "Des drames viraux avec des fruits et aliments animés.",
-    image: "https://images.unsplash.com/photo-1543528176-61b239494933?w=200&q=80",
+    id: "fruit", label: "Fruit'z Story", emoji: "🍓", desc: "Dramas viraux avec personnages à têtes de fruits.",
+    image: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/7fc6e5eaa_image.png",
     appearances: [
       { emoji: "🍓", label: "Fraise" }, { emoji: "🍌", label: "Banane" }, { emoji: "🍎", label: "Pomme" },
       { emoji: "🍊", label: "Orange" }, { emoji: "🥭", label: "Mangue" }, { emoji: "🍍", label: "Ananas" },
@@ -19,8 +19,8 @@ export const characterCategories = [
     ],
   },
   {
-    id: "person", label: "Personne", emoji: "🧑", desc: "Des personnages humains réalistes ou stylisés.",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80",
+    id: "person", label: "YouTuber", emoji: "🎥", desc: "Crée des vidéos style YouTubeur.",
+    image: "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=400&q=80",
     appearances: [
       { emoji: "👦", label: "Garçon" }, { emoji: "👧", label: "Fille" }, { emoji: "👨", label: "Homme" },
       { emoji: "👩", label: "Femme" }, { emoji: "🧓", label: "Aîné" }, { emoji: "🧒", label: "Enfant" },
@@ -29,8 +29,8 @@ export const characterCategories = [
     ],
   },
   {
-    id: "object", label: "Objet", emoji: "📦", desc: "Donnez vie à des objets du quotidien avec l'IA.",
-    image: "https://images.unsplash.com/photo-1531746790731-6c087fecdced?w=200&q=80",
+    id: "object", label: "Publicité", emoji: "📢", desc: "Crée des publicités impactantes pour ta marque.",
+    image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&q=80",
     appearances: [
       { emoji: "🤖", label: "Robot" }, { emoji: "💡", label: "Lampe" }, { emoji: "📱", label: "Téléphone" },
       { emoji: "📖", label: "Livre" }, { emoji: "⚔️", label: "Épée" }, { emoji: "👑", label: "Couronne" },
@@ -38,8 +38,8 @@ export const characterCategories = [
     ],
   },
   {
-    id: "vehicle", label: "Véhicule", emoji: "🚗", desc: "Des aventures à toute vitesse avec véhicules animés.",
-    image: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=200&q=80",
+    id: "vehicle", label: "Transport", emoji: "🚌", desc: "BRT, Air Sénégal, TER et plus encore.",
+    image: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=400&q=80",
     appearances: [
       { emoji: "🚗", label: "Voiture" }, { emoji: "🚚", label: "Camion" }, { emoji: "🏍️", label: "Moto" },
       { emoji: "🚤", label: "Bateau" }, { emoji: "✈️", label: "Avion" }, { emoji: "🚂", label: "Train" },
@@ -47,8 +47,8 @@ export const characterCategories = [
     ],
   },
   {
-    id: "place", label: "Lieu / Décor", emoji: "🏠", desc: "Explorez des décors et lieux extraordinaires.",
-    image: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=200&q=80",
+    id: "place", label: "Lieux", emoji: "🏛️", desc: "Dubai, Palais du Sénégal et décors inspirants.",
+    image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&q=80",
     appearances: [
       { emoji: "🏰", label: "Château" }, { emoji: "🌳", label: "Forêt" }, { emoji: "🏙️", label: "Ville" },
       { emoji: "🏖️", label: "Plage" }, { emoji: "⛰️", label: "Montagne" }, { emoji: "🏠", label: "Maison" },
@@ -56,8 +56,8 @@ export const characterCategories = [
     ],
   },
   {
-    id: "creature", label: "Créature imaginaire", emoji: "✨", desc: "Inventez des créatures fantastiques et mythiques.", isNew: true,
-    image: "https://images.unsplash.com/photo-1559666126-84f389727b9a?w=200&q=80",
+    id: "creature", label: "Créature", emoji: "✨", desc: "Invente des créatures fantastiques et mythiques.", isNew: true,
+    image: "https://images.unsplash.com/photo-1559666126-84f389727b9a?w=400&q=80",
     appearances: [
       { emoji: "🐉", label: "Dragon" }, { emoji: "🦄", label: "Licorne" }, { emoji: "👾", label: "Monstre" },
       { emoji: "👽", label: "Alien" }, { emoji: "👻", label: "Fantôme" }, { emoji: "🧚", label: "Fée" },

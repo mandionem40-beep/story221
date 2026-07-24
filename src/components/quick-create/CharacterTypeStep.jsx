@@ -1,5 +1,5 @@
 import { characterCategories } from "@/lib/quick-create-data";
-import { Dice5, Sparkles } from "lucide-react";
+import { Dice5, Sparkles, Play } from "lucide-react";
 
 export default function CharacterTypeStep({ onSelect, onSurprise, showcases = [] }) {
   return (
@@ -17,7 +17,7 @@ export default function CharacterTypeStep({ onSelect, onSurprise, showcases = []
         Surprends-moi !
       </button>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {characterCategories.map((cat, i) => {
           const showcase = showcases[i];
           const imageUrl = showcase?.thumbnail_url || cat.image;
@@ -25,19 +25,28 @@ export default function CharacterTypeStep({ onSelect, onSurprise, showcases = []
             <button
               key={cat.id}
               onClick={() => onSelect(cat)}
-              className="group flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-border hover:border-primary/30 hover:bg-primary/[0.03] transition-all text-left"
+              className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/50 transition-all duration-300 group hover:glow-red-sm"
             >
-              <div className="flex-1 min-w-0">
-                {cat.isNew && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/15 text-primary text-[10px] font-semibold mb-1.5">
-                    {cat.isNew && <Sparkles className="w-2.5 h-2.5" />} Nouveau
-                  </span>
-                )}
-                <h3 className="text-base font-bold text-white mb-0.5 leading-tight">{cat.label}</h3>
-                <p className="text-xs text-muted-foreground line-clamp-2 leading-snug">{cat.desc}</p>
+              <img
+                src={imageUrl}
+                alt={cat.label}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+              {cat.isNew && (
+                <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-primary/90 text-white text-[10px] font-semibold flex items-center gap-1 z-10">
+                  <Sparkles className="w-2.5 h-2.5" /> Nouveau
+                </span>
+              )}
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="w-11 h-11 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+                  <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                </div>
               </div>
-              <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-secondary group-hover:scale-105 transition-transform">
-                <img src={imageUrl} alt={cat.label} className="w-full h-full object-cover" loading="lazy" />
+              <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                <h3 className="text-sm font-bold text-white leading-tight">{cat.label}</h3>
+                <p className="text-[10px] text-white/70 line-clamp-2 leading-snug mt-0.5">{cat.desc}</p>
               </div>
             </button>
           );
