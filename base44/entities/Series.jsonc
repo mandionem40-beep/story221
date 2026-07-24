@@ -1,0 +1,43 @@
+{
+  "name": "Series",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "season_number": {
+      "type": "integer",
+      "default": 1
+    },
+    "description": {
+      "type": "string"
+    },
+    "cover_image_url": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}
