@@ -73,10 +73,15 @@ export default function Home() {
 
       {/* Balance badges */}
       <div className="flex items-center gap-2 mb-5">
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-border">
-          <DiamondIcon className="w-4 h-4" />
-          <span className="text-sm font-semibold text-white">{diamonds}</span>
-        </div>
+        <button
+          onClick={() => navigate("/app/diamonds")}
+          className="relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-card to-secondary border border-primary/30 hover:border-primary/60 transition-all duration-300 hover:scale-105 group overflow-hidden"
+        >
+          <span className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/20 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+          <DiamondIcon className="w-4 h-4 relative animate-float" />
+          <span className="text-sm font-semibold text-white relative">{diamonds}</span>
+          <span className="text-[10px] text-muted-foreground relative hidden sm:inline">Diamants</span>
+        </button>
         {freeTrialAvailable &&
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
             <Gift className="w-4 h-4 text-primary" />
