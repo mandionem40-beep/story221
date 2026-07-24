@@ -1,0 +1,39 @@
+{
+  "name": "InteractionHistory",
+  "type": "object",
+  "properties": {
+    "reel_id": {
+      "type": "string"
+    },
+    "interaction_type": {
+      "type": "string",
+      "enum": [
+        "view",
+        "like",
+        "comment",
+        "share",
+        "favorite"
+      ]
+    },
+    "reel_author_id": {
+      "type": "string",
+      "description": "The created_by_id of the reel, for personalization queries"
+    }
+  },
+  "required": [
+    "reel_id",
+    "interaction_type"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

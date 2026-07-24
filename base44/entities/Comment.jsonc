@@ -13,6 +13,18 @@
     },
     "author_avatar": {
       "type": "string"
+    },
+    "parent_id": {
+      "type": "string",
+      "description": "ID of parent comment for replies (one level deep)"
+    },
+    "pinned": {
+      "type": "boolean",
+      "default": false
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false
     }
   },
   "required": [

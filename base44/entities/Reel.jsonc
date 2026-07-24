@@ -40,8 +40,11 @@
       "type": "string"
     },
     "influencer_id": {
-      "type": "string",
-      "description": "Linked Influencer entity ID if this reel was created by an AI influencer"
+      "type": "string"
+    },
+    "share_count": {
+      "type": "integer",
+      "default": 0
     },
     "hidden": {
       "type": "boolean",

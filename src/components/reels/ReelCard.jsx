@@ -1,27 +1,35 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
+import { createNotification } from "@/lib/notifications";
+import { trackInteraction, updateTrendingScore } from "@/lib/reels-feed";
 import { Heart, MessageCircle, Share2, Bookmark, UserPlus, UserCheck, Download, Flag, X, Send } from "lucide-react";
 import { Image } from "@/components/ui/image";
 import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/use-toast";
 import ShareModal from "@/components/share/ShareModal";
-import QuickShareButtons from "@/components/share/QuickShareButtons";
+import CommentThread from "@/components/reels/CommentThread";
 
-export default function ReelCard({ reel, currentUser, isActive }) {
+export default function ReelCard({ reel, currentUser, isActive, isNext }) {
   const videoRef = useRef(null);
+  const lastTapRef = useRef(0);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [isFavorited, setIsFavorited] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [commentCount, setCommentCount] = useState(0);
+  const [shareCount, setShareCount] = useState(0);
   const [showComments, setShowComments] = useState(false);
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState("");
-  const [reporting, setReporting] = useState(false);
+  const [showHeart, setShowHeart] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showShare, setShowShare] = useState(false);
 
   const isOwner = reel.created_by_id === currentUser?.id;
+  const shareUrl = `${window.location.origin}/reel?id=${reel.id}`;
+
+  // Connection-aware preload
+  const conn = typeof navigator !== "undefined" && (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
+  const isSlow = conn && (conn.effectiveType === "2g" || conn.effectiveType === "slow-2g");
+  const preloadAttr = isNext && !isSlow ? "auto" : isSlow ? "none" : "metadata";
 
   const loadData = useCallback(async () => {
     try {
@@ -35,32 +43,29 @@ export default function ReelCard({ reel, currentUser, isActive }) {
       setIsLiked(likes.some(l => l.created_by_id === currentUser?.id));
       setIsFavorited(favs.length > 0);
       setIsFollowing(follows.length > 0);
-      setCommentCount(commentsRes.length);
-      setComments(commentsRes.slice(-20).reverse());
-    } catch { /* ignore */ }
-  }, [reel.id, reel.created_by_id, currentUser?.id]);
+      setCommentCount(commentsRes.filter(c => !c.hidden).length);
+      setShareCount(reel.share_count || 0);
+    } catch {}
+  }, [reel.id, reel.created_by_id, reel.share_count, currentUser?.id]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // Auto-play
   useEffect(() => {
     if (!videoRef.current) return;
-    if (isActive && reel.video_url) {
-      videoRef.current.play().catch(() => {});
-    } else {
-      videoRef.current.pause();
-    }
+    if (isActive && reel.video_url) videoRef.current.play().catch(() => {});
+    else videoRef.current.pause();
   }, [isActive, reel.video_url]);
 
-  // Increment views on first active
   useEffect(() => {
     if (isActive && !reel._viewed) {
       reel._viewed = true;
       base44.entities.Reel.update(reel.id, { views: (reel.views || 0) + 1 }).catch(() => {});
+      trackInteraction(reel.id, "view", reel.created_by_id);
+      updateTrendingScore(reel.id);
     }
   }, [isActive, reel]);
 
-  const toggleLike = async () => {
+  const handleLike = async () => {
     try {
       if (isLiked) {
         const myLike = await base44.entities.Like.filter({ reel_id: reel.id, created_by_id: currentUser.id });
@@ -71,8 +76,30 @@ export default function ReelCard({ reel, currentUser, isActive }) {
         await base44.entities.Like.create({ reel_id: reel.id });
         setIsLiked(true);
         setLikeCount(c => c + 1);
+        trackInteraction(reel.id, "like", reel.created_by_id);
+        updateTrendingScore(reel.id);
+        if (reel.created_by_id && reel.created_by_id !== currentUser.id) {
+          createNotification({
+            recipientId: reel.created_by_id, type: "like",
+            title: "Nouveau like",
+            body: `${currentUser?.username || "Quelqu'un"} a aimé votre vidéo`,
+            sourceUserId: currentUser.id, reelId: reel.id,
+          });
+        }
       }
-    } catch { /* ignore */ }
+    } catch {}
+  };
+
+  const handleVideoTap = () => {
+    const now = Date.now();
+    if (now - lastTapRef.current < 300) {
+      if (!isLiked) handleLike();
+      setShowHeart(true);
+      setTimeout(() => setShowHeart(false), 800);
+      lastTapRef.current = 0;
+    } else {
+      lastTapRef.current = now;
+    }
   };
 
   const toggleFavorite = async () => {
@@ -84,8 +111,9 @@ export default function ReelCard({ reel, currentUser, isActive }) {
       } else {
         await base44.entities.Favorite.create({ reel_id: reel.id });
         setIsFavorited(true);
+        trackInteraction(reel.id, "favorite", reel.created_by_id);
       }
-    } catch { /* ignore */ }
+    } catch {}
   };
 
   const toggleFollow = async () => {
@@ -97,12 +125,25 @@ export default function ReelCard({ reel, currentUser, isActive }) {
       } else {
         await base44.entities.Follow.create({ followed_id: reel.created_by_id });
         setIsFollowing(true);
+        if (reel.created_by_id !== currentUser.id) {
+          createNotification({
+            recipientId: reel.created_by_id, type: "follow",
+            title: "Nouvel abonné",
+            body: `${currentUser?.username || "Quelqu'un"} vous suit maintenant`,
+            sourceUserId: currentUser.id,
+          });
+        }
       }
-    } catch { /* ignore */ }
+    } catch {}
   };
 
-  const handleShare = () => {
-    setShowShare(true);
+  const handleShared = async () => {
+    setShareCount(c => c + 1);
+    try {
+      await base44.entities.Reel.update(reel.id, { share_count: (reel.share_count || 0) + 1 });
+      trackInteraction(reel.id, "share", reel.created_by_id);
+      updateTrendingScore(reel.id);
+    } catch {}
   };
 
   const handleDownload = () => {
@@ -114,7 +155,6 @@ export default function ReelCard({ reel, currentUser, isActive }) {
   };
 
   const handleReport = async () => {
-    setReporting(false);
     setShowMenu(false);
     try {
       await base44.entities.Report.create({ reel_id: reel.id, reason: "Contenu inapproprié" });
@@ -124,33 +164,23 @@ export default function ReelCard({ reel, currentUser, isActive }) {
     }
   };
 
-  const submitComment = async () => {
-    if (!newComment.trim()) return;
-    try {
-      const c = await base44.entities.Comment.create({ reel_id: reel.id, content: newComment.trim() });
-      setComments([c, ...comments]);
-      setCommentCount(c => c + 1);
-      setNewComment("");
-    } catch { /* ignore */ }
-  };
-
   return (
     <div className="relative h-full w-full flex items-center justify-center bg-black snap-start">
-      {/* Video / Image */}
-      {reel.video_url ? (
-        <video
-          ref={videoRef}
-          src={reel.video_url}
-          loop
- muted
-          playsInline
-          className="h-full w-full object-cover"
-        />
-      ) : reel.thumbnail_url ? (
-        <Image src={reel.thumbnail_url} fittingType="fill" className="h-full w-full" />
-      ) : (
-        <div className="flex items-center justify-center h-full">
-          <p className="text-muted-foreground">Contenu non disponible</p>
+      {/* Video / Image with double-tap */}
+      <div className="relative h-full w-full" onClick={handleVideoTap}>
+        {reel.video_url ? (
+          <video ref={videoRef} src={reel.video_url} loop muted playsInline preload={preloadAttr} className="h-full w-full object-cover" />
+        ) : reel.thumbnail_url ? (
+          <Image src={reel.thumbnail_url} fittingType="fill" className="h-full w-full" />
+        ) : (
+          <div className="flex items-center justify-center h-full"><p className="text-muted-foreground">Contenu non disponible</p></div>
+        )}
+      </div>
+
+      {/* Double-tap heart animation */}
+      {showHeart && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+          <Heart className="w-20 h-20 text-white fill-white drop-shadow-2xl animate-pulse" />
         </div>
       )}
 
@@ -159,7 +189,7 @@ export default function ReelCard({ reel, currentUser, isActive }) {
 
       {/* Right side actions */}
       <div className="absolute right-3 bottom-20 sm:bottom-24 flex flex-col gap-5 items-center z-10">
-        <button onClick={toggleLike} className="flex flex-col items-center gap-1">
+        <button onClick={handleLike} className="flex flex-col items-center gap-1">
           <div className={cn("w-11 h-11 rounded-full flex items-center justify-center backdrop-blur-sm", isLiked ? "bg-primary" : "bg-black/40")}>
             <Heart className={cn("w-5 h-5 text-white", isLiked && "fill-white")} />
           </div>
@@ -171,10 +201,11 @@ export default function ReelCard({ reel, currentUser, isActive }) {
           </div>
           <span className="text-xs text-white font-medium">{commentCount}</span>
         </button>
-        <button onClick={handleShare} className="flex flex-col items-center gap-1">
+        <button onClick={() => setShowShare(true)} className="flex flex-col items-center gap-1">
           <div className="w-11 h-11 rounded-full bg-black/40 flex items-center justify-center backdrop-blur-sm">
             <Share2 className="w-5 h-5 text-white" />
           </div>
+          <span className="text-xs text-white font-medium">{shareCount}</span>
         </button>
         <button onClick={toggleFavorite} className="flex flex-col items-center gap-1">
           <div className={cn("w-11 h-11 rounded-full flex items-center justify-center backdrop-blur-sm", isFavorited ? "bg-primary" : "bg-black/40")}>
@@ -210,34 +241,23 @@ export default function ReelCard({ reel, currentUser, isActive }) {
             <p className="text-sm font-semibold text-white truncate">@{reel.author_name || "createur"}</p>
           </div>
           {!isOwner && (
-            <button
-              onClick={toggleFollow}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1",
-                isFollowing ? "bg-secondary text-white" : "bg-primary text-white"
-              )}
-            >
+            <button onClick={toggleFollow} className={cn("px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1", isFollowing ? "bg-secondary text-white" : "bg-primary text-white")}>
               {isFollowing ? <><UserCheck className="w-3.5 h-3.5" />Suivi</> : <><UserPlus className="w-3.5 h-3.5" />Suivre</>}
             </button>
           )}
         </div>
         <p className="text-sm text-white line-clamp-2">{reel.title}</p>
-        <p className="text-xs text-white/50 mt-0.5">{reel.views || 0} vues</p>
-        <QuickShareButtons
-          url={`${window.location.origin}/app/reels`}
-          title={reel.title || "Reel Story221"}
-          className="mt-3"
-        />
+        <p className="text-xs text-white/50 mt-0.5">{reel.views || 0} vues · {shareCount} partages</p>
       </div>
 
       {/* Report menu */}
       {showMenu && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60" onClick={() => setShowMenu(false)}>
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/60" onClick={() => setShowMenu(false)}>
           <div className="bg-card rounded-2xl border border-border p-4 max-w-xs w-full mx-4" onClick={e => e.stopPropagation()}>
             <p className="text-sm font-semibold text-white mb-3">Signaler cette vidéo</p>
             <div className="space-y-2">
               <button onClick={handleReport} className="w-full text-left p-3 rounded-lg bg-secondary hover:bg-secondary/70 text-sm text-white">Contenu inapproprié</button>
-              <button onClick={() => { setReporting(false); setShowMenu(false); }} className="w-full text-left p-3 rounded-lg bg-secondary hover:bg-secondary/70 text-sm text-white">Spam ou tromperie</button>
+              <button onClick={() => setShowMenu(false)} className="w-full text-left p-3 rounded-lg bg-secondary hover:bg-secondary/70 text-sm text-white">Spam ou tromperie</button>
               <button onClick={() => setShowMenu(false)} className="w-full text-left p-3 rounded-lg hover:bg-secondary text-sm text-muted-foreground">Annuler</button>
             </div>
           </div>
@@ -246,49 +266,23 @@ export default function ReelCard({ reel, currentUser, isActive }) {
 
       {/* Comments drawer */}
       {showComments && (
-        <div className="absolute inset-0 z-20 flex items-end" onClick={() => setShowComments(false)}>
+        <div className="absolute inset-0 z-30 flex items-end" onClick={() => setShowComments(false)}>
           <div className="absolute inset-0 bg-black/60" />
-          <div className="relative w-full bg-card rounded-t-2xl border-t border-border max-h-[60%] flex flex-col" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <p className="text-sm font-semibold text-white">{commentCount} commentaire{commentCount > 1 ? "s" : ""}</p>
-              <button onClick={() => setShowComments(false)}><X className="w-5 h-5 text-muted-foreground" /></button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {comments.length === 0 && <p className="text-center text-sm text-muted-foreground py-8">Soyez le premier à commenter !</p>}
-              {comments.map(c => (
-                <div key={c.id} className="flex gap-2">
-                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-semibold flex-shrink-0">
-                    U
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Utilisateur</p>
-                    <p className="text-sm text-white">{c.content}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="p-3 border-t border-border flex gap-2">
-              <input
-                value={newComment}
-                onChange={e => setNewComment(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && submitComment()}
-                placeholder="Ajouter un commentaire..."
-                className="flex-1 h-10 rounded-lg bg-background border border-border px-3 text-sm text-white"
-                maxLength={500}
-              />
-              <button onClick={submitComment} className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-                <Send className="w-4 h-4 text-white" />
-              </button>
-            </div>
+          <div className="relative w-full" onClick={e => e.stopPropagation()}>
+            <CommentThread
+              reelId={reel.id}
+              reelOwnerId={reel.created_by_id}
+              currentUser={currentUser}
+              commentCount={commentCount}
+              onCountChange={(n) => { setCommentCount(n); if (n === commentCount) setShowComments(false); }}
+            />
           </div>
         </div>
       )}
+
+      {/* Share modal */}
       {showShare && (
-        <ShareModal
-          url={`${window.location.origin}/app/reels`}
-          title={reel.title || "Reel Story221"}
-          onClose={() => setShowShare(false)}
-        />
+        <ShareModal url={shareUrl} title={reel.title || "Reel Story221"} mediaUrl={reel.video_url} mediaType="video" onShared={handleShared} onClose={() => setShowShare(false)} />
       )}
     </div>
   );
