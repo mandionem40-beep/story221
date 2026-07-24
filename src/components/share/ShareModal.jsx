@@ -3,7 +3,7 @@ import { X, Copy, Check, MessageCircle, Facebook, Instagram, Music, Share2, Load
 import { toast } from "@/components/ui/use-toast";
 import { base44 } from "@/api/base44Client";
 
-export default function ShareModal({ url, title, mediaUrl, mediaType, onClose }) {
+export default function ShareModal({ url, title, mediaUrl, mediaType, onClose, onShared }) {
   const [copied, setCopied] = useState(false);
   const [igPublishing, setIgPublishing] = useState(false);
   const [igPublished, setIgPublished] = useState(false);
@@ -17,12 +17,14 @@ export default function ShareModal({ url, title, mediaUrl, mediaType, onClose })
     navigator.clipboard?.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    onShared?.();
   };
 
   const handleNativeShare = async () => {
     if (navigator.share) {
       try {
         await navigator.share({ title: title || "Story221", url });
+        onShared?.();
       } catch { /* user cancelled */ }
     } else {
       handleCopy();
@@ -35,6 +37,7 @@ export default function ShareModal({ url, title, mediaUrl, mediaType, onClose })
       toast({ title: "Lien copié !", description: "Collez-le dans l'application." });
     }
     window.open(platformUrl, "_blank");
+    onShared?.();
   };
 
   const handleInstagramPublish = async () => {
@@ -62,13 +65,13 @@ export default function ShareModal({ url, title, mediaUrl, mediaType, onClose })
       name: "WhatsApp",
       icon: MessageCircle,
       color: "bg-green-500 hover:bg-green-600",
-      onClick: () => window.open(`https://wa.me/?text=${encodedTitle}%20${encodedUrl}`, "_blank"),
+      onClick: () => openPlatform(`https://wa.me/?text=${encodedTitle}%20${encodedUrl}`),
     },
     {
       name: "Facebook",
       icon: Facebook,
       color: "bg-blue-600 hover:bg-blue-700",
-      onClick: () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, "_blank"),
+      onClick: () => openPlatform(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`),
     },
     {
       name: "TikTok",

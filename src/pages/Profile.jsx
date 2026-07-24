@@ -6,6 +6,7 @@ import DiamondIcon from "@/components/DiamondIcon";
 import { Image } from "@/components/ui/image";
 import { toast } from "@/components/ui/use-toast";
 import ReferralDashboard from "@/components/referral/ReferralDashboard";
+import NotificationPreferences from "@/components/NotificationPreferences";
 
 export default function Profile() {
   const { currentUser, refreshUser } = useOutletContext();
@@ -193,6 +194,9 @@ export default function Profile() {
         </div>
         <Link to="/app/diamonds" className="text-sm text-primary hover:underline">Acheter</Link>
       </div>
+
+      {/* Notification Preferences */}
+      <NotificationPreferences currentUser={currentUser} />
 
       {/* Referral Dashboard */}
       <ReferralDashboard currentUser={currentUser} />

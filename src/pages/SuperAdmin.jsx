@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
-import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video, Share2, Mail, Cpu, Gift, Building2, MessageCircle, MousePointerClick, Zap, Wallet } from "lucide-react";
+import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video, Share2, Mail, Cpu, Gift, Building2, MessageCircle, MousePointerClick, Zap, Wallet, Film } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import AnalyticsTab from "@/components/admin/AnalyticsTab";
 import AdjustCreditsDialog from "@/components/admin/AdjustCreditsDialog";
@@ -16,6 +16,7 @@ import TransactionsTab from "@/components/admin/TransactionsTab";
 import PixelsTab from "@/components/admin/PixelsTab";
 import SocialPublishingTab from "@/components/admin/SocialPublishingTab";
 import FinanceTab from "@/components/admin/FinanceTab";
+import FeedConfigTab from "@/components/admin/FeedConfigTab";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: BarChart3 },
@@ -34,6 +35,7 @@ const tabs = [
   { id: "params", label: "Paramètres", icon: Building2 },
   { id: "pixels", label: "Pixels", icon: MousePointerClick },
   { id: "social_pub", label: "Publication Auto", icon: Zap },
+  { id: "feed", label: "Fil Reels", icon: Film },
   { id: "messages", label: "Messagerie", icon: Mail },
 ];
 
@@ -649,6 +651,10 @@ export default function SuperAdmin() {
             {/* Social Auto-Publish tab */}
             {activeTab === "social_pub" && (
               <SocialPublishingTab />
+            )}
+
+            {activeTab === "feed" && (
+              <FeedConfigTab />
             )}
 
             {/* Analytics tab */}

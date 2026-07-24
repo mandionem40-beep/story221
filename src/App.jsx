@@ -18,6 +18,7 @@ import Home from '@/pages/Home';
 import Create from '@/pages/Create';
 import QuickCreate from '@/pages/QuickCreate';
 import Influencers from '@/pages/Influencers';
+import PublicReel from '@/pages/PublicReel';
 import Library from '@/pages/Library';
 import Reels from '@/pages/Reels';
 import Diamonds from '@/pages/Diamonds';
@@ -55,6 +56,7 @@ const AuthenticatedApp = () => {
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/reel" element={<PublicReel />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
