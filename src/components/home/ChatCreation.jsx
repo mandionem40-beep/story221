@@ -16,6 +16,20 @@ export default function ChatCreation({ selectedCategory, currentUser }) {
   const [language, setLanguage] = useState("Français");
   const [voice, setVoice] = useState("river");
   const [mediaType, setMediaType] = useState("video");
+  const [showUploadMenu, setShowUploadMenu] = useState(false);
+  const imageInputRef = useRef(null);
+  const videoInputRef = useRef(null);
+  const uploadMenuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (uploadMenuRef.current && !uploadMenuRef.current.contains(e.target)) {
+        setShowUploadMenu(false);
+      }
+    };
+    if (showUploadMenu) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showUploadMenu]);
 
   const cost = mediaType === "video" ? duration.cost : 5;
   const { covered, remaining } = calculateFreeTrial(cost, currentUser?.free_trial_used);
@@ -135,35 +149,54 @@ export default function ChatCreation({ selectedCategory, currentUser }) {
         </div>
       )}
 
-      {/* Bottom bar: uploads + settings + generate */}
-      <div className="flex items-center gap-2 mt-3">
-        {/* Upload buttons */}
-        <label className="w-9 h-9 rounded-lg bg-secondary border border-border flex items-center justify-center cursor-pointer hover:border-primary/40 transition-colors flex-shrink-0">
-          {uploading ? <Loader2 className="w-4 h-4 text-primary animate-spin" /> : <Upload className="w-4 h-4 text-muted-foreground" />}
-          <input type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
-        </label>
-        <label className="w-9 h-9 rounded-lg bg-secondary border border-border flex items-center justify-center cursor-pointer hover:border-primary/40 transition-colors flex-shrink-0">
-          <VideoIcon className="w-4 h-4 text-muted-foreground" />
-          <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
-        </label>
+      {/* Bottom bar: upload + + settings + generate */}
+      <div className="flex items-center gap-1.5 sm:gap-2 mt-3">
+        {/* Upload "+" button with menu */}
+        <div className="relative flex-shrink-0" ref={uploadMenuRef}>
+          <button
+            onClick={() => setShowUploadMenu(!showUploadMenu)}
+            className="w-9 h-9 rounded-lg bg-secondary border border-border flex items-center justify-center hover:border-primary/40 transition-colors"
+          >
+            {uploading ? <Loader2 className="w-4 h-4 text-primary animate-spin" /> : <Plus className={`w-4 h-4 text-muted-foreground transition-transform ${showUploadMenu ? "rotate-45" : ""}`} />}
+          </button>
+          {showUploadMenu && (
+            <div className="absolute bottom-11 left-0 z-50 w-36 rounded-xl bg-popover border border-border shadow-xl overflow-hidden">
+              <button
+                onClick={() => { imageInputRef.current?.click(); setShowUploadMenu(false); }}
+                className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-medium text-white hover:bg-primary/10 transition-colors"
+              >
+                <ImageIcon className="w-3.5 h-3.5 text-primary" /> Photo
+              </button>
+              <button
+                onClick={() => { videoInputRef.current?.click(); setShowUploadMenu(false); }}
+                className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-medium text-white hover:bg-primary/10 transition-colors border-t border-border"
+              >
+                <VideoIcon className="w-3.5 h-3.5 text-primary" /> Vidéo
+              </button>
+            </div>
+          )}
+          <input ref={imageInputRef} type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
+          <input ref={videoInputRef} type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
+        </div>
 
         {/* Settings toggle */}
         <button
           onClick={() => setShowSettings(!showSettings)}
-          className="flex items-center gap-1 px-3 h-9 rounded-lg bg-secondary border border-border text-xs text-muted-foreground hover:text-white transition-colors"
+          className="flex items-center gap-1 px-2 sm:px-3 h-9 rounded-lg bg-secondary border border-border text-xs text-muted-foreground hover:text-white transition-colors flex-shrink-0"
         >
-          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showSettings ? "rotate-180" : ""}`} />
-          {duration.label} · {language}
+          <ChevronDown className={`w-3.5 h-3.5 transition-transform flex-shrink-0 ${showSettings ? "rotate-180" : ""}`} />
+          <span className="hidden sm:inline truncate max-w-[120px]">{duration.label} · {language}</span>
+          <span className="sm:hidden"><DiamondIcon className="w-3 h-3 inline" /></span>
         </button>
 
         {/* Generate button */}
         <button
           onClick={handleGenerate}
           disabled={!prompt.trim() || !selectedCategory}
-          className="flex-1 h-9 rounded-lg bg-primary text-white text-sm font-semibold flex items-center justify-center gap-1.5 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed glow-red-sm"
+          className="flex-1 min-w-0 h-9 rounded-lg bg-primary text-white text-sm font-semibold flex items-center justify-center gap-1.5 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed glow-red-sm"
         >
-          <Send className="w-3.5 h-3.5" />
-          {prompt.trim() && selectedCategory ? `Générer (${remaining > 0 ? remaining : 0} 💎)` : "Générer"}
+          <Send className="w-3.5 h-3.5 flex-shrink-0" />
+          <span className="truncate">{prompt.trim() && selectedCategory ? `Générer (${remaining > 0 ? remaining : 0} 💎)` : "Générer"}</span>
         </button>
       </div>
 
