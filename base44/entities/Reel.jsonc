@@ -39,6 +39,10 @@
     "author_avatar": {
       "type": "string"
     },
+    "influencer_id": {
+      "type": "string",
+      "description": "Linked Influencer entity ID if this reel was created by an AI influencer"
+    },
     "hidden": {
       "type": "boolean",
       "default": false

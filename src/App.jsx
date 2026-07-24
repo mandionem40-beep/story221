@@ -17,6 +17,7 @@ import Layout from '@/components/dashboard/Layout';
 import Home from '@/pages/Home';
 import Create from '@/pages/Create';
 import QuickCreate from '@/pages/QuickCreate';
+import Influencers from '@/pages/Influencers';
 import Library from '@/pages/Library';
 import Reels from '@/pages/Reels';
 import Diamonds from '@/pages/Diamonds';
@@ -61,6 +62,7 @@ const AuthenticatedApp = () => {
           <Route path="/app" element={<Home />} />
           <Route path="/app/create" element={<Create />} />
           <Route path="/app/quick-create" element={<QuickCreate />} />
+          <Route path="/app/influencers" element={<Influencers />} />
           <Route path="/app/library" element={<Library />} />
           <Route path="/app/reels" element={<Reels />} />
           <Route path="/app/diamonds" element={<Diamonds />} />

@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
-import { Home, Library, Clapperboard, Diamond, User, LogOut, Bell, MessageSquare } from "lucide-react";
+import { Home, Library, Clapperboard, Diamond, User, LogOut, Bell, MessageSquare, Star } from "lucide-react";
 import DiamondIcon from "@/components/DiamondIcon";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
@@ -11,6 +11,7 @@ const navItems = [
   { label: "Accueil", icon: Home, path: "/app" },
   { label: "Bibliothèque", icon: Library, path: "/app/library" },
   { label: "Reels", icon: Clapperboard, path: "/app/reels" },
+  { label: "Influenceurs", icon: Star, path: "/app/influencers" },
   { label: "Messages", icon: MessageSquare, path: "/app/messages" },
   { label: "Diamants", icon: DiamondIcon, path: "/app/diamonds" },
 ];

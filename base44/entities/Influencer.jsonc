@@ -1,0 +1,98 @@
+{
+  "name": "Influencer",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "bio": {
+      "type": "string"
+    },
+    "avatar_url": {
+      "type": "string"
+    },
+    "character_id": {
+      "type": "string",
+      "description": "Source Character entity ID"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "animal",
+        "fruit",
+        "person",
+        "object",
+        "vehicle",
+        "place",
+        "creature"
+      ]
+    },
+    "appearance": {
+      "type": "string"
+    },
+    "color": {
+      "type": "string"
+    },
+    "visual_style": {
+      "type": "string"
+    },
+    "personality_traits": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "personality_profile": {
+      "type": "string",
+      "description": "Claude-generated personality profile"
+    },
+    "speech_samples": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Claude-generated speech examples"
+    },
+    "frozen_voice": {
+      "type": "string"
+    },
+    "frozen_language": {
+      "type": "string"
+    },
+    "content_themes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "follower_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "total_likes": {
+      "type": "integer",
+      "default": 0
+    },
+    "total_views": {
+      "type": "integer",
+      "default": 0
+    },
+    "content_count": {
+      "type": "integer",
+      "default": 0
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": true,
+    "read": true,
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}
