@@ -55,33 +55,33 @@ export default function Home() {
           aria-label="Voir mon profil">
           
           <span className="absolute inset-0 rounded-full bg-primary/40 blur-md animate-pulse-glow" />
-          <span className="relative block w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-primary ring-2 ring-primary/20 bg-card group-hover:scale-110 transition-transform duration-300 hidden">
-            {currentUser?.avatar_url || currentUser?.image_url ?
-            <img
-              src={currentUser.avatar_url || currentUser.image_url}
-              alt="Profil"
-              className="w-full h-full object-cover" /> :
+          
 
 
-            <span className="flex items-center justify-center w-full h-full bg-gradient-to-br from-primary/30 to-secondary text-white text-base font-bold uppercase">
-                {(currentUser?.username || currentUser?.full_name || "U").charAt(0)}
-              </span>
-            }
-          </span>
+
+
+
+
+
+
+
+
+
+          
         </button>
       </div>
 
       {/* Balance badges */}
       <div className="flex items-center gap-2 mb-5">
-        <button
-          onClick={() => navigate("/app/diamonds")}
-          className="relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-card to-secondary border border-primary/30 hover:border-primary/60 transition-all duration-300 hover:scale-105 group overflow-hidden hidden">
-          
-          <span className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/20 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-          <DiamondIcon className="w-4 h-4 relative animate-float" />
-          <span className="text-sm font-semibold text-white relative">{diamonds}</span>
-          <span className="text-[10px] text-muted-foreground relative hidden sm:inline">Diamants</span>
-        </button>
+        
+
+
+
+
+
+
+
+        
         {freeTrialAvailable &&
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
             <Gift className="w-4 h-4 text-primary" />
