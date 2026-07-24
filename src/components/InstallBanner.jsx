@@ -8,6 +8,7 @@ export default function InstallBanner() {
   const [visible, setVisible] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [showIOSHelp, setShowIOSHelp] = useState(false);
+  const [showDesktopHelp, setShowDesktopHelp] = useState(false);
 
   useEffect(() => {
     if (sessionStorage.getItem("s221_install_dismissed")) return;
@@ -42,6 +43,9 @@ export default function InstallBanner() {
       dismiss();
     } else if (isIOS) {
       setShowIOSHelp(true);
+    } else {
+      // Desktop / other browsers without beforeinstallprompt — show manual instructions
+      setShowDesktopHelp(true);
     }
   };
 
@@ -87,6 +91,20 @@ export default function InstallBanner() {
                     <Share className="w-3.5 h-3.5 text-primary flex-shrink-0" />
                     <p className="text-[11px] text-white leading-snug">
                       Bouton <span className="font-bold text-primary">Partager</span> → « Sur l'écran d'accueil »
+                    </p>
+                  </div>
+                  <button onClick={dismiss} className="w-full h-9 rounded-lg bg-primary text-white text-xs font-semibold">
+                    J'ai compris
+                  </button>
+                </div>
+              ) : showDesktopHelp ? (
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2 p-2 rounded-lg bg-secondary/60">
+                    <Share2 className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
+                    <p className="text-[11px] text-white leading-snug">
+                      <span className="font-bold text-primary">Chrome / Edge :</span> cliquez sur l'icône « Installer » dans la barre d'adresse, ou Menu (⋮) → « Installer Story221 ».
+                      <br /><br />
+                      <span className="font-bold text-primary">Safari :</span> Menu Fichier → « Ajouter à la barre de favoris » ou Partager → « Sur l'écran d'accueil ».
                     </p>
                   </div>
                   <button onClick={dismiss} className="w-full h-9 rounded-lg bg-primary text-white text-xs font-semibold">
