@@ -24,7 +24,7 @@ export default function Home() {
           4
         );
         setRecentGens(gens || []);
-      } catch { /* empty state is fine */ }
+      } catch {/* empty state is fine */}
     };
     loadRecent();
   }, [currentUser]);
@@ -51,8 +51,8 @@ export default function Home() {
         </div>
         <button
           onClick={() => navigate("/app/quick-create")}
-          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors glow-red-sm flex-shrink-0"
-        >
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors glow-red-sm flex-shrink-0 hidden">
+          
           <Zap className="w-4 h-4" /> Création rapide
         </button>
       </div>
@@ -63,12 +63,12 @@ export default function Home() {
           <DiamondIcon className="w-4 h-4" />
           <span className="text-sm font-semibold text-white">{diamonds}</span>
         </div>
-        {freeTrialAvailable && (
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+        {freeTrialAvailable &&
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
             <Gift className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium text-primary">Essai gratuit (1 min)</span>
           </div>
-        )}
+        }
       </div>
 
       {/* Chat Creation Zone */}
@@ -82,43 +82,43 @@ export default function Home() {
       {/* Universe Gallery */}
       <UniverseGallery
         selectedId={selectedCategory?.id}
-        onSelect={handleSelectCategory}
-      />
+        onSelect={handleSelectCategory} />
+      
 
 
 
       {/* Recent creations */}
-      {recentGens.length > 0 && (
-        <div className="mt-8">
+      {recentGens.length > 0 &&
+      <div className="mt-8">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Créations récentes</h3>
             <Link to="/app/library" className="text-sm text-primary hover:underline">Tout voir</Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {recentGens.map(gen => (
-              <Link
-                key={gen.id}
-                to="/app/library"
-                className="rounded-xl bg-card border border-border overflow-hidden hover:border-primary/30 transition-colors"
-              >
-                {gen.result_url ? (
-                  <div className="aspect-video bg-secondary">
+            {recentGens.map((gen) =>
+          <Link
+            key={gen.id}
+            to="/app/library"
+            className="rounded-xl bg-card border border-border overflow-hidden hover:border-primary/30 transition-colors">
+            
+                {gen.result_url ?
+            <div className="aspect-video bg-secondary">
                     <Image src={gen.result_url} fittingType="fill" className="w-full h-full" />
-                  </div>
-                ) : (
-                  <div className="aspect-video bg-secondary flex items-center justify-center">
+                  </div> :
+
+            <div className="aspect-video bg-secondary flex items-center justify-center">
                     <Sparkles className="w-5 h-5 text-muted-foreground" />
                   </div>
-                )}
+            }
                 <div className="p-2">
                   <p className="text-xs font-medium text-white truncate">{gen.title || gen.prompt?.substring(0, 30)}</p>
                   <p className="text-[10px] text-muted-foreground">{gen.type}</p>
                 </div>
               </Link>
-            ))}
+          )}
           </div>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }
