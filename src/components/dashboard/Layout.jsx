@@ -7,6 +7,7 @@ import DiamondIcon from "@/components/DiamondIcon";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
 
+// Desktop sidebar uses all items; mobile bottom nav uses only the 4 main ones
 const navItems = [
   { label: "Accueil", icon: Home, path: "/app" },
   { label: "Bibliothèque", icon: Library, path: "/app/library" },
@@ -15,6 +16,14 @@ const navItems = [
   { label: "Démo", icon: Globe, path: "/app/demo" },
   { label: "Influenceurs", icon: Star, path: "/app/influencers" },
   { label: "Messages", icon: MessageSquare, path: "/app/messages" },
+  { label: "Diamants", icon: DiamondIcon, path: "/app/diamonds" },
+];
+
+// Mobile bottom nav — only 4 main buttons
+const mobileNavItems = [
+  { label: "Accueil", icon: Home, path: "/app" },
+  { label: "Bibliothèque", icon: Library, path: "/app/library" },
+  { label: "Reels", icon: Clapperboard, path: "/app/reels" },
   { label: "Diamants", icon: DiamondIcon, path: "/app/diamonds" },
 ];
 
@@ -139,10 +148,10 @@ export default function Layout() {
         <Outlet context={{ currentUser, refreshUser }} />
       </main>
 
-      {/* Mobile Bottom Nav */}
+      {/* Mobile Bottom Nav — 4 main buttons only */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-t border-border">
         <div className="flex items-center justify-around h-16 px-2">
-          {navItems.map((item) => (
+          {mobileNavItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}

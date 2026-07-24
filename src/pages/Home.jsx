@@ -6,6 +6,7 @@ import { base44 } from "@/api/base44Client";
 import { Image } from "@/components/ui/image";
 import UniverseGallery from "@/components/home/UniverseGallery";
 import ChatCreation from "@/components/home/ChatCreation";
+import QuickAccess from "@/components/home/QuickAccess";
 import { characterCategories } from "@/lib/quick-create-data";
 
 export default function Home() {
@@ -75,11 +76,25 @@ export default function Home() {
         <ChatCreation selectedCategory={selectedCategory} currentUser={currentUser} />
       </div>
 
+      {/* Quick Access Shortcuts — after chat */}
+      <QuickAccess />
+
       {/* Universe Gallery */}
       <UniverseGallery
         selectedId={selectedCategory?.id}
         onSelect={handleSelectCategory}
       />
+
+      {/* Quick Create button — at the bottom */}
+      <div className="mt-8 mb-4">
+        <button
+          onClick={() => navigate("/app/quick-create")}
+          className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors glow-red-sm"
+        >
+          <Zap className="w-5 h-5" />
+          Création Rapide
+        </button>
+      </div>
 
       {/* Recent creations */}
       {recentGens.length > 0 && (
