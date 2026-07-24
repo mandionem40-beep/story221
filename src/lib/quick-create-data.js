@@ -1,6 +1,7 @@
 export const characterCategories = [
   {
-    id: "animal", label: "Animal", emoji: "🐾",
+    id: "animal", label: "Animal", emoji: "🐾", desc: "Crée des histoires avec des personnages animaux pleins de vie.",
+    image: "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=200&q=80",
     appearances: [
       { emoji: "🦁", label: "Lion" }, { emoji: "🐘", label: "Éléphant" }, { emoji: "🐒", label: "Singe" },
       { emoji: "🐱", label: "Chat" }, { emoji: "🐶", label: "Chien" }, { emoji: "🦅", label: "Aigle" },
@@ -9,7 +10,8 @@ export const characterCategories = [
     ],
   },
   {
-    id: "fruit", label: "Fruit / Aliment", emoji: "🍓",
+    id: "fruit", label: "Fruit / Aliment", emoji: "🍓", desc: "Des drames viraux avec des fruits et aliments animés.",
+    image: "https://images.unsplash.com/photo-1619566636858-adf101ef2bfd?w=200&q=80",
     appearances: [
       { emoji: "🍓", label: "Fraise" }, { emoji: "🍌", label: "Banane" }, { emoji: "🍎", label: "Pomme" },
       { emoji: "🍊", label: "Orange" }, { emoji: "🥭", label: "Mangue" }, { emoji: "🍍", label: "Ananas" },
@@ -17,7 +19,8 @@ export const characterCategories = [
     ],
   },
   {
-    id: "person", label: "Personne", emoji: "🧑",
+    id: "person", label: "Personne", emoji: "🧑", desc: "Des personnages humains réalistes ou stylisés.",
+    image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
     appearances: [
       { emoji: "👦", label: "Garçon" }, { emoji: "👧", label: "Fille" }, { emoji: "👨", label: "Homme" },
       { emoji: "👩", label: "Femme" }, { emoji: "🧓", label: "Aîné" }, { emoji: "🧒", label: "Enfant" },
@@ -26,7 +29,8 @@ export const characterCategories = [
     ],
   },
   {
-    id: "object", label: "Objet", emoji: "📦",
+    id: "object", label: "Objet", emoji: "📦", desc: "Donnez vie à des objets du quotidien avec l'IA.",
+    image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=200&q=80",
     appearances: [
       { emoji: "🤖", label: "Robot" }, { emoji: "💡", label: "Lampe" }, { emoji: "📱", label: "Téléphone" },
       { emoji: "📖", label: "Livre" }, { emoji: "⚔️", label: "Épée" }, { emoji: "👑", label: "Couronne" },
@@ -34,7 +38,8 @@ export const characterCategories = [
     ],
   },
   {
-    id: "vehicle", label: "Véhicule", emoji: "🚗",
+    id: "vehicle", label: "Véhicule", emoji: "🚗", desc: "Des aventures à toute vitesse avec véhicules animés.",
+    image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=200&q=80",
     appearances: [
       { emoji: "🚗", label: "Voiture" }, { emoji: "🚚", label: "Camion" }, { emoji: "🏍️", label: "Moto" },
       { emoji: "🚤", label: "Bateau" }, { emoji: "✈️", label: "Avion" }, { emoji: "🚂", label: "Train" },
@@ -42,7 +47,8 @@ export const characterCategories = [
     ],
   },
   {
-    id: "place", label: "Lieu / Décor", emoji: "🏠",
+    id: "place", label: "Lieu / Décor", emoji: "🏠", desc: "Explorez des décors et lieux extraordinaires.",
+    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&q=80",
     appearances: [
       { emoji: "🏰", label: "Château" }, { emoji: "🌳", label: "Forêt" }, { emoji: "🏙️", label: "Ville" },
       { emoji: "🏖️", label: "Plage" }, { emoji: "⛰️", label: "Montagne" }, { emoji: "🏠", label: "Maison" },
@@ -50,7 +56,8 @@ export const characterCategories = [
     ],
   },
   {
-    id: "creature", label: "Créature imaginaire", emoji: "✨",
+    id: "creature", label: "Créature imaginaire", emoji: "✨", desc: "Inventez des créatures fantastiques et mythiques.", isNew: true,
+    image: "https://images.unsplash.com/photo-1635776062043-223faf31522d?w=200&q=80",
     appearances: [
       { emoji: "🐉", label: "Dragon" }, { emoji: "🦄", label: "Licorne" }, { emoji: "👾", label: "Monstre" },
       { emoji: "👽", label: "Alien" }, { emoji: "👻", label: "Fantôme" }, { emoji: "🧚", label: "Fée" },
