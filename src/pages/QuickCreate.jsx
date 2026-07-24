@@ -30,6 +30,7 @@ export default function QuickCreate() {
   });
   const [scenarios, setScenarios] = useState([]);
   const [savedCharacters, setSavedCharacters] = useState([]);
+  const [showcases, setShowcases] = useState([]);
 
   const [phase, setPhase] = useState("form"); // form | pipeline | result | error
   const [generation, setGeneration] = useState(null);
@@ -44,6 +45,8 @@ export default function QuickCreate() {
       base44.entities.Character.filter({ created_by_id: currentUser.id }, "-created_date", 50)
         .then(setSavedCharacters).catch(() => {});
     }
+    base44.entities.ShowcaseVideo.filter({ active: true }, "display_order", 50)
+      .then(setShowcases).catch(() => {});
   }, [currentUser]);
 
   useEffect(() => {
@@ -205,7 +208,7 @@ export default function QuickCreate() {
         ))}
       </div>
 
-      {step === 1 && <CharacterTypeStep onSelect={(cat) => { setCharacter({ ...character, category: cat.id, appearance: null }); setStep(2); }} onSurprise={handleSurprise} />}
+      {step === 1 && <CharacterTypeStep showcases={showcases} onSelect={(cat) => { setCharacter({ ...character, category: cat.id, appearance: null }); setStep(2); }} onSurprise={handleSurprise} />}
       {step === 2 && <BuildCharacterStep character={character} onChange={setCharacter} onNext={() => setStep(3)} onBack={() => setStep(1)} />}
       {step === 3 && <StoryStep story={story} scenarios={scenarios.length > 0 ? scenarios : defaultScenarios} savedCharacters={savedCharacters} onChange={setStory} onNext={() => setStep(4)} onBack={() => setStep(2)} />}
       {step === 4 && <SettingsStep settings={settings} onChange={setSettings} onNext={() => setStep(5)} onBack={() => setStep(3)} diamonds={currentUser?.diamonds ?? 0} />}
