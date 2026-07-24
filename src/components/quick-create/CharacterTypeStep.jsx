@@ -1,5 +1,5 @@
-import { characterCategories } from "@/lib/quick-create-data";
-import { Dice5, Sparkles, Play } from "lucide-react";
+import CategoryVideoGrid from "@/components/quick-create/CategoryVideoGrid";
+import { Dice5 } from "lucide-react";
 
 export default function CharacterTypeStep({ onSelect, onSurprise, showcases = [] }) {
   return (
@@ -17,54 +17,7 @@ export default function CharacterTypeStep({ onSelect, onSurprise, showcases = []
         Surprends-moi !
       </button>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {characterCategories.map((cat, i) => {
-          const showcase = showcases[i];
-          const imageUrl = showcase?.thumbnail_url || cat.image;
-          const videoUrl = cat.video_url;
-          return (
-            <button
-              key={cat.id}
-              onClick={() => onSelect(cat)}
-              className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/50 transition-all duration-300 group hover:glow-red-sm"
-            >
-              {videoUrl ? (
-                <video
-                  src={videoUrl}
-                  poster={imageUrl}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-              ) : (
-                <img
-                  src={imageUrl}
-                  alt={cat.label}
-                  className="absolute inset-0 w-full h-full object-cover animate-ken-burns"
-                  loading="lazy"
-                />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-              {cat.isNew && (
-                <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-primary/90 text-white text-[10px] font-semibold flex items-center gap-1 z-10">
-                  <Sparkles className="w-2.5 h-2.5" /> Nouveau
-                </span>
-              )}
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="w-11 h-11 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
-                  <Play className="w-5 h-5 text-white fill-white ml-0.5" />
-                </div>
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 p-2.5">
-                <h3 className="text-sm font-bold text-white leading-tight">{cat.label}</h3>
-                <p className="text-[10px] text-white/70 line-clamp-2 leading-snug mt-0.5">{cat.desc}</p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
+      <CategoryVideoGrid showcases={showcases} onSelect={onSelect} />
     </div>
   );
 }

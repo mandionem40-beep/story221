@@ -5,6 +5,7 @@ import DiamondIcon from "@/components/DiamondIcon";
 import { contentTypes, calculateCost, styles, languages } from "@/lib/generation-utils";
 import { base44 } from "@/api/base44Client";
 import { Image } from "@/components/ui/image";
+import CategoryVideoGrid from "@/components/quick-create/CategoryVideoGrid";
 
 const MAX_IMAGES = 10;
 
@@ -259,6 +260,12 @@ export default function Home() {
         <Send className="w-4 h-4" />
         {prompt.trim() ? <span className="flex items-center gap-1.5">Générer ({cost}) <DiamondIcon className="w-4 h-4" /></span> : "Tapez votre idée..."}
       </button>
+
+      {/* Category video grid */}
+      <div className="mt-8">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Choisis ton univers</h3>
+        <CategoryVideoGrid onSelect={() => navigate("/app/quick-create")} />
+      </div>
 
       {/* Quick type grid */}
       <div className="mt-8">

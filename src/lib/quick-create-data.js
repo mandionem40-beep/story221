@@ -13,6 +13,7 @@ export const characterCategories = [
   {
     id: "fruit", label: "Fruit'z Story", emoji: "🍓", desc: "Dramas viraux avec personnages à têtes de fruits.",
     image: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/7fc6e5eaa_image.png",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/b474fefc8_Fruit_z_Story.mp4",
     appearances: [
       { emoji: "🍓", label: "Fraise" }, { emoji: "🍌", label: "Banane" }, { emoji: "🍎", label: "Pomme" },
       { emoji: "🍊", label: "Orange" }, { emoji: "🥭", label: "Mangue" }, { emoji: "🍍", label: "Ananas" },
@@ -33,6 +34,7 @@ export const characterCategories = [
   {
     id: "object", label: "Publicité", emoji: "📢", desc: "Crée des publicités impactantes pour ta marque.",
     image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&q=80",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/9429fc9fe_Publicit_Saly.mp4",
     appearances: [
       { emoji: "🤖", label: "Robot" }, { emoji: "💡", label: "Lampe" }, { emoji: "📱", label: "Téléphone" },
       { emoji: "📖", label: "Livre" }, { emoji: "⚔️", label: "Épée" }, { emoji: "👑", label: "Couronne" },
@@ -67,6 +69,50 @@ export const characterCategories = [
       { emoji: "🐉", label: "Dragon" }, { emoji: "🦄", label: "Licorne" }, { emoji: "👾", label: "Monstre" },
       { emoji: "👽", label: "Alien" }, { emoji: "👻", label: "Fantôme" }, { emoji: "🧚", label: "Fée" },
       { emoji: "🧜", label: "Sirène" }, { emoji: "🔥", label: "Phénix" },
+    ],
+  },
+  {
+    id: "film", label: "Film", emoji: "🎬", desc: "Des courts-métrages cinématiques immersifs.", isNew: true,
+    image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&q=80",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/d7c4910fa_Film.mp4",
+    appearances: [
+      { emoji: "🎭", label: "Drame" }, { emoji: "😄", label: "Comédie" }, { emoji: "😱", label: "Horreur" },
+      { emoji: "💕", label: "Romance" }, { emoji: "🕵️", label: "Thriller" }, { emoji: "🤠", label: "Western" },
+    ],
+  },
+  {
+    id: "serie", label: "Série", emoji: "📺", desc: "Des épisodes de série dramatique captivants.", isNew: true,
+    image: "https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=400&q=80",
+    appearances: [
+      { emoji: "🔥", label: "Drame" }, { emoji: "😂", label: "Sitcom" }, { emoji: "🔪", label: "Crime" },
+      { emoji: "🏰", label: "Historique" }, { emoji: "🚀", label: "Sci-Fi" }, { emoji: "👻", label: "Fantastique" },
+    ],
+  },
+  {
+    id: "anime", label: "Anime", emoji: "🎏", desc: "Des animations style japonais explosives.", isNew: true,
+    image: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&q=80",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/ff50d1666_Anime.mp4",
+    appearances: [
+      { emoji: "⚔️", label: "Shonen" }, { emoji: "🌸", label: "Shojo" }, { emoji: "🌑", label: "Seinen" },
+      { emoji: "👻", label: "Surnaturel" }, { emoji: "🤖", label: "Mecha" }, { emoji: "🎯", label: "Isekai" },
+    ],
+  },
+  {
+    id: "music_clip", label: "Clip Musique", emoji: "🎵", desc: "Des clips musicaux dynamiques et néon.", isNew: true,
+    image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&q=80",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/190d62bac_Clip_Musique.mp4",
+    appearances: [
+      { emoji: "🎤", label: "Rap" }, { emoji: "🎸", label: "Rock" }, { emoji: "🥁", label: "Afrobeat" },
+      { emoji: "🎹", label: "Électro" }, { emoji: "🎷", label: "Jazz" }, { emoji: "🎻", label: "Classique" },
+    ],
+  },
+  {
+    id: "manga", label: "Manga", emoji: "📕", desc: "Des scènes manga animées avec effet de vitesse.", isNew: true,
+    image: "https://images.unsplash.com/photo-1612036782185-5f138d549b39?w=400&q=80",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/3081193f3_Manga.mp4",
+    appearances: [
+      { emoji: "💥", label: "Action" }, { emoji: "🌀", label: "Aventure" }, { emoji: "😄", label: "Comédie" },
+      { emoji: "💀", label: "Dark" }, { emoji: "🌟", label: "Hero" }, { emoji: "👹", label: "Démon" },
     ],
   },
 ];
