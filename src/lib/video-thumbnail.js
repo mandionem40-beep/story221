@@ -1,35 +1,81 @@
 /**
- * Video Thumbnail Extractor
+ * Video Thumbnail Extractor — with persistent localStorage cache.
  *
  * Extracts a real frame from a video file using a hidden <video> + <canvas>,
- * producing a JPEG data URL used as a poster image.
+ * producing a small JPEG data URL used as a poster image.
+ *
+ * Posters are persisted to localStorage so on repeat visits they are available
+ * INSTANTLY (synchronous, zero network) — even on the weakest connection.
  *
  * The extracted thumbnail is a TRUE frame from the video — not a separate
  * stock image — so there's no visual "change" between poster and video.
- *
- * Results are cached per URL. If CORS or any error prevents extraction,
- * resolves null (graceful fallback — AutoVideo shows the video's first
- * frame directly).
  */
 
 const thumbnailCache = new Map(); // url → Promise<string|null>
 const resolvedValues = new Map(); // url → string (sync lookup)
 
+const STORAGE_PREFIX = "vthumb_";
+const MAX_STORAGE_SIZE = 40; // max thumbnails in localStorage
+
+function getStorageKey(videoUrl) {
+  let hash = 0;
+  for (let i = 0; i < videoUrl.length; i++) {
+    hash = ((hash << 5) - hash) + videoUrl.charCodeAt(i);
+    hash |= 0;
+  }
+  return STORAGE_PREFIX + Math.abs(hash).toString(36);
+}
+
+function getFromStorage(videoUrl) {
+  try {
+    return localStorage.getItem(getStorageKey(videoUrl)) || null;
+  } catch {
+    return null;
+  }
+}
+
+function saveToStorage(videoUrl, dataUrl) {
+  try {
+    // Evict oldest entries if at capacity
+    const keys = Object.keys(localStorage).filter((k) =>
+      k.startsWith(STORAGE_PREFIX)
+    );
+    if (keys.length >= MAX_STORAGE_SIZE) {
+      keys.slice(0, keys.length - MAX_STORAGE_SIZE + 1).forEach((k) =>
+        localStorage.removeItem(k)
+      );
+    }
+    localStorage.setItem(getStorageKey(videoUrl), dataUrl);
+  } catch {
+    // localStorage might be full — silently ignore
+  }
+}
+
 /**
  * Extract a frame from a video URL.
  * @param {string} videoUrl
- * @param {number} seekTime - seconds to seek for the frame (default 0.3)
+ * @param {number} seekTime - seconds to seek (default 0 = first frame)
  * @returns {Promise<string|null>} JPEG data URL or null
  */
-export function getVideoThumbnail(videoUrl, seekTime = 0.3) {
-  // If already resolved, return immediately
+export function getVideoThumbnail(videoUrl, seekTime = 0) {
+  // 1. Check sync memory cache
   if (resolvedValues.has(videoUrl)) {
     return Promise.resolve(resolvedValues.get(videoUrl));
   }
+
+  // 2. Check localStorage (synchronous, instant on repeat visits)
+  const stored = getFromStorage(videoUrl);
+  if (stored) {
+    resolvedValues.set(videoUrl, stored);
+    return Promise.resolve(stored);
+  }
+
+  // 3. Already extracting?
   if (thumbnailCache.has(videoUrl)) {
     return thumbnailCache.get(videoUrl);
   }
 
+  // 4. Extract from video
   const promise = new Promise((resolve) => {
     const video = document.createElement("video");
     video.crossOrigin = "anonymous";
@@ -43,7 +89,10 @@ export function getVideoThumbnail(videoUrl, seekTime = 0.3) {
     const finish = (result) => {
       if (done) return;
       done = true;
-      if (result) resolvedValues.set(videoUrl, result);
+      if (result) {
+        resolvedValues.set(videoUrl, result);
+        saveToStorage(videoUrl, result);
+      }
       resolve(result);
       try {
         video.pause();
@@ -57,34 +106,28 @@ export function getVideoThumbnail(videoUrl, seekTime = 0.3) {
 
     const captureFrame = () => {
       try {
-        const w = video.videoWidth || 640;
-        const h = video.videoHeight || 360;
+        const vw = video.videoWidth || 320;
+        const vh = video.videoHeight || 180;
+        // Scale down: max 320px wide → small data URL, fast to store/read
+        const scale = Math.min(1, 320 / vw);
+        const w = Math.round(vw * scale);
+        const h = Math.round(vh * scale);
         const canvas = document.createElement("canvas");
         canvas.width = w;
         canvas.height = h;
         const ctx = canvas.getContext("2d");
         ctx.drawImage(video, 0, 0, w, h);
-        finish(canvas.toDataURL("image/jpeg", 0.75));
+        finish(canvas.toDataURL("image/jpeg", 0.6));
       } catch {
         finish(null);
       }
     };
 
-    video.addEventListener(
-      "loadeddata",
-      () => {
-        try {
-          video.currentTime = seekTime;
-        } catch {
-          captureFrame();
-        }
-      },
-      { once: true }
-    );
-
-    video.addEventListener("seeked", captureFrame, { once: true });
+    // Capture as soon as the first frame is decoded (no seek needed — faster)
+    video.addEventListener("loadeddata", captureFrame, { once: true });
     video.addEventListener("error", () => finish(null), { once: true });
-    setTimeout(() => finish(null), 5000);
+    // Timeout: 10s (generous for weak connections)
+    setTimeout(() => finish(null), 10000);
   });
 
   thumbnailCache.set(videoUrl, promise);
@@ -92,10 +135,19 @@ export function getVideoThumbnail(videoUrl, seekTime = 0.3) {
 }
 
 /**
- * Synchronous check — returns cached thumbnail data URL or null.
+ * Synchronous check — returns cached thumbnail from memory or localStorage.
+ * Used by AutoVideo for instant poster display on mount.
  */
 export function getCachedThumbnail(videoUrl) {
-  return resolvedValues.get(videoUrl) || null;
+  if (resolvedValues.has(videoUrl)) {
+    return resolvedValues.get(videoUrl);
+  }
+  const stored = getFromStorage(videoUrl);
+  if (stored) {
+    resolvedValues.set(videoUrl, stored);
+    return stored;
+  }
+  return null;
 }
 
 /**

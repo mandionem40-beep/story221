@@ -5,16 +5,13 @@ import { getVideoThumbnail, getCachedThumbnail } from "@/lib/video-thumbnail";
 /**
  * AutoVideo — instant-play video with a real frame as poster.
  *
- * - Extracts a TRUE frame from the video itself (via canvas) and uses it as
- *   the poster image. No separate stock image — the poster IS the video's
- *   own frame, so there's no visual "change" between poster and playback.
- * - preload="auto" ALWAYS: the browser starts downloading immediately on
- *   mount, not when scrolled into view.
- * - Poster (extracted frame) shows instantly at opacity-100 while the video
- *   buffers, then crossfades to the playing video when canPlay fires.
- * - Global video preloader (src/lib/video-preloader.js) pre-generates
- *   thumbnails at app boot, so by the time any card mounts the poster is
- *   already in cache → zero black cage, instant display.
+ * - Poster is a TRUE frame extracted from the video itself (via canvas),
+ *   persisted to localStorage → instant on repeat visits, zero black cage.
+ * - preload="auto" ALWAYS: browser starts downloading on mount.
+ * - Poster stays visible until the video is ACTUALLY playing (onPlaying),
+ *   not just "can play" — prevents any black flash on slow connections.
+ * - If no poster yet (first visit), video element is visible at opacity-100
+ *   so the browser shows its own first frame as soon as data arrives.
  */
 export default function AutoVideo({
   src,
@@ -25,23 +22,21 @@ export default function AutoVideo({
 }) {
   const videoRef = useRef(null);
   const [visible, setVisible] = useState(true);
-  const [canPlay, setCanPlay] = useState(false);
-  // Start with cached thumbnail if available (synchronous, instant)
+  const [playing, setPlaying] = useState(false);
+  // Synchronous init: check memory cache + localStorage (instant on repeat visits)
   const [poster, setPoster] = useState(() => getCachedThumbnail(src));
 
   const isActive = controlledActive ?? visible;
 
-  // Generate thumbnail from video (or get from cache)
+  // Generate thumbnail if not cached (only runs once per device per video)
   useEffect(() => {
     let cancelled = false;
     if (!src) return;
-    // Check sync cache first
     const cached = getCachedThumbnail(src);
     if (cached) {
       setPoster(cached);
       return;
     }
-    // Otherwise extract from video
     getVideoThumbnail(src).then((url) => {
       if (!cancelled && url) setPoster(url);
     });
@@ -50,7 +45,7 @@ export default function AutoVideo({
     };
   }, [src]);
 
-  // Observe visibility to play/pause (NOT to gate preload)
+  // Observe visibility to play/pause
   useEffect(() => {
     if (controlledActive !== undefined) return;
     const el = videoRef.current;
@@ -82,25 +77,31 @@ export default function AutoVideo({
     }
   }, [isActive, src]);
 
-  const handleCanPlay = () => {
-    if (!canPlay) {
-      setCanPlay(true);
+  const handlePlaying = () => {
+    if (!playing) {
+      setPlaying(true);
       onReady?.();
     }
   };
 
+  const handlePause = () => {
+    setPlaying(false);
+  };
+
   if (!src) return null;
+
+  // Poster shows when: we have one AND video isn't actively playing yet
+  const showPoster = poster && !playing;
 
   return (
     <>
-      {/* Real video frame as poster — instant, no visual change */}
-      {poster && !canPlay && (
+      {showPoster && (
         <img
           src={poster}
           alt=""
           aria-hidden="true"
           className={cn(
-            "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
+            "absolute inset-0 w-full h-full object-cover",
             className
           )}
         />
@@ -113,12 +114,15 @@ export default function AutoVideo({
         muted
         playsInline
         preload="auto"
-        onCanPlay={handleCanPlay}
-        onLoadedData={handleCanPlay}
-        onPlaying={handleCanPlay}
+        onPlaying={handlePlaying}
+        onPause={handlePause}
+        onWaiting={handlePause}
         className={cn(
-          "object-cover transition-opacity duration-300",
-          canPlay ? "opacity-100" : "opacity-0",
+          "object-cover",
+          // If poster is showing, hide video until it's playing.
+          // If no poster, show video at full opacity so browser can
+          // display the first frame as soon as data arrives.
+          showPoster ? "opacity-0" : "opacity-100",
           className
         )}
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
