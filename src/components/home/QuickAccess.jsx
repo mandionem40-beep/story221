@@ -12,15 +12,17 @@ const shortcuts = [
 export default function QuickAccess() {
   return (
     <div className="mb-6">
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-5 gap-1 sm:gap-2">
         {shortcuts.map((item) => (
           <Link
             key={item.path}
             to={item.path}
-            className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors"
+            className="flex flex-col items-center justify-center gap-1 py-2.5 sm:py-3 px-1 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors min-w-0"
           >
-            <item.icon className="w-5 h-5 text-primary" />
-            <span className="text-[10px] font-medium text-muted-foreground text-center leading-tight">{item.label}</span>
+            <item.icon className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+            <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground text-center leading-tight break-words w-full">
+              {item.label}
+            </span>
           </Link>
         ))}
       </div>
