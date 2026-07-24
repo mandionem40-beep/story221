@@ -1,0 +1,75 @@
+{
+  "name": "MontagePreset",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "emoji": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "technical_description": {
+      "type": "string",
+      "description": "Technical parameters for the AI: rhythm, transition types, tone"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "display_order": {
+      "type": "integer",
+      "default": 0
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": true,
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

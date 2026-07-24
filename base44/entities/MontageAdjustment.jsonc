@@ -1,0 +1,72 @@
+{
+  "name": "MontageAdjustment",
+  "type": "object",
+  "properties": {
+    "montage_id": {
+      "type": "string"
+    },
+    "prompt": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processing",
+        "completed",
+        "failed"
+      ],
+      "default": "pending"
+    },
+    "cost_diamonds": {
+      "type": "integer",
+      "default": 5
+    },
+    "result_url": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "montage_id",
+    "prompt"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        }
+      ]
+    }
+  }
+}

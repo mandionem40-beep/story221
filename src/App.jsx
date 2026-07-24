@@ -25,6 +25,8 @@ import Diamonds from '@/pages/Diamonds';
 import Profile from '@/pages/Profile';
 import Messages from '@/pages/Messages';
 import SuperAdmin from '@/pages/SuperAdmin';
+import VideoEditor from '@/pages/VideoEditor';
+import DemoGenerator from '@/pages/DemoGenerator';
 import PixelTracker from '@/components/PixelTracker';
 
 const AuthenticatedApp = () => {
@@ -70,6 +72,8 @@ const AuthenticatedApp = () => {
           <Route path="/app/diamonds" element={<Diamonds />} />
           <Route path="/app/profile" element={<Profile />} />
           <Route path="/app/messages" element={<Messages />} />
+          <Route path="/app/editor" element={<VideoEditor />} />
+          <Route path="/app/demo" element={<DemoGenerator />} />
         </Route>
         <Route path="/admin" element={<SuperAdmin />} />
       </Route>

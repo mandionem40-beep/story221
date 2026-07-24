@@ -1,0 +1,86 @@
+{
+  "name": "Montage",
+  "type": "object",
+  "properties": {
+    "source_video_url": {
+      "type": "string"
+    },
+    "preset_id": {
+      "type": "string"
+    },
+    "preset_name": {
+      "type": "string"
+    },
+    "prompt": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processing",
+        "completed",
+        "failed"
+      ],
+      "default": "pending"
+    },
+    "cost_diamonds": {
+      "type": "integer",
+      "default": 0
+    },
+    "duration_minutes": {
+      "type": "number",
+      "default": 1
+    },
+    "result_url": {
+      "type": "string"
+    },
+    "montage_plan": {
+      "type": "string",
+      "description": "Claude-generated montage plan"
+    }
+  },
+  "required": [
+    "source_video_url",
+    "prompt"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        }
+      ]
+    }
+  }
+}

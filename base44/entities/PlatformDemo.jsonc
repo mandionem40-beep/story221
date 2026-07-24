@@ -1,0 +1,90 @@
+{
+  "name": "PlatformDemo",
+  "type": "object",
+  "properties": {
+    "url": {
+      "type": "string"
+    },
+    "rights_confirmed": {
+      "type": "boolean",
+      "default": false
+    },
+    "confirmed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "prompt": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processing",
+        "completed",
+        "failed",
+        "blocked"
+      ],
+      "default": "pending"
+    },
+    "cost_diamonds": {
+      "type": "integer",
+      "default": 0
+    },
+    "duration_minutes": {
+      "type": "number",
+      "default": 1
+    },
+    "result_url": {
+      "type": "string"
+    },
+    "voice_url": {
+      "type": "string"
+    },
+    "block_reason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "url"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        }
+      ]
+    }
+  }
+}
