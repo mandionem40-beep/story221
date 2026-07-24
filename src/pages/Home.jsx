@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useOutletContext, Link } from "react-router-dom";
-import { Sparkles, Gift } from "lucide-react";
+import { Sparkles, Gift, Zap } from "lucide-react";
 import DiamondIcon from "@/components/DiamondIcon";
 import { base44 } from "@/api/base44Client";
 import { Image } from "@/components/ui/image";
 import UniverseGallery from "@/components/home/UniverseGallery";
-import ChatPersonalize from "@/components/home/ChatPersonalize";
+import ChatCreation from "@/components/home/ChatCreation";
+import { characterCategories } from "@/lib/quick-create-data";
 
 export default function Home() {
   const { currentUser } = useOutletContext();
   const navigate = useNavigate();
-  const [chatCategory, setChatCategory] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [recentGens, setRecentGens] = useState([]);
 
   useEffect(() => {
@@ -30,27 +31,33 @@ export default function Home() {
   const diamonds = currentUser?.diamonds ?? 0;
   const freeTrialAvailable = !currentUser?.free_trial_used;
 
-  const handleChat = (category) => setChatCategory(category);
-  const handleQuickCreate = (category) => {
-    if (category.redirect) {
-      navigate(category.redirect);
+  const handleSelectCategory = (cat) => {
+    if (cat.redirect) {
+      navigate(cat.redirect);
     } else {
-      navigate(`/app/quick-create?category=${category.id}`);
+      setSelectedCategory(cat);
     }
   };
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 lg:py-8">
-      {/* Welcome */}
-      <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white">
-          Bonjour, <span className="gradient-text-red">{currentUser?.username || currentUser?.full_name || "créateur"}</span> 👋
-        </h1>
-        <p className="text-muted-foreground mt-1 text-sm sm:text-base">Choisis un univers, personnalise-le, et crée en quelques secondes.</p>
+      {/* Header row */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">
+            Bonjour, <span className="gradient-text-red">{currentUser?.username || currentUser?.full_name || "créateur"}</span> 👋
+          </h1>
+        </div>
+        <button
+          onClick={() => navigate("/app/quick-create")}
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors glow-red-sm flex-shrink-0"
+        >
+          <Zap className="w-4 h-4" /> Création rapide
+        </button>
       </div>
 
       {/* Balance badges */}
-      <div className="flex items-center gap-2 mb-6">
+      <div className="flex items-center gap-2 mb-5">
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-border">
           <DiamondIcon className="w-4 h-4" />
           <span className="text-sm font-semibold text-white">{diamonds}</span>
@@ -63,8 +70,16 @@ export default function Home() {
         )}
       </div>
 
+      {/* Chat Creation Zone */}
+      <div className="mb-6">
+        <ChatCreation selectedCategory={selectedCategory} currentUser={currentUser} />
+      </div>
+
       {/* Universe Gallery */}
-      <UniverseGallery onChat={handleChat} onQuickCreate={handleQuickCreate} />
+      <UniverseGallery
+        selectedId={selectedCategory?.id}
+        onSelect={handleSelectCategory}
+      />
 
       {/* Recent creations */}
       {recentGens.length > 0 && (
@@ -97,15 +112,6 @@ export default function Home() {
             ))}
           </div>
         </div>
-      )}
-
-      {/* Chat Personalize Modal */}
-      {chatCategory && (
-        <ChatPersonalize
-          category={chatCategory}
-          currentUser={currentUser}
-          onClose={() => setChatCategory(null)}
-        />
       )}
     </div>
   );
