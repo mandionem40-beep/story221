@@ -3,7 +3,7 @@ export const characterCategories = [
     id: "fruit", label: "Fruit'z Story", emoji: "🍓", desc: "Dramas viraux avec personnages à têtes de fruits.",
     body_template: "Personnage 3D animé, style cinématique réaliste haut de gamme (qualité Pixar/Disney premium), corps humain entièrement réaliste et détaillé, proportions humaines normales, tête remplacée par un [FRUIT/LÉGUME] entier et texturé de façon photoréaliste (peau, reflets, imperfections naturelles du fruit/légume conservées), expression du visage expressive et vivante intégrée naturellement sur la texture du fruit/légume (yeux, sourcils, bouche animés comme un vrai visage humain), tenue vestimentaire moderne et détaillée cohérente avec la scène, éclairage cinématographique chaud, rendu photoréaliste 3D haute définition. ⚠️ CORPS CONSTANT OBLIGATOIRE: tous les personnages de cette famille (fraises, pastèques, bananes, pommes, ananas, mangues, oranges, cerises, carottes, poivrons, citrons, ail, etc.) doivent avoir un rendu de corps strictement identique en qualité et en style — mêmes proportions, même niveau de détail de peau/vêtements, même qualité de lumière — seule la tête (le fruit/légume) et la tenue changent.",
     image: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/8c3cdc54a_image.png",
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/3a74bf6c5_Fruit_z_Story_Famille.mp4",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/db0d0a7cd_Fruit_z_Story_Animation.mp4",
     appearances: [
       { emoji: "🍓", label: "Fraise" }, { emoji: "🍌", label: "Banane" }, { emoji: "🍎", label: "Pomme" },
       { emoji: "🍊", label: "Orange" }, { emoji: "🥭", label: "Mangue" }, { emoji: "🍍", label: "Ananas" },
@@ -74,8 +74,9 @@ export const characterCategories = [
     id: "object", label: "Publicité", emoji: "📢", desc: "Crée des publicités pour ta marque (logo fourni par toi).",
     body_template: "Template publicitaire Story221. L'utilisateur fournit son propre logo/produit. Le style de rendu reste cohérent avec la marque Story221. Aucun logo de marque réelle non fourni par l'utilisateur n'est reproduit.",
     image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&q=80",
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/9429fc9fe_Publicit_Saly.mp4",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/9e8602580_Pub_Parfum_Luxe.mp4",
     appearances: [
+      { emoji: "🧴", label: "Parfum" }, { emoji: "🥤", label: "Jus Préséa" }, { emoji: "🥛", label: "Lait Laicran" },
       { emoji: "🤖", label: "Robot" }, { emoji: "💡", label: "Lampe" }, { emoji: "📱", label: "Téléphone" },
       { emoji: "📖", label: "Livre" }, { emoji: "⚔️", label: "Épée" }, { emoji: "👑", label: "Couronne" },
       { emoji: "🗝️", label: "Clé" }, { emoji: "🕐", label: "Horloge" },
