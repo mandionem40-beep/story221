@@ -15,7 +15,6 @@ export default function ShowcaseVideoCard({ video }) {
         {hasVideo ? (
           <AutoVideo
             src={video.video_url}
-            posterSrc={video.thumbnail_url}
             onError={() => setError(true)}
             className="absolute inset-0 w-full h-full transition-transform duration-500 group-hover:scale-105"
           />

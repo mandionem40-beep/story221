@@ -2,26 +2,22 @@ import { useRef, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * AutoVideo — instant-play video with no empty cage.
+ * AutoVideo — instant-play video showing its own first frame as poster.
  *
- * Key differences from the old version:
- * - preload="auto" ALWAYS (never "metadata") — the browser starts
- *   downloading immediately on mount, not when scrolled into view.
- * - No IntersectionObserver gate: the video element exists and loads from
- *   the first render, so by the time it's visible the first frame is often
- *   already decoded.
- * - Optional `posterSrc` (static image URL): shown instantly at opacity-1
- *   while the video buffers, then crossfaded out when the video is ready.
- *   This eliminates the empty/black cage entirely.
- * - The video element itself is always rendered (opacity-0 → opacity-1
- *   crossfade when canPlay fires), so there's never a gap.
+ * - preload="auto" ALWAYS: the browser starts downloading immediately on
+ *   mount, not when scrolled into view.
+ * - No IntersectionObserver gate on preload: the video loads from the first
+ *   render so the first frame is decoded as early as possible.
+ * - No separate poster image: the video element itself shows its first frame
+ *   as soon as `loadeddata` fires — no visual "change" between an image and
+ *   the video. The video is always at opacity-100.
+ * - Play/pause based on visibility to save resources when off-screen.
  *
  * Combined with the global video preloader (src/lib/video-preloader.js),
- * repeat visits are fully instant — the videos are in the browser disk cache.
+ * repeat visits are fully instant — videos are in the browser disk cache.
  */
 export default function AutoVideo({
   src,
-  posterSrc,
   className,
   active: controlledActive,
   onReady,
@@ -29,12 +25,11 @@ export default function AutoVideo({
 }) {
   const videoRef = useRef(null);
   const [visible, setVisible] = useState(true);
-  const [canPlay, setCanPlay] = useState(false);
+  const [ready, setReady] = useState(false);
 
   const isActive = controlledActive ?? visible;
 
-  // Observe visibility to play/pause (but NOT to gate preload — preload is
-  // always "auto" so the video downloads immediately regardless of position).
+  // Observe visibility to play/pause (NOT to gate preload).
   useEffect(() => {
     if (controlledActive !== undefined) return;
     const el = videoRef.current;
@@ -55,9 +50,7 @@ export default function AutoVideo({
       const p = v.play();
       if (p && p.catch) {
         p.catch(() => {
-          const retry = () => {
-            v.play().catch(() => {});
-          };
+          const retry = () => { v.play().catch(() => {}); };
           v.addEventListener("canplay", retry, { once: true });
         });
       }
@@ -66,9 +59,9 @@ export default function AutoVideo({
     }
   }, [isActive, src]);
 
-  const handleCanPlay = () => {
-    if (!canPlay) {
-      setCanPlay(true);
+  const handleReady = () => {
+    if (!ready) {
+      setReady(true);
       onReady?.();
     }
   };
@@ -76,36 +69,20 @@ export default function AutoVideo({
   if (!src) return null;
 
   return (
-    <>
-      {/* Static image fallback — instant, no network round-trip for the
-          frame. Crossfades out when the video is ready. */}
-      {posterSrc && !canPlay && (
-        <img
-          src={posterSrc}
-          alt=""
-          aria-hidden="true"
-          className={cn("absolute inset-0 w-full h-full object-cover", className)}
-        />
-      )}
-      <video
-        ref={videoRef}
-        src={src}
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="auto"
-        onCanPlay={handleCanPlay}
-        onLoadedData={handleCanPlay}
-        onPlaying={handleCanPlay}
-        className={cn(
-          "object-cover transition-opacity duration-300",
-          canPlay ? "opacity-100" : "opacity-0",
-          className
-        )}
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-        {...props}
-      />
-    </>
+    <video
+      ref={videoRef}
+      src={src}
+      autoPlay
+      loop
+      muted
+      playsInline
+      preload="auto"
+      onCanPlay={handleReady}
+      onLoadedData={handleReady}
+      onPlaying={handleReady}
+      className={cn("object-cover", className)}
+      style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+      {...props}
+    />
   );
 }
