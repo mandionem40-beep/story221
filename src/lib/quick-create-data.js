@@ -1,24 +1,27 @@
 export const characterCategories = [
   {
     id: "fruit", label: "Fruit'z Story", emoji: "🍓", desc: "Dramas viraux avec personnages à têtes de fruits.",
-    body_template: "Personnages au corps 100% humain (proportions réalistes, mains, bras, jambes humaines avec peau de carnation naturelle) mais dont la TÊTE est un fruit géant: la tête a la forme, la couleur et la texture du fruit (fraise rouge piquée, banane jaune courbe, pastèque verte rayée, pomme rouge lisse, etc.) MAIS le visage est humain — yeux expressifs, nez, bouche, lèvres — intégré directement dans la surface du fruit. Le corps reste totalement humain et identique pour tous les personnages. SEUL le fruit de la tête et sa texture changent.",
+    body_template: "Personnage 3D animé, style cinématique réaliste haut de gamme (qualité Pixar/Disney premium), corps humain entièrement réaliste et détaillé, proportions humaines normales, tête remplacée par un [FRUIT/LÉGUME] entier et texturé de façon photoréaliste (peau, reflets, imperfections naturelles du fruit/légume conservées), expression du visage expressive et vivante intégrée naturellement sur la texture du fruit/légume (yeux, sourcils, bouche animés comme un vrai visage humain), tenue vestimentaire moderne et détaillée cohérente avec la scène, éclairage cinématographique chaud, rendu photoréaliste 3D haute définition. ⚠️ CORPS CONSTANT OBLIGATOIRE: tous les personnages de cette famille (fraises, pastèques, bananes, pommes, ananas, mangues, oranges, cerises, carottes, poivrons, citrons, ail, etc.) doivent avoir un rendu de corps strictement identique en qualité et en style — mêmes proportions, même niveau de détail de peau/vêtements, même qualité de lumière — seule la tête (le fruit/légume) et la tenue changent.",
     image: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/8c3cdc54a_image.png",
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/ffb742f7f_Fruit_z_Story.mp4",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/3a74bf6c5_Fruit_z_Story_Famille.mp4",
     appearances: [
       { emoji: "🍓", label: "Fraise" }, { emoji: "🍌", label: "Banane" }, { emoji: "🍎", label: "Pomme" },
       { emoji: "🍊", label: "Orange" }, { emoji: "🥭", label: "Mangue" }, { emoji: "🍍", label: "Ananas" },
-      { emoji: "🍉", label: "Pastèque" }, { emoji: "🍇", label: "Raisin" },
+      { emoji: "🍉", label: "Pastèque" }, { emoji: "🍇", label: "Raisin" }, { emoji: "🥕", label: "Carotte" },
+      { emoji: "🫑", label: "Poivron" }, { emoji: "🍋", label: "Citron" }, { emoji: "🧄", label: "Ail" },
+      { emoji: "🍒", label: "Cerise" }, { emoji: "🥑", label: "Avocat" },
     ],
   },
   {
     id: "chocolate", label: "Chocolate Story", emoji: "🍫", desc: "Personnages à tête d'aliment/objet sur corps humain constant.", isNew: true,
-    body_template: "Personnages au corps 100% humain (proportions réalistes, mains, bras, jambes humaines) mais dont la PEAU et le VISAGE ont la texture et la couleur du chocolat ou de l'aliment choisi: chocolat au lait (brun lisse et brillant), chocolat noir (brun intense), chocolat blanc (crème ivoire), etc. Le visage reste humain — yeux expressifs, nez, bouche, lèvres — mais toute la peau du visage et du corps a la couleur et la texture de l'aliment. Le corps et les proportions restent humains et constants. SEUL le type d'aliment et sa texture changent.",
+    body_template: "Personnage 3D animé, style cinématique premium et élégant (ambiance chocolaterie/confiserie haut de gamme), corps humain réaliste et détaillé, proportions humaines normales, tête remplacée par [ALIMENT/OBJET: tablette de chocolat noir/au lait/blanc, sucette, bouteille, boule de crème glacée, part de pizza, taco, bonbon...] avec sa texture caractéristique conservée fidèlement (brillance du chocolat, transparence de la bouteille, texture givrée de la glace, etc.), expression du visage vivante et expressive intégrée naturellement sur l'objet/aliment, éclairage chaud et feutré type boutique premium ou cuisine conviviale, rendu photoréaliste 3D haute définition. ⚠️ CORPS CONSTANT OBLIGATOIRE: tous les personnages de cette famille (chocolats, bonbons, boissons, glaces, pizzas, tacos, etc.) doivent avoir un rendu de corps strictement identique en qualité et en style — mêmes proportions, même niveau de détail, même qualité de lumière — seule la tête (l'aliment/objet) et la tenue changent.",
     image: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/89261f01c_image.png",
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/b8be496f7_Chocolate_Story.mp4",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/71395496c_Chocolate_Story_Famille.mp4",
     appearances: [
-      { emoji: "🍫", label: "Chocolat" }, { emoji: "🥛", label: "Lait" }, { emoji: "💰", label: "Or" },
-      { emoji: "💎", label: "Diamant" }, { emoji: "🖊️", label: "Stylo" }, { emoji: "🍶", label: "Bouteille" },
-      { emoji: "🪣", label: "Seau" }, { emoji: "🧹", label: "Balai" },
+      { emoji: "🍫", label: "Chocolat Noir" }, { emoji: "🍫", label: "Chocolat au Lait" }, { emoji: "🍫", label: "Chocolat Blanc" },
+      { emoji: "🍭", label: "Sucette" }, { emoji: "🍶", label: "Bouteille" }, { emoji: "🍦", label: "Crème Glacée" },
+      { emoji: "🍕", label: "Pizza" }, { emoji: "🌮", label: "Taco" }, { emoji: "🍬", label: "Bonbon" },
+      { emoji: "🥤", label: "Soda" }, { emoji: "🍩", label: "Donut" }, { emoji: "🧁", label: "Cupcake" },
     ],
   },
   {
@@ -60,7 +63,7 @@ export const characterCategories = [
     id: "place", label: "Lieux", emoji: "🏛️", desc: "Monuments, villes et paysages stylisés.",
     body_template: "Vues panoramiques cinématographiques des lieux iconiques du Sénégal: Mausolée de Seydina Limamou Laye à Yoff (dôme vert sur la plage au coucher de soleil, avec fidèles Laye habillés en blanc assis sur le sable), Mosquée de la Divinité (minarets blancs et dômes verts sur le rivage, pirogues colorées sur le sable), Monument de la Renaissance (statue de bronze colossale homme-femme-enfant sur piédestal), Île de Gorée (vue aérienne de l'île aux toits rouges entourée d'eau turquoise), Palais de la République (bâtiment néoclassique blanc avec drapeau sénégalais), Corniche Ouest (route côtière avec palmiers, océan et Monument de la Renaissance au loin). Style drone 4K, lumière dorée.",
     image: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/71550b7b1_image.png",
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/706060c07_Lieux_Sngal.mp4",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/3ca8139c6_Lieux_Sngal_Cinmatique.mp4",
     appearances: [
       { emoji: "🏰", label: "Château" }, { emoji: "🌳", label: "Forêt" }, { emoji: "🏙️", label: "Ville" },
       { emoji: "🏖️", label: "Plage" }, { emoji: "⛰️", label: "Montagne" }, { emoji: "🏠", label: "Maison" },

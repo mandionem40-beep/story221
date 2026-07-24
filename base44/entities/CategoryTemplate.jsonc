@@ -1,0 +1,84 @@
+{
+  "name": "CategoryTemplate",
+  "type": "object",
+  "properties": {
+    "category_id": {
+      "type": "string",
+      "description": "The category ID from quick-create-data.js (e.g. 'fruit', 'chocolate')"
+    },
+    "category_label": {
+      "type": "string"
+    },
+    "master_prompt": {
+      "type": "string",
+      "description": "The full master prompt template with [VARIABLE] placeholders injected by Claude at generation time"
+    },
+    "variable_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of variable placeholders in the master prompt (e.g. ['FRUIT/L\u00c9GUME', 'D\u00c9COR DEMAND\u00c9'])"
+    },
+    "family_members": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Catalog of available members in this family (e.g. ['fraise', 'banane', 'carotte'])"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "category_id",
+    "master_prompt"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": true,
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
