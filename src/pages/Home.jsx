@@ -49,12 +49,12 @@ export default function Home() {
             Bonjour, <span className="gradient-text-red">{currentUser?.username || currentUser?.full_name || "créateur"}</span> 👋
           </h1>
         </div>
-        <button
-          onClick={() => navigate("/app/quick-create")}
-          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors glow-red-sm flex-shrink-0 hidden">
-          
-          <Zap className="w-4 h-4" /> Création rapide
-        </button>
+        
+
+
+
+
+        
       </div>
 
       {/* Balance badges */}
