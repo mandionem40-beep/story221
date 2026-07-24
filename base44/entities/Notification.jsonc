@@ -11,6 +11,14 @@
     "type": {
       "type": "string",
       "enum": [
+        "like",
+        "comment",
+        "reply",
+        "follow",
+        "diamonds",
+        "influencer_published",
+        "performance",
+        "moderation",
         "referral_signup",
         "referral_published",
         "referral_reward",
@@ -24,21 +32,43 @@
     },
     "data": {
       "type": "string"
+    },
+    "recipient_id": {
+      "type": "string"
+    },
+    "source_user_id": {
+      "type": "string"
+    },
+    "reel_id": {
+      "type": "string"
+    },
+    "grouped_count": {
+      "type": "integer",
+      "default": 1
     }
   },
   "required": [
-    "title"
+    "title",
+    "type",
+    "recipient_id"
   ],
   "rls": {
     "create": true,
     "read": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "data.recipient_id": "{{user.id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
     },
     "update": {
-      "created_by_id": "{{user.id}}"
+      "data.recipient_id": "{{user.id}}"
     },
     "delete": {
-      "created_by_id": "{{user.id}}"
+      "data.recipient_id": "{{user.id}}"
     }
   }
 }
