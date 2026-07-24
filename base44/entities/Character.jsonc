@@ -11,6 +11,30 @@
     "appearance": {
       "type": "string"
     },
+    "category": {
+      "type": "string",
+      "enum": [
+        "animal",
+        "fruit",
+        "person",
+        "object",
+        "vehicle",
+        "place",
+        "creature"
+      ]
+    },
+    "color": {
+      "type": "string"
+    },
+    "visual_style": {
+      "type": "string"
+    },
+    "personality_traits": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "voice": {
       "type": "string"
     },
@@ -34,6 +58,10 @@
     },
     "reference_image_url": {
       "type": "string"
+    },
+    "share_enabled": {
+      "type": "boolean",
+      "default": false
     }
   },
   "required": [
@@ -42,7 +70,14 @@
   "rls": {
     "create": true,
     "read": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.share_enabled": true
+        }
+      ]
     },
     "update": {
       "created_by_id": "{{user.id}}"
