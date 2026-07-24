@@ -18,6 +18,7 @@ export default function CategoryVideoGrid({ showcases = [], onSelect }) {
             {videoUrl ? (
               <AutoVideo
                 src={videoUrl}
+                posterSrc={imageUrl}
                 className="absolute inset-0 w-full h-full"
               />
             ) : (

@@ -23,7 +23,13 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Preconnect to the video/image CDN so the first video request has no DNS/TLS overhead -->
+    <link rel="preconnect" href="https://media.base44.com" crossorigin />
+    <link rel="dns-prefetch" href="https://media.base44.com" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <!-- Preload the two most visible hero/universe videos so they're cached before React mounts -->
+    <link rel="preload" as="video" href="https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/576aa66d5_Fruit_z_Story_Walk.mp4" />
+    <link rel="preload" as="video" href="https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/c28b60065_Carte_vnement_Ayoo.mp4" />
     <title>Story221 — Studio IA Social | Créez des films avec l'IA</title>
   </head>
   <body>
