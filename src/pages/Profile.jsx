@@ -94,7 +94,7 @@ export default function Profile() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-8">
-        <div className="relative">
+        <div className="relative flex-shrink-0">
           {avatarUrl ? (
             <img src={avatarUrl} alt="" className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-primary" />
           ) : (
@@ -109,36 +109,38 @@ export default function Profile() {
             </label>
           )}
         </div>
-        <div className="flex-1 text-center sm:text-left">
+        <div className="flex-1 text-center sm:text-left min-w-0 w-full">
           {editing ? (
             <input
               value={username}
               onChange={(e) => setUsername(e.target.value.replace(/\s+/g, "_"))}
-              className="text-xl font-bold text-white bg-transparent border-b border-border focus:border-primary outline-none px-1"
+              className="text-lg sm:text-xl font-bold text-white bg-transparent border-b border-border focus:border-primary outline-none px-1 w-full"
               minLength={3}
               maxLength={30}
             />
           ) : (
-            <h1 className="text-xl font-bold text-white">@{username || "utilisateur"}</h1>
+            <h1 className="text-lg sm:text-xl font-bold text-white truncate">@{username || "utilisateur"}</h1>
           )}
-          <p className="text-sm text-muted-foreground mt-0.5">{country}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">{country}</p>
           {!editing && currentUser?.phone && (
-            <p className="text-sm text-muted-foreground mt-0.5">{currentUser.phone}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 truncate">{currentUser.phone}</p>
           )}
-          {!editing && bio && <p className="text-sm text-white/70 mt-2 max-w-md">{bio}</p>}
+          {!editing && bio && <p className="text-sm text-white/70 mt-2 break-words">{bio}</p>}
         </div>
-        <button
-          onClick={() => editing ? handleSave() : setEditing(true)}
-          disabled={saving}
-          className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold flex items-center gap-1.5 disabled:opacity-50"
-        >
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : editing ? <><Save className="w-4 h-4" />Enregistrer</> : <><Edit className="w-4 h-4" />Modifier</>}
-        </button>
-        {editing && (
-          <button onClick={() => setEditing(false)} className="px-4 py-2 rounded-lg bg-secondary text-white text-sm font-medium">
-            <X className="w-4 h-4" />
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start">
+          <button
+            onClick={() => editing ? handleSave() : setEditing(true)}
+            disabled={saving}
+            className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold flex items-center justify-center gap-1.5 disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : editing ? <><Save className="w-4 h-4" />Enregistrer</> : <><Edit className="w-4 h-4" />Modifier</>}
           </button>
-        )}
+          {editing && (
+            <button onClick={() => setEditing(false)} className="px-4 py-2 rounded-lg bg-secondary text-white text-sm font-medium">
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {editing && (
@@ -163,36 +165,36 @@ export default function Profile() {
       )}
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-6 sm:mb-8">
         {[
           { icon: Sparkles, label: "Créations", value: stats.creations },
           { icon: Eye, label: "Vues", value: stats.views },
           { icon: Heart, label: "Likes reçus", value: stats.likes },
           { icon: Users, label: "Abonnés", value: stats.followers },
         ].map(s => (
-          <div key={s.label} className="rounded-xl bg-card border border-border p-4 text-center">
-            <s.icon className="w-5 h-5 text-primary mx-auto mb-2" />
-            <p className="text-xl font-bold text-white">{s.value}</p>
-            <p className="text-xs text-muted-foreground">{s.label}</p>
+          <div key={s.label} className="rounded-xl bg-card border border-border p-3 sm:p-4 text-center">
+            <s.icon className="w-4 h-4 sm:w-5 sm:h-5 text-primary mx-auto mb-1.5 sm:mb-2" />
+            <p className="text-lg sm:text-xl font-bold text-white">{s.value}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">{s.label}</p>
           </div>
         ))}
       </div>
 
       {/* Diamonds */}
-      <div className="rounded-2xl bg-gradient-to-r from-primary/20 to-transparent border border-primary/20 p-5 mb-8 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-            <DiamondIcon className="w-6 h-6" />
+      <div className="rounded-2xl bg-gradient-to-r from-primary/20 to-transparent border border-primary/20 p-4 sm:p-5 mb-6 sm:mb-8 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+            <DiamondIcon className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-xs text-muted-foreground">Diamants</p>
-            <p className="text-lg font-bold text-white flex items-center gap-1">
+            <p className="text-base sm:text-lg font-bold text-white flex items-center gap-1">
               {diamonds}
-              <DiamondIcon className="w-4 h-4" />
+              <DiamondIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </p>
           </div>
         </div>
-        <Link to="/app/diamonds" className="text-sm text-primary hover:underline">Acheter</Link>
+        <Link to="/app/diamonds" className="text-xs sm:text-sm text-primary hover:underline flex-shrink-0">Acheter</Link>
       </div>
 
       {/* Notification Preferences */}
