@@ -44,17 +44,31 @@ export default function Home() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 lg:py-8">
       {/* Header row */}
       <div className="flex items-center justify-between mb-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white truncate">
             Bonjour, <span className="gradient-text-red">{currentUser?.username || currentUser?.full_name || "créateur"}</span> 👋
           </h1>
         </div>
-        
-
-
-
-
-        
+        <button
+          onClick={() => navigate("/app/profile")}
+          className="relative flex-shrink-0 group"
+          aria-label="Voir mon profil"
+        >
+          <span className="absolute inset-0 rounded-full bg-primary/40 blur-md animate-pulse-glow" />
+          <span className="relative block w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-primary ring-2 ring-primary/20 bg-card group-hover:scale-110 transition-transform duration-300">
+            {currentUser?.avatar_url || currentUser?.image_url ? (
+              <img
+                src={currentUser.avatar_url || currentUser.image_url}
+                alt="Profil"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="flex items-center justify-center w-full h-full bg-gradient-to-br from-primary/30 to-secondary text-white text-base font-bold uppercase">
+                {(currentUser?.username || currentUser?.full_name || "U").charAt(0)}
+              </span>
+            )}
+          </span>
+        </button>
       </div>
 
       {/* Balance badges */}
