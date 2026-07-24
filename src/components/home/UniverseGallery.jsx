@@ -1,0 +1,16 @@
+import { characterCategories } from "@/lib/quick-create-data";
+import UniverseCard from "./UniverseCard";
+
+export default function UniverseGallery({ onChat, onQuickCreate }) {
+  return (
+    <div>
+      <h2 className="text-lg font-bold text-white mb-1">🎬 Galerie d'univers</h2>
+      <p className="text-sm text-muted-foreground mb-4">Choisis un univers, personnalise-le, l'IA s'occupe du reste.</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {characterCategories.map(cat => (
+          <UniverseCard key={cat.id} category={cat} onChat={onChat} onQuickCreate={onQuickCreate} />
+        ))}
+      </div>
+    </div>
+  );
+}

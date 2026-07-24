@@ -1,6 +1,29 @@
 export const characterCategories = [
   {
+    id: "fruit", label: "Fruit'z Story", emoji: "🍓", desc: "Dramas viraux avec personnages à têtes de fruits.",
+    body_template: "Corps humain stylisé Story221 (proportions cartoon 3D, gabarit identique pour tous les personnages de cette catégorie), avec une tête en forme de fruit ou légume. Le corps, le style de rendu et les proportions restent constants — seul le fruit/légume de la tête et sa texture change.",
+    image: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/7fc6e5eaa_image.png",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/b474fefc8_Fruit_z_Story.mp4",
+    appearances: [
+      { emoji: "🍓", label: "Fraise" }, { emoji: "🍌", label: "Banane" }, { emoji: "🍎", label: "Pomme" },
+      { emoji: "🍊", label: "Orange" }, { emoji: "🥭", label: "Mangue" }, { emoji: "🍍", label: "Ananas" },
+      { emoji: "🍉", label: "Pastèque" }, { emoji: "🍇", label: "Raisin" },
+    ],
+  },
+  {
+    id: "chocolate", label: "Chocolate Story", emoji: "🍫", desc: "Personnages à tête d'aliment/objet sur corps humain constant.", isNew: true,
+    body_template: "Corps humain stylisé Story221 (même gabarit que Fruit'z Story), avec une tête en forme d'objet ou aliment (chocolat, lait, or, diamant, stylo, bouteille, seau, balai...). Le corps reste identique — seul l'objet de la tête et sa texture change.",
+    image: "https://images.unsplash.com/photo-1511381939415-e44015466834?w=400&q=80",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/68edd69b5_Chocolate_Story.mp4",
+    appearances: [
+      { emoji: "🍫", label: "Chocolat" }, { emoji: "🥛", label: "Lait" }, { emoji: "💰", label: "Or" },
+      { emoji: "💎", label: "Diamant" }, { emoji: "🖊️", label: "Stylo" }, { emoji: "🍶", label: "Bouteille" },
+      { emoji: "🪣", label: "Seau" }, { emoji: "🧹", label: "Balai" },
+    ],
+  },
+  {
     id: "animal", label: "Animaux", emoji: "🐾", desc: "Personnages animaux animés style 3D.",
+    body_template: "Personnage animal stylisé 3D Story221. Le style de rendu (textures, proportions cartoon 3D, qualité cinématique) reste constant — seul l'espèce animale change.",
     image: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/656a1b063_image.png",
     video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/682350670_Animaux.mp4",
     appearances: [
@@ -11,17 +34,8 @@ export const characterCategories = [
     ],
   },
   {
-    id: "fruit", label: "Fruit'z Story", emoji: "🍓", desc: "Dramas viraux avec personnages à têtes de fruits.",
-    image: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/7fc6e5eaa_image.png",
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/b474fefc8_Fruit_z_Story.mp4",
-    appearances: [
-      { emoji: "🍓", label: "Fraise" }, { emoji: "🍌", label: "Banane" }, { emoji: "🍎", label: "Pomme" },
-      { emoji: "🍊", label: "Orange" }, { emoji: "🥭", label: "Mangue" }, { emoji: "🍍", label: "Ananas" },
-      { emoji: "🍉", label: "Pastèque" }, { emoji: "🍇", label: "Raisin" },
-    ],
-  },
-  {
     id: "person", label: "YouTuber", emoji: "🎥", desc: "Crée des vidéos style YouTubeur.",
+    body_template: "Personnage humain générique style créateur de contenu Story221. Style visuel moderne et dynamique — seul le visage, l'âge et le genre varient.",
     image: "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=400&q=80",
     video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/fea2e4bb9_YouTuber.mp4",
     appearances: [
@@ -32,17 +46,8 @@ export const characterCategories = [
     ],
   },
   {
-    id: "object", label: "Publicité", emoji: "📢", desc: "Crée des publicités impactantes pour ta marque.",
-    image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&q=80",
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/9429fc9fe_Publicit_Saly.mp4",
-    appearances: [
-      { emoji: "🤖", label: "Robot" }, { emoji: "💡", label: "Lampe" }, { emoji: "📱", label: "Téléphone" },
-      { emoji: "📖", label: "Livre" }, { emoji: "⚔️", label: "Épée" }, { emoji: "👑", label: "Couronne" },
-      { emoji: "🗝️", label: "Clé" }, { emoji: "🕐", label: "Horloge" },
-    ],
-  },
-  {
-    id: "vehicle", label: "Transport", emoji: "🚌", desc: "BRT, Air Sénégal, TER et plus encore.",
+    id: "vehicle", label: "Transport", emoji: "🚌", desc: "BRT, TER, Air Sénégal stylisés (sans logo officiel).",
+    body_template: "Véhicule stylisé générique Story221 (type BRT/TER/avion stylisé, SANS logo de marque réelle). Le style visuel reste cohérent — seul le type de véhicule change. Aucun logo officiel exact n'est reproduit.",
     image: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=400&q=80",
     video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/cc44a3452_Transport.mp4",
     appearances: [
@@ -52,7 +57,8 @@ export const characterCategories = [
     ],
   },
   {
-    id: "place", label: "Lieux", emoji: "🏛️", desc: "Dubai, Palais du Sénégal et décors inspirants.",
+    id: "place", label: "Lieux", emoji: "🏛️", desc: "Monuments, villes et paysages stylisés.",
+    body_template: "Décor stylisé Story221 (monuments, villes, paysages). Le style visuel reste cohérent — seul le lieu change. Représentation stylisée libre, sans logos ni signalétiques officiels.",
     image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&q=80",
     video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/2b9905261_Lieux.mp4",
     appearances: [
@@ -62,7 +68,19 @@ export const characterCategories = [
     ],
   },
   {
-    id: "creature", label: "Créature", emoji: "✨", desc: "Invente des créatures fantastiques et mythiques.", isNew: true,
+    id: "object", label: "Publicité", emoji: "📢", desc: "Crée des publicités pour ta marque (logo fourni par toi).",
+    body_template: "Template publicitaire Story221. L'utilisateur fournit son propre logo/produit. Le style de rendu reste cohérent avec la marque Story221. Aucun logo de marque réelle non fourni par l'utilisateur n'est reproduit.",
+    image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&q=80",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/9429fc9fe_Publicit_Saly.mp4",
+    appearances: [
+      { emoji: "🤖", label: "Robot" }, { emoji: "💡", label: "Lampe" }, { emoji: "📱", label: "Téléphone" },
+      { emoji: "📖", label: "Livre" }, { emoji: "⚔️", label: "Épée" }, { emoji: "👑", label: "Couronne" },
+      { emoji: "🗝️", label: "Clé" }, { emoji: "🕐", label: "Horloge" },
+    ],
+  },
+  {
+    id: "creature", label: "Créature", emoji: "🐉", desc: "Invente des créatures fantastiques et mythiques.",
+    body_template: "Créature fantastique originale style Story221. Le style de rendu 3D reste constant — seul le type de créature change.",
     image: "https://images.unsplash.com/photo-1559666126-84f389727b9a?w=400&q=80",
     video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/9b2f85645_Crature.mp4",
     appearances: [
@@ -73,6 +91,7 @@ export const characterCategories = [
   },
   {
     id: "film", label: "Film", emoji: "🎬", desc: "Des courts-métrages cinématiques immersifs.", isNew: true,
+    body_template: "Court-métrage cinématique style Story221. Le style visuel (éclairage, colorimétrie, qualité cinématique) reste constant.",
     image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&q=80",
     video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/d7c4910fa_Film.mp4",
     appearances: [
@@ -82,6 +101,7 @@ export const characterCategories = [
   },
   {
     id: "serie", label: "Série", emoji: "📺", desc: "Des épisodes de série dramatique captivants.", isNew: true,
+    body_template: "Épisode de série dramatique style Story221. Le style visuel reste constant.",
     image: "https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=400&q=80",
     appearances: [
       { emoji: "🔥", label: "Drame" }, { emoji: "😂", label: "Sitcom" }, { emoji: "🔪", label: "Crime" },
@@ -90,6 +110,7 @@ export const characterCategories = [
   },
   {
     id: "anime", label: "Anime", emoji: "🎏", desc: "Des animations style japonais explosives.", isNew: true,
+    body_template: "Animation style japonais Story221. Le style visuel anime reste constant.",
     image: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&q=80",
     video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/ff50d1666_Anime.mp4",
     appearances: [
@@ -99,6 +120,7 @@ export const characterCategories = [
   },
   {
     id: "music_clip", label: "Clip Musique", emoji: "🎵", desc: "Des clips musicaux dynamiques et néon.", isNew: true,
+    body_template: "Clip musical dynamique style Story221. Le style visuel néon/énergique reste constant.",
     image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&q=80",
     video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/190d62bac_Clip_Musique.mp4",
     appearances: [
@@ -108,6 +130,7 @@ export const characterCategories = [
   },
   {
     id: "manga", label: "Manga", emoji: "📕", desc: "Des scènes manga animées avec effet de vitesse.", isNew: true,
+    body_template: "Scène manga animée style Story221. Le style visuel manga (lignes de vitesse, effets) reste constant.",
     image: "https://images.unsplash.com/photo-1612036782185-5f138d549b39?w=400&q=80",
     video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/3081193f3_Manga.mp4",
     appearances: [
@@ -115,7 +138,34 @@ export const characterCategories = [
       { emoji: "💀", label: "Dark" }, { emoji: "🌟", label: "Hero" }, { emoji: "👹", label: "Démon" },
     ],
   },
+  {
+    id: "african", label: "Histoires Africaines", emoji: "🌍", desc: "Récits inspirés du patrimoine africain.", isNew: true,
+    body_template: "Personnages fictionnalisés/éducatifs inspirés du patrimoine et de l'histoire africaine, JAMAIS une personne réelle vivante identifiable. Style visuel Story221 cohérent. Les figures historiques sont traitées de façon éducative et fictionnalisée.",
+    image: "https://images.unsplash.com/photo-1515098224017-7b3c4db1d8d4?w=400&q=80",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/1c8915a4a_Histoires_Africaines.mp4",
+    appearances: [
+      { emoji: "👑", label: "Roi" }, { emoji: "🛡️", label: "Guerrier" }, { emoji: "🧙", label: "Sage" },
+      { emoji: "🌾", label: "Paysan" }, { emoji: "🏺", label: "Artisan" }, { emoji: "🎭", label: "Griot" },
+    ],
+  },
+  {
+    id: "influencer", label: "Influenceurs", emoji: "⭐", desc: "Crée et gère tes influenceurs IA.",
+    body_template: "Influenceur IA avec identité verrouillée. Cohérence visuelle et vocale absolue sur toutes les publications.",
+    redirect: "/app/influencers",
+    image: "https://images.unsplash.com/photo-1495803843457-4f2d8d1d1f1f?w=400&q=80",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/ecfeda517_Influenceurs_IA.mp4",
+    appearances: [],
+  },
 ];
+
+export const FREE_TRIAL_MINUTES = 1;
+export const FREE_TRIAL_COST = 10;
+
+export function calculateFreeTrial(cost, freeTrialUsed) {
+  if (freeTrialUsed) return { covered: 0, remaining: cost };
+  const covered = Math.min(cost, FREE_TRIAL_COST);
+  return { covered, remaining: cost - covered };
+}
 
 export const colors = [
   { id: "red", label: "Rouge", hex: "#ef4444" },
@@ -199,7 +249,7 @@ const funNames = [
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 export function randomizeCharacter() {
-  const category = pick(characterCategories);
+  const category = pick(characterCategories.filter(c => !c.redirect));
   return {
     category: category.id,
     appearance: pick(category.appearances),
@@ -224,6 +274,9 @@ export function buildPrompt(character, story, settings) {
   if (character.traits && character.traits.length > 0) {
     prompt += `. Personnalité: ${character.traits.join(", ")}`;
   }
+  if (cat?.body_template) {
+    prompt += `\n\n⚠️ CORPS CONSTANT OBLIGATOIRE (gabarit Story221 — ne JAMAIS modifier le style de corps, seul l'élément caractéristique change): ${cat.body_template}`;
+  }
   if (story.scenario) {
     prompt += `. Scénario: ${story.scenario.title}`;
     if (story.scenario.description) prompt += ` — ${story.scenario.description}`;
@@ -239,5 +292,19 @@ export function buildPrompt(character, story, settings) {
     prompt += `. Détail important: ${story.detail.trim()}`;
   }
   prompt += `. Durée souhaitée: ${settings.duration.minutes} minute(s). Format: ${settings.format}.`;
+  return prompt;
+}
+
+export function buildChatPrompt(category, userDetail, settings) {
+  const langLabel = settings.language === "Wolof" ? "en wolof" : settings.language === "Anglais" ? "en anglais" : "en français";
+  let prompt = `Crée une vidéo ${langLabel} dans l'univers « ${category.label} ».`;
+  if (category.body_template) {
+    prompt += `\n\n⚠️ CORPS CONSTANT OBLIGATOIRE (gabarit Story221 — ne JAMAIS modifier ce style de corps, seul l'élément caractéristique change): ${category.body_template}`;
+  }
+  prompt += `\n\nPersonnalisation de l'utilisateur (ce qui rend cette création unique): ${userDetail}`;
+  prompt += `\nDurée souhaitée: ${settings.duration.minutes} minute(s). Format: ${settings.format}.`;
+  if (settings.voice) prompt += ` Voix narrateur: ${settings.voice}.`;
+  if (settings.music) prompt += ` Ambiance musicale: ${settings.music}.`;
+  prompt += `\nGénère le scénario complet, les scènes, les dialogues et le décor en respectant strictement le corps constant de la catégorie.`;
   return prompt;
 }

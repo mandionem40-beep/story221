@@ -1,26 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useOutletContext, Link } from "react-router-dom";
-import { Send, Settings, Gift, Sparkles, ChevronDown, ImagePlus, X, Loader2 } from "lucide-react";
+import { Sparkles, Gift } from "lucide-react";
 import DiamondIcon from "@/components/DiamondIcon";
-import { contentTypes, calculateCost, styles, languages } from "@/lib/generation-utils";
 import { base44 } from "@/api/base44Client";
 import { Image } from "@/components/ui/image";
-import CategoryVideoGrid from "@/components/quick-create/CategoryVideoGrid";
-
-const MAX_IMAGES = 10;
+import UniverseGallery from "@/components/home/UniverseGallery";
+import ChatPersonalize from "@/components/home/ChatPersonalize";
 
 export default function Home() {
   const { currentUser } = useOutletContext();
   const navigate = useNavigate();
-  const [prompt, setPrompt] = useState("");
-  const [type, setType] = useState("video");
-  const [duration, setDuration] = useState(1);
-  const [language, setLanguage] = useState("Français");
-  const [style, setStyle] = useState(styles[0]);
-  const [showSettings, setShowSettings] = useState(false);
+  const [chatCategory, setChatCategory] = useState(null);
   const [recentGens, setRecentGens] = useState([]);
-  const [uploadedImages, setUploadedImages] = useState([]);
-  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const loadRecent = async () => {
@@ -36,52 +27,15 @@ export default function Home() {
     loadRecent();
   }, [currentUser]);
 
-  const config = contentTypes.find(t => t.id === type) || contentTypes[0];
-  const cost = calculateCost(type, duration);
   const diamonds = currentUser?.diamonds ?? 0;
   const freeTrialAvailable = !currentUser?.free_trial_used;
 
-  const handleImageUpload = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-    const remaining = MAX_IMAGES - uploadedImages.length;
-    if (remaining <= 0) return;
-    const toUpload = files.slice(0, remaining);
-    setUploading(true);
-    try {
-      const results = await Promise.all(
-        toUpload.map((file) => base44.integrations.Core.UploadFile({ file }))
-      );
-      setUploadedImages((prev) => [...prev, ...results.map((r) => r.file_url)]);
-    } catch { /* ignore */ }
-    setUploading(false);
-    e.target.value = "";
-  };
-
-  const handleRemoveImage = (idx) => {
-    setUploadedImages((prev) => prev.filter((_, i) => i !== idx));
-  };
-
-  const handleGenerate = () => {
-    if (!prompt.trim()) return;
-    const params = new URLSearchParams();
-    params.set("type", type);
-    params.set("prompt", prompt.trim());
-    if (config.costType === "per_minute") params.set("duration", duration);
-    params.set("style", style);
-    params.set("language", language);
-    if (uploadedImages.length > 0) {
-      sessionStorage.setItem("pending_reference_images", JSON.stringify(uploadedImages));
+  const handleChat = (category) => setChatCategory(category);
+  const handleQuickCreate = (category) => {
+    if (category.redirect) {
+      navigate(category.redirect);
     } else {
-      sessionStorage.removeItem("pending_reference_images");
-    }
-    navigate(`/app/create?${params.toString()}`);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault();
-      handleGenerate();
+      navigate(`/app/quick-create?category=${category.id}`);
     }
   };
 
@@ -92,11 +46,11 @@ export default function Home() {
         <h1 className="text-2xl sm:text-3xl font-bold text-white">
           Bonjour, <span className="gradient-text-red">{currentUser?.username || currentUser?.full_name || "créateur"}</span> 👋
         </h1>
-        <p className="text-muted-foreground mt-1 text-sm sm:text-base">Décrivez votre idée, l'IA s'occupe du reste.</p>
+        <p className="text-muted-foreground mt-1 text-sm sm:text-base">Choisis un univers, personnalise-le, et crée en quelques secondes.</p>
       </div>
 
       {/* Balance badges */}
-      <div className="flex items-center gap-2 mb-5">
+      <div className="flex items-center gap-2 mb-6">
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-border">
           <DiamondIcon className="w-4 h-4" />
           <span className="text-sm font-semibold text-white">{diamonds}</span>
@@ -104,189 +58,13 @@ export default function Home() {
         {freeTrialAvailable && (
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
             <Gift className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Essai gratuit</span>
+            <span className="text-sm font-medium text-primary">Essai gratuit (1 min)</span>
           </div>
         )}
       </div>
 
-      {/* Quick Create banner */}
-      <button
-        onClick={() => navigate("/app/quick-create")}
-        className="w-full mb-4 p-4 rounded-2xl bg-gradient-to-r from-primary/15 to-primary/5 border border-primary/30 flex items-center gap-3 hover:from-primary/20 hover:to-primary/10 transition-colors text-left glow-red-sm"
-      >
-        <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
-          <Sparkles className="w-6 h-6 text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-white">✨ Création Rapide</p>
-          <p className="text-xs text-muted-foreground">Construis ton personnage et ton histoire en quelques clics — sans écrire !</p>
-        </div>
-        <Send className="w-5 h-5 text-primary flex-shrink-0" />
-      </button>
-
-      {/* Chat / Prompt box */}
-      <div className="rounded-2xl bg-card border border-border overflow-hidden mb-3 focus-within:border-primary/40 transition-colors">
-        <textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Une fraise en or appelée Mandione tombe amoureuse d'une fraise en argent appelée Yama..."
-          className="w-full min-h-[120px] bg-transparent p-4 text-sm text-white placeholder:text-muted-foreground/50 resize-none border-none outline-none"
-          autoFocus
-        />
-
-        {/* Uploaded images preview + upload zone */}
-        {(uploadedImages.length > 0 || uploading) && (
-          <div className="flex gap-2 px-3 pt-3 overflow-x-auto scrollbar-hide">
-            {uploadedImages.map((url, idx) => (
-              <div key={idx} className="relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border border-border group">
-                <Image src={url} fittingType="fill" className="w-full h-full" />
-                <button
-                  onClick={() => handleRemoveImage(idx)}
-                  className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="w-3 h-3 text-white" />
-                </button>
-              </div>
-            ))}
-            {uploading && (
-              <div className="flex-shrink-0 w-16 h-16 rounded-lg border border-dashed border-primary/40 flex items-center justify-center">
-                <Loader2 className="w-5 h-5 text-primary animate-spin" />
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Settings bar */}
-        <div className="flex items-center gap-2 px-3 py-2.5 border-t border-border overflow-x-auto scrollbar-hide">
-          {/* Type selector */}
-          <div className="relative flex-shrink-0">
-            <select
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              className="appearance-none pl-8 pr-7 h-9 rounded-lg bg-secondary border border-border text-xs font-medium text-white cursor-pointer"
-            >
-              {contentTypes.map(t => (
-                <option key={t.id} value={t.id}>{t.label}</option>
-              ))}
-            </select>
-            <config.icon className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-primary pointer-events-none" />
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-          </div>
-
-          {/* Duration (for per_minute types) */}
-          {config.costType === "per_minute" && (
-            <div className="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-secondary border border-border flex-shrink-0">
-              <span className="text-xs text-muted-foreground">Durée</span>
-              <input
-                type="range"
-                min="1"
-                max="10"
-                value={duration}
-                onChange={(e) => setDuration(parseInt(e.target.value))}
-                className="w-14 accent-primary"
-              />
-              <span className="text-xs font-medium text-white">{duration}min</span>
-            </div>
-          )}
-
-          {/* Language */}
-          <div className="relative flex-shrink-0">
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="appearance-none px-3 pr-7 h-9 rounded-lg bg-secondary border border-border text-xs font-medium text-white cursor-pointer"
-            >
-              {languages.map(l => <option key={l.id} value={l.id}>{l.label}</option>)}
-            </select>
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-          </div>
-
-          {/* More settings */}
-          <button
-            onClick={() => setShowSettings(!showSettings)}
-            className={`flex items-center gap-1.5 h-9 px-3 rounded-lg border transition-colors flex-shrink-0 ${
-              showSettings ? "bg-primary/20 border-primary/40 text-primary" : "bg-secondary border-border text-muted-foreground hover:text-white"
-            }`}
-          >
-            <Settings className="w-3.5 h-3.5" />
-            <span className="text-xs font-medium">Réglages</span>
-          </button>
-
-          {/* Image upload */}
-          <label className={`flex items-center gap-1.5 h-9 px-3 rounded-lg border transition-colors flex-shrink-0 cursor-pointer ${
-            uploadedImages.length >= MAX_IMAGES ? "bg-secondary border-border text-muted-foreground/50 cursor-not-allowed" : "bg-secondary border-border text-muted-foreground hover:text-white"
-          }`}>
-            {uploading ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <ImagePlus className="w-3.5 h-3.5" />
-            )}
-            <span className="text-xs font-medium">{uploadedImages.length}/{MAX_IMAGES}</span>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleImageUpload}
-              disabled={uploading || uploadedImages.length >= MAX_IMAGES}
-              className="hidden"
-            />
-          </label>
-
-          {/* Cost indicator */}
-          <div className="flex items-center gap-1 ml-auto flex-shrink-0">
-            <DiamondIcon className="w-4 h-4" />
-            <span className="text-sm font-bold text-white">{cost}</span>
-          </div>
-        </div>
-
-        {/* Expanded settings */}
-        {showSettings && (
-          <div className="px-3 py-3 border-t border-border">
-            <label className="text-xs text-muted-foreground mb-1.5 block">Style visuel</label>
-            <select value={style} onChange={(e) => setStyle(e.target.value)} className="w-full h-9 rounded-lg bg-secondary border border-border px-3 text-xs text-white">
-              {styles.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </div>
-        )}
-      </div>
-
-      {/* Generate button */}
-      <button
-        onClick={handleGenerate}
-        disabled={!prompt.trim()}
-        className="w-full h-12 rounded-2xl bg-primary text-white font-semibold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed glow-red-sm"
-      >
-        <Send className="w-4 h-4" />
-        {prompt.trim() ? <span className="flex items-center gap-1.5">Générer ({cost}) <DiamondIcon className="w-4 h-4" /></span> : "Tapez votre idée..."}
-      </button>
-
-      {/* Category video grid */}
-      <div className="mt-8">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Choisis ton univers</h3>
-        <CategoryVideoGrid onSelect={() => navigate("/app/quick-create")} />
-      </div>
-
-      {/* Quick type grid */}
-      <div className="mt-8">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Types de création</h3>
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-          {contentTypes.map(t => (
-            <button
-              key={t.id}
-              onClick={() => setType(t.id)}
-              className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all ${
-                type === t.id ? "bg-primary/10 border-primary/40" : "bg-card border-border hover:border-primary/30"
-              }`}
-            >
-              <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${t.color} flex items-center justify-center`}>
-                <t.icon className="w-4 h-4 text-white" />
-              </div>
-              <span className="text-[10px] font-medium text-white text-center leading-tight">{t.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* Universe Gallery */}
+      <UniverseGallery onChat={handleChat} onQuickCreate={handleQuickCreate} />
 
       {/* Recent creations */}
       {recentGens.length > 0 && (
@@ -319,6 +97,15 @@ export default function Home() {
             ))}
           </div>
         </div>
+      )}
+
+      {/* Chat Personalize Modal */}
+      {chatCategory && (
+        <ChatPersonalize
+          category={chatCategory}
+          currentUser={currentUser}
+          onClose={() => setChatCategory(null)}
+        />
       )}
     </div>
   );

@@ -27,13 +27,16 @@ export async function deductCredits(base44, userId, generationId, cost) {
   }
 
   const currentDiamonds = freshUser.diamonds || 0;
+  const FREE_TRIAL_MAX_COST = 10; // 1 minute max
   const freeTrialAvailable = !freshUser.free_trial_used && cost > 0;
+  const freeTrialCover = freeTrialAvailable ? Math.min(cost, FREE_TRIAL_MAX_COST) : 0;
+  const remainingCost = cost - freeTrialCover;
 
-  if (!freeTrialAvailable && currentDiamonds < cost) {
+  if (currentDiamonds < remainingCost) {
     throw new Error("Solde insuffisant");
   }
 
-  const newBalance = freeTrialAvailable ? currentDiamonds : currentDiamonds - cost;
+  const newBalance = currentDiamonds - remainingCost;
 
   await base44.asServiceRole.entities.User.update(userId, {
     diamonds: newBalance,
@@ -42,14 +45,14 @@ export async function deductCredits(base44, userId, generationId, cost) {
 
   await base44.asServiceRole.entities.Transaction.create({
     type: freeTrialAvailable ? "free_trial" : "generation",
-    amount: -cost,
-    description: `Génération ${generationId}`,
+    amount: -remainingCost,
+    description: `Génération ${generationId}${freeTrialCover > 0 ? ` (essai gratuit: ${freeTrialCover} 💎)` : ""}`,
     reference: `gen_${generationId}`,
     balance_after: newBalance,
     created_by_id: userId,
   });
 
-  return { newBalance, usedFreeTrial: freeTrialAvailable };
+  return { newBalance, usedFreeTrial: freeTrialAvailable, freeTrialCover };
 }
 
 export async function refundCredits(base44, userId, generationId, cost) {

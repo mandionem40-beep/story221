@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext, useSearchParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { toast } from "@/components/ui/use-toast";
 import { runGenerationPipeline } from "@/lib/generation-pipeline";
@@ -22,8 +22,10 @@ export default function QuickCreate() {
   const navigate = useNavigate();
   const { currentUser, refreshUser } = useOutletContext();
 
-  const [step, setStep] = useState(1);
-  const [character, setCharacter] = useState({ category: null, appearance: null, color: null, visualStyle: null, traits: [], name: "" });
+  const [searchParams] = useSearchParams();
+  const initialCategory = searchParams.get("category");
+  const [step, setStep] = useState(initialCategory ? 2 : 1);
+  const [character, setCharacter] = useState({ category: initialCategory, appearance: null, color: null, visualStyle: null, traits: [], name: "" });
   const [story, setStory] = useState({ scenario: null, secondCharacter: null, detail: "" });
   const [settings, setSettings] = useState({
     duration: quickDurations[1], voice: "river", language: "Français", music: "Joyeuse", format: "vertical",
@@ -76,9 +78,12 @@ export default function QuickCreate() {
 
   const handleGenerate = async () => {
     const user = await base44.auth.me();
-    const useFreeTrial = !user.free_trial_used && cost > 0;
-    if (!useFreeTrial && user.diamonds < cost) {
-      toast({ title: "Solde insuffisant", description: "Achetez des diamants pour continuer.", variant: "destructive" });
+    const FREE_TRIAL_MAX = 10;
+    const useFreeTrial = !user.free_trial_used;
+    const freeTrialCover = useFreeTrial ? Math.min(cost, FREE_TRIAL_MAX) : 0;
+    const remainingCost = cost - freeTrialCover;
+    if (user.diamonds < remainingCost) {
+      toast({ title: "Solde insuffisant", description: `Essai gratuit couvre 1 min (${freeTrialCover} 💎). Il reste ${remainingCost} 💎 à payer.`, variant: "destructive" });
       navigate("/app/diamonds");
       return;
     }
@@ -208,7 +213,7 @@ export default function QuickCreate() {
         ))}
       </div>
 
-      {step === 1 && <CharacterTypeStep showcases={showcases} onSelect={(cat) => { setCharacter({ ...character, category: cat.id, appearance: null }); setStep(2); }} onSurprise={handleSurprise} />}
+      {step === 1 && <CharacterTypeStep showcases={showcases} onSelect={(cat) => { if (cat.redirect) { navigate(cat.redirect); return; } setCharacter({ ...character, category: cat.id, appearance: null }); setStep(2); }} onSurprise={handleSurprise} />}
       {step === 2 && <BuildCharacterStep character={character} onChange={setCharacter} onNext={() => setStep(3)} onBack={() => setStep(1)} />}
       {step === 3 && <StoryStep story={story} scenarios={scenarios.length > 0 ? scenarios : defaultScenarios} savedCharacters={savedCharacters} onChange={setStory} onNext={() => setStep(4)} onBack={() => setStep(2)} />}
       {step === 4 && <SettingsStep settings={settings} onChange={setSettings} onNext={() => setStep(5)} onBack={() => setStep(3)} diamonds={currentUser?.diamonds ?? 0} />}
