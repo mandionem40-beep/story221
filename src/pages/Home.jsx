@@ -108,6 +108,21 @@ export default function Home() {
         )}
       </div>
 
+      {/* Quick Create banner */}
+      <button
+        onClick={() => navigate("/app/quick-create")}
+        className="w-full mb-4 p-4 rounded-2xl bg-gradient-to-r from-primary/15 to-primary/5 border border-primary/30 flex items-center gap-3 hover:from-primary/20 hover:to-primary/10 transition-colors text-left glow-red-sm"
+      >
+        <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+          <Sparkles className="w-6 h-6 text-primary" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-bold text-white">✨ Création Rapide</p>
+          <p className="text-xs text-muted-foreground">Construis ton personnage et ton histoire en quelques clics — sans écrire !</p>
+        </div>
+        <Send className="w-5 h-5 text-primary flex-shrink-0" />
+      </button>
+
       {/* Chat / Prompt box */}
       <div className="rounded-2xl bg-card border border-border overflow-hidden mb-3 focus-within:border-primary/40 transition-colors">
         <textarea
