@@ -2,6 +2,7 @@ export const characterCategories = [
   {
     id: "animal", label: "Animaux", emoji: "🐾", desc: "Personnages animaux animés style 3D.",
     image: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/656a1b063_image.png",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/682350670_Animaux.mp4",
     appearances: [
       { emoji: "🦁", label: "Lion" }, { emoji: "🐘", label: "Éléphant" }, { emoji: "🐒", label: "Singe" },
       { emoji: "🐱", label: "Chat" }, { emoji: "🐶", label: "Chien" }, { emoji: "🦅", label: "Aigle" },
@@ -21,6 +22,7 @@ export const characterCategories = [
   {
     id: "person", label: "YouTuber", emoji: "🎥", desc: "Crée des vidéos style YouTubeur.",
     image: "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=400&q=80",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/fea2e4bb9_YouTuber.mp4",
     appearances: [
       { emoji: "👦", label: "Garçon" }, { emoji: "👧", label: "Fille" }, { emoji: "👨", label: "Homme" },
       { emoji: "👩", label: "Femme" }, { emoji: "🧓", label: "Aîné" }, { emoji: "🧒", label: "Enfant" },
@@ -40,6 +42,7 @@ export const characterCategories = [
   {
     id: "vehicle", label: "Transport", emoji: "🚌", desc: "BRT, Air Sénégal, TER et plus encore.",
     image: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=400&q=80",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/cc44a3452_Transport.mp4",
     appearances: [
       { emoji: "🚗", label: "Voiture" }, { emoji: "🚚", label: "Camion" }, { emoji: "🏍️", label: "Moto" },
       { emoji: "🚤", label: "Bateau" }, { emoji: "✈️", label: "Avion" }, { emoji: "🚂", label: "Train" },
@@ -49,6 +52,7 @@ export const characterCategories = [
   {
     id: "place", label: "Lieux", emoji: "🏛️", desc: "Dubai, Palais du Sénégal et décors inspirants.",
     image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&q=80",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/2b9905261_Lieux.mp4",
     appearances: [
       { emoji: "🏰", label: "Château" }, { emoji: "🌳", label: "Forêt" }, { emoji: "🏙️", label: "Ville" },
       { emoji: "🏖️", label: "Plage" }, { emoji: "⛰️", label: "Montagne" }, { emoji: "🏠", label: "Maison" },
@@ -58,6 +62,7 @@ export const characterCategories = [
   {
     id: "creature", label: "Créature", emoji: "✨", desc: "Invente des créatures fantastiques et mythiques.", isNew: true,
     image: "https://images.unsplash.com/photo-1559666126-84f389727b9a?w=400&q=80",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/9b2f85645_Crature.mp4",
     appearances: [
       { emoji: "🐉", label: "Dragon" }, { emoji: "🦄", label: "Licorne" }, { emoji: "👾", label: "Monstre" },
       { emoji: "👽", label: "Alien" }, { emoji: "👻", label: "Fantôme" }, { emoji: "🧚", label: "Fée" },

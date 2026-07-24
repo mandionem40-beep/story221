@@ -79,6 +79,15 @@
     display: none;
   }
 
+  @keyframes ken-burns {
+    0% { transform: scale(1) translate(0, 0); }
+    100% { transform: scale(1.15) translate(-2%, -2%); }
+  }
+
+  .animate-ken-burns {
+    animation: ken-burns 8s ease-in-out infinite alternate;
+  }
+
   .gradient-text-red {
     background: linear-gradient(135deg, #ff0033 0%, #ff4466 100%);
     -webkit-background-clip: text;

@@ -21,19 +21,32 @@ export default function CharacterTypeStep({ onSelect, onSurprise, showcases = []
         {characterCategories.map((cat, i) => {
           const showcase = showcases[i];
           const imageUrl = showcase?.thumbnail_url || cat.image;
+          const videoUrl = cat.video_url;
           return (
             <button
               key={cat.id}
               onClick={() => onSelect(cat)}
               className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/50 transition-all duration-300 group hover:glow-red-sm"
             >
-              <img
-                src={imageUrl}
-                alt={cat.label}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+              {videoUrl ? (
+                <video
+                  src={videoUrl}
+                  poster={imageUrl}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              ) : (
+                <img
+                  src={imageUrl}
+                  alt={cat.label}
+                  className="absolute inset-0 w-full h-full object-cover animate-ken-burns"
+                  loading="lazy"
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
               {cat.isNew && (
                 <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-primary/90 text-white text-[10px] font-semibold flex items-center gap-1 z-10">
                   <Sparkles className="w-2.5 h-2.5" /> Nouveau
