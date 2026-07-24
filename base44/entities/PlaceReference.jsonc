@@ -1,0 +1,106 @@
+{
+  "name": "PlaceReference",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nom officiel du lieu r\u00e9el (ex: Monument de la Renaissance Africaine)"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "transport",
+        "monument",
+        "city",
+        "neighborhood",
+        "infrastructure",
+        "natural",
+        "other"
+      ]
+    },
+    "visual_description": {
+      "type": "string",
+      "description": "Caract\u00e9ristiques visuelles v\u00e9rifi\u00e9es: forme, couleurs dominantes, architecture, mat\u00e9riaux, environnement imm\u00e9diat, ambiance lumineuse typique"
+    },
+    "keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Mots-cl\u00e9s de d\u00e9tection dans les prompts (minuscules, ex: ['brt', 'bus rapid transit', 'busway'])"
+    },
+    "location": {
+      "type": "string",
+      "description": "Localisation (ville, quartier, r\u00e9gion)"
+    },
+    "verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "True uniquement apr\u00e8s v\u00e9rification visuelle contre des r\u00e9f\u00e9rences r\u00e9elles"
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Une fiche n'est active pour les g\u00e9n\u00e9rations qu'une fois v\u00e9rifi\u00e9e ET activ\u00e9e"
+    },
+    "display_order": {
+      "type": "integer",
+      "default": 0
+    }
+  },
+  "required": [
+    "name",
+    "category",
+    "visual_description",
+    "keywords"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": true,
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

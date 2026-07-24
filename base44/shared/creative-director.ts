@@ -43,6 +43,21 @@ Pour chaque scène, tu choisis automatiquement les meilleurs: angles de caméra,
 ### 9. Recherche contextuelle intelligente
 Quand le prompt mentionne un monument, un pays, une ville, une personnalité publique ou un événement historique, tu enrichis le scénario avec des informations fiables et cohérentes. Pour les personnes réelles, utilise UNIQUEMENT les images fournies par l'utilisateur — jamais de récupération automatique d'images protégées.
 
+### 9b. Fidélité visuelle des lieux réels
+Quand le prompt mentionne un lieu réel, un monument, une infrastructure ou un élément géographique identifiable (BRT, TER, Monument de la Renaissance, Stade Abdoulaye Wade, Dakar Arena, Corniche de Dakar, Mosquée de la Divinité, car rapide, etc.), tu DOIS:
+- Comprendre précisément de quel lieu il s'agit (recherche web si le contexte "LIEUX RÉELS DÉTECTÉS" est fourni ci-dessous)
+- Respecter les caractéristiques visuelles vérifiées fournies dans le contexte: forme, couleurs dominantes, architecture, matériaux, environnement
+- Produire un rendu RECONNAISSABLE et fidèle à la réalité — pas une interprétation vague ou générique
+- Injecter ces caractéristiques dans les engine_prompts (image et vidéo) et les descriptions de scènes
+- Pour les infrastructures de transport (BRT, TER, cars rapides), reproduis fidèlement le design réel SANS apposer de logo officiel exact d'un opérateur commercial, sauf si l'utilisateur a fourni ses propres visuels de marque autorisés
+
+### 9c. Verrouillage strict des références uploadées
+Quand l'utilisateur fournit une image de référence (sa propre photo, un produit, un personnage), cette image est une VÉRITÉ ABSOLUE:
+- Le visage, la morphologie, les vêtements, les couleurs, les proportions doivent rester STRICTEMENT IDENTIQUES à l'image fournie à travers toutes les scènes
+- Tu ne dois JAMAIS modifier, embellir, transformer ou réinterpréter les traits de la personne ou de l'objet fourni
+- Décris chaque référence avec une précision extrême dans les engine_prompts et l'apparence des personnages
+- Si tu détectes que la fidélité ne peut pas être garantie pour une scène donnée (angle complexe, mouvement difficile), ajoute une entrée dans fidelity_warnings plutôt que de livrer un résultat qui déforme la référence
+
 ### 10. Découpage en scènes avec durée
 Tu découpes l'histoire en scènes. Chaque scène a: description visuelle, dialogue, émotion dominante, angle de caméra, mouvement de caméra, éclairage, colorimétrie, durée en secondes, transition vers la scène suivante. La somme des durées des scènes doit correspondre à la durée totale demandée.
 
@@ -81,8 +96,12 @@ Tu réponds UNIQUEMENT avec un objet JSON valide. Aucun texte autour, aucun mark
   "subtitles": [{ "timestamp": "MM:SS", "text": "string" }],
   "ad_concept": "string",
   "ad_slogan": "string",
-  "ad_cta": "string"
-}`;
+  "ad_cta": "string",
+  "fidelity_warnings": [{ "scene": "string", "warning": "string", "reference_type": "string" }]
+}
+
+## FIDELITY_WARNINGS
+Si tu ne peux pas garantir la fidélité d'une référence uploadée (personne/produit/personnage) ou d'un lieu réel sur une scène donnée (angle complexe, mouvement difficile, perspective impossible), ajoute une entrée dans fidelity_warnings avec: le numéro de scène, la nature du problème, et le type ("reference_image" ou "real_place"). Ne livre jamais un résultat silencieusement déformé — signale toujours.`;
 
 const RESPONSE_SCHEMA = {
   type: "object",
@@ -173,13 +192,24 @@ const RESPONSE_SCHEMA = {
     },
     ad_concept: { type: "string" },
     ad_slogan: { type: "string" },
-    ad_cta: { type: "string" }
+    ad_cta: { type: "string" },
+    fidelity_warnings: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          scene: { type: "string" },
+          warning: { type: "string" },
+          reference_type: { type: "string" }
+        }
+      }
+    }
   },
   required: ["title", "enhanced_script", "characters", "scenes"]
 };
 
 function buildUserMessage(payload) {
-  const { prompt, type, options, mode, previousGeneration } = payload;
+  const { prompt, type, options, mode, previousGeneration, place_context, reference_lock_context } = payload;
   const opts = options || {};
   let msg = `Type de contenu: ${type}\n`;
   msg += `Prompt utilisateur: "${prompt}"\n`;
@@ -190,6 +220,16 @@ function buildUserMessage(payload) {
   if (opts.voice) msg += `Voix: ${opts.voice}\n`;
   if (opts.music && opts.music !== "Aucune") msg += `Ambiance musicale: ${opts.music}\n`;
   if (opts.resolution) msg += `Résolution: ${opts.resolution}\n`;
+
+  // Inject verified real-place visual context
+  if (place_context && place_context.trim()) {
+    msg += `\n${place_context}\n`;
+  }
+
+  // Inject reference image lock context
+  if (reference_lock_context && reference_lock_context.trim()) {
+    msg += `\n${reference_lock_context}\n`;
+  }
 
   if (type === "ad") {
     if (opts.ad_sector) msg += `Secteur publicitaire: ${opts.ad_sector}\n`;
@@ -366,8 +406,33 @@ async function tryAnthropicDirect(fullPrompt, fileUrls) {
 }
 
 export async function runCreativeDirection(base44, payload) {
-  const userText = buildUserMessage(payload);
+  // ==== Pre-step: Verify real places mentioned in the prompt ====
+  let placeContext = "";
+  try {
+    const { verifyPlacesInPrompt } = await import("./place-verifier.ts");
+    const placeResult = await verifyPlacesInPrompt(base44, payload.prompt || "");
+    if (placeResult.has_matches) {
+      placeContext = placeResult.enriched_context;
+    }
+  } catch (e) {
+    console.error("Place verification failed (non-blocking):", e.message);
+  }
+
+  // ==== Build reference lock context if user uploaded reference images ====
+  let referenceLockContext = "";
   const referenceImages = payload.reference_images || [];
+  if (referenceImages.length > 0) {
+    referenceLockContext = `## RÉFÉRENCES UPLOADÉES — VERROU D'IDENTITÉ ABSOLU
+${referenceImages.length} image(s) de référence ont été fournies par l'utilisateur. Ces images sont une VÉRITÉ ABSOLUE:
+- Le visage, la morphologie, les vêtements, les couleurs et les proportions doivent rester STRICTEMENT IDENTIQUES à l'image fournie dans TOUTES les scènes
+- Tu ne dois JAMAIS modifier, embellir, transformer ou réinterpréter les traits de ce qui a été fourni
+- Analyse chaque image avec une précision extrême et décris l'apparence EXACTE dans les engine_prompts et l'apparence des personnages
+- Si la fidélité ne peut pas être garantie sur une scène (angle/mouvement complexe), signale-le dans fidelity_warnings plutôt que de livrer un résultat déformé
+- Ces références sont fournies par l'utilisateur pour son propre usage (lui-même, son produit, son personnage) — ne pas appliquer à des tiers non autorisés`;
+  }
+
+  const enrichedPayload = { ...payload, place_context: placeContext, reference_lock_context: referenceLockContext };
+  const userText = buildUserMessage(enrichedPayload);
   const fileUrls = referenceImages.length > 0 ? referenceImages.slice(0, 10) : undefined;
   const fullPrompt = `${SYSTEM_PROMPT}\n\n---\n\nPROJET STORY221\n${userText}`;
 

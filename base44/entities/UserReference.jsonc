@@ -1,0 +1,82 @@
+{
+  "name": "UserReference",
+  "type": "object",
+  "properties": {
+    "image_url": {
+      "type": "string",
+      "description": "URL de l'image de r\u00e9f\u00e9rence upload\u00e9e par l'utilisateur"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "person",
+        "product",
+        "character"
+      ]
+    },
+    "label": {
+      "type": "string",
+      "description": "Nom donn\u00e9 par l'utilisateur \u00e0 cette r\u00e9f\u00e9rence"
+    },
+    "description": {
+      "type": "string",
+      "description": "Notes utilisateur sur cette r\u00e9f\u00e9rence (contexte, droits, utilisation pr\u00e9vue)"
+    },
+    "locked": {
+      "type": "boolean",
+      "default": true,
+      "description": "Si true, l'identit\u00e9 et l'apparence sont verrouill\u00e9es \u2014 le moteur ne doit JAMAIS les modifier, embellir ou r\u00e9interpr\u00e9ter"
+    },
+    "visual_analysis": {
+      "type": "string",
+      "description": "Analyse visuelle extraite par l'IA (visage, morphologie, v\u00eatements, couleurs, proportions) pour injection dans les prompts de g\u00e9n\u00e9ration"
+    },
+    "generation_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs des g\u00e9n\u00e9rations utilisant cette r\u00e9f\u00e9rence"
+    },
+    "fidelity_warning": {
+      "type": "boolean",
+      "default": false,
+      "description": "True si le moteur a signal\u00e9 ne pas pouvoir garantir la fid\u00e9lit\u00e9 sur une sc\u00e8ne"
+    }
+  },
+  "required": [
+    "image_url",
+    "type",
+    "label"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}
