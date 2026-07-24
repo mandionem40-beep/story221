@@ -1,4 +1,5 @@
 import { Sparkles } from "lucide-react";
+import AutoVideo from "@/components/ui/auto-video";
 
 export default function UniverseCard({ category, selected, onSelect }) {
   const isRedirect = !!category.redirect;
@@ -13,14 +14,9 @@ export default function UniverseCard({ category, selected, onSelect }) {
       }`}
     >
       {category.video_url ? (
-        <video
+        <AutoVideo
           src={category.video_url}
-          poster={category.image}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full"
         />
       ) : (
         <img

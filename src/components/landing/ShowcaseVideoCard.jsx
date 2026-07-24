@@ -1,39 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
+import AutoVideo from "@/components/ui/auto-video";
 
 export default function ShowcaseVideoCard({ video }) {
-  const [ready, setReady] = useState(false);
   const [error, setError] = useState(false);
-  const [visible, setVisible] = useState(false);
-  const videoRef = useRef(null);
-
   const hasVideo = !!video.video_url && !error;
-  const thumb = video.thumbnail_url;
-
-  // Only play videos that are visible in the viewport
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([entry]) => setVisible(entry.isIntersecting),
-      { threshold: 0.1 }
-    );
-    const el = videoRef.current;
-    if (el) obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  // Play / pause based on visibility — with retry for autoplay
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v || !hasVideo) return;
-    if (visible) {
-      v.play().catch(() => {
-        // Retry once the video is actually ready
-        const onReady = () => { v.play().catch(() => {}); };
-        v.addEventListener("canplay", onReady, { once: true });
-      });
-    } else {
-      v.pause();
-    }
-  }, [visible, hasVideo]);
 
   return (
     <div className="group relative rounded-2xl overflow-hidden bg-card border border-border transition-all duration-300 hover:border-primary/60">
@@ -41,39 +11,15 @@ export default function ShowcaseVideoCard({ video }) {
       <div className="pointer-events-none absolute -inset-2 rounded-3xl bg-primary/0 blur-xl transition-all duration-500 group-hover:bg-primary/25 group-hover:shadow-[0_0_40px_rgba(255,0,51,0.35)]" />
 
       <div className="relative aspect-[9/16] overflow-hidden bg-black">
-        {/* Thumbnail — shows instantly while video loads */}
-        {thumb && (
-          <img
-            src={thumb}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        )}
-
-        {/* Fallback gradient when no thumbnail */}
-        {!thumb && (
-          <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-primary/20 to-secondary" />
-        )}
-
-        {/* Video layer — fades in once ready to play */}
-        {hasVideo && (
-          <video
-            ref={videoRef}
+        {/* Video — no poster, no thumbnail, visible immediately */}
+        {hasVideo ? (
+          <AutoVideo
             src={video.video_url}
-            poster={thumb || undefined}
-            loop
-            muted
-            playsInline
-            autoPlay
-            preload="auto"
-            onCanPlay={() => setReady(true)}
-            onLoadedData={() => setReady(true)}
-            onPlaying={() => setReady(true)}
             onError={() => setError(true)}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:scale-105 ${
-              ready ? "opacity-100" : "opacity-0"
-            }`}
+            className="absolute inset-0 w-full h-full transition-transform duration-500 group-hover:scale-105"
           />
+        ) : (
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-primary/20 to-secondary" />
         )}
 
         {/* Title overlay */}

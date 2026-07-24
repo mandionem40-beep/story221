@@ -1,5 +1,6 @@
 import { characterCategories } from "@/lib/quick-create-data";
 import { Sparkles, Play } from "lucide-react";
+import AutoVideo from "@/components/ui/auto-video";
 
 export default function CategoryVideoGrid({ showcases = [], onSelect }) {
   return (
@@ -15,14 +16,9 @@ export default function CategoryVideoGrid({ showcases = [], onSelect }) {
             className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/50 transition-all duration-300 group hover:glow-red-sm"
           >
             {videoUrl ? (
-              <video
+              <AutoVideo
                 src={videoUrl}
-                poster={imageUrl}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full"
               />
             ) : (
               <img
