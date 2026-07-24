@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Send, Image as ImageIcon, Video as VideoIcon, ChevronDown, Upload, X, Loader2, Plus } from "lucide-react";
+import { Send, Image as ImageIcon, Video as VideoIcon, ChevronDown, Upload, X, Loader2, Plus, SlidersHorizontal } from "lucide-react";
 import DiamondIcon from "@/components/DiamondIcon";
 import { base44 } from "@/api/base44Client";
 import { quickDurations, quickLanguages, quickVoices, buildChatPrompt, calculateFreeTrial } from "@/lib/quick-create-data";
@@ -149,9 +149,9 @@ export default function ChatCreation({ selectedCategory, currentUser }) {
         </div>
       )}
 
-      {/* Bottom bar: upload + + settings + generate */}
+      {/* Bottom bar: upload + settings + generate (3 zones) */}
       <div className="flex items-center gap-1.5 sm:gap-2 mt-3">
-        {/* Upload "+" button with menu */}
+        {/* Zone 1: Upload "+" button */}
         <div className="relative flex-shrink-0" ref={uploadMenuRef}>
           <button
             onClick={() => setShowUploadMenu(!showUploadMenu)}
@@ -179,21 +179,20 @@ export default function ChatCreation({ selectedCategory, currentUser }) {
           <input ref={videoInputRef} type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
         </div>
 
-        {/* Settings toggle */}
+        {/* Zone 2: Settings toggle (elongated) */}
         <button
           onClick={() => setShowSettings(!showSettings)}
-          className="flex items-center gap-1 px-2 sm:px-3 h-9 rounded-lg bg-secondary border border-border text-xs text-muted-foreground hover:text-white transition-colors flex-shrink-0"
+          className="flex items-center justify-center gap-1.5 px-3 sm:px-4 h-9 rounded-lg bg-secondary border border-border text-xs text-muted-foreground hover:text-white hover:border-primary/40 transition-colors flex-1 min-w-0"
         >
-          <ChevronDown className={`w-3.5 h-3.5 transition-transform flex-shrink-0 ${showSettings ? "rotate-180" : ""}`} />
-          <span className="hidden sm:inline truncate max-w-[120px]">{duration.label} · {language}</span>
-          <span className="sm:hidden"><DiamondIcon className="w-3 h-3 inline" /></span>
+          <SlidersHorizontal className={`w-3.5 h-3.5 flex-shrink-0 transition-transform ${showSettings ? "text-primary" : ""}`} />
+          <span className="truncate">{duration.label} · {language}</span>
         </button>
 
-        {/* Generate button */}
+        {/* Zone 3: Generate button (50%) */}
         <button
           onClick={handleGenerate}
           disabled={!prompt.trim() || !selectedCategory}
-          className="flex-1 min-w-0 h-9 rounded-lg bg-primary text-white text-sm font-semibold flex items-center justify-center gap-1.5 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed glow-red-sm"
+          className="w-1/2 h-9 rounded-lg bg-primary text-white text-sm font-semibold flex items-center justify-center gap-1.5 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed glow-red-sm flex-shrink-0"
         >
           <Send className="w-3.5 h-3.5 flex-shrink-0" />
           <span className="truncate">{prompt.trim() && selectedCategory ? `Générer (${remaining > 0 ? remaining : 0} 💎)` : "Générer"}</span>
