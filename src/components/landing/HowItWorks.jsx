@@ -33,6 +33,27 @@ const steps = [
   },
 ];
 
+// Vertical ECG path for mobile timeline: spikes at each step position
+function EcgPathVertical({ width = 40, height = 100 }) {
+  const segments = steps.length;
+  const stepH = height / segments;
+  const mid = width / 2;
+  let d = `M ${mid} 0`;
+  for (let i = 0; i < segments; i++) {
+    const cy = stepH * (i + 0.5);
+    // flat line before spike
+    d += ` L ${mid} ${cy - 4}`;
+    // heartbeat spike: left, peak, right, valley, back
+    d += ` L ${mid - 10} ${cy - 2}`;
+    d += ` L ${mid + 10} ${cy}`;
+    d += ` L ${mid - 4} ${cy + 2}`;
+    d += ` L ${mid} ${cy + 4}`;
+    // flat line after spike
+    d += ` L ${mid} ${stepH * (i + 1)}`;
+  }
+  return d;
+}
+
 // ECG heartbeat path: flat segments with spikes at each step position
 // 5 steps evenly spaced, spike at each step center
 function EcgPath({ width = 100, height = 40 }) {
@@ -58,6 +79,7 @@ function EcgPath({ width = 100, height = 40 }) {
 
 export default function HowItWorks() {
   const pathD = EcgPath({ width: 100, height: 40 });
+  const verticalPathD = EcgPathVertical({ width: 40, height: 100 });
 
   return (
     <section className="relative py-20 lg:py-28 bg-card/30">
@@ -109,34 +131,38 @@ export default function HowItWorks() {
             </svg>
           </div>
 
-          {/* ECG heartbeat line - mobile vertical (between stacked steps) */}
-          <div className="lg:hidden absolute left-7 top-16 bottom-16 w-20 pointer-events-none">
+          {/* ECG heartbeat line - mobile vertical timeline (connects each step) */}
+          <div className="sm:hidden absolute left-0 w-16 top-8 bottom-8 pointer-events-none z-0">
             <svg
               viewBox="0 0 40 100"
               preserveAspectRatio="none"
               className="w-full h-full overflow-visible"
             >
-              <path
-                d="M 20 0 L 20 100"
+              {/* faint base path */}
+              <path d={verticalPathD} fill="none" stroke="rgba(255,0,51,0.15)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+              {/* animated glow path */}
+              <motion.path
+                d={verticalPathD}
                 fill="none"
-                stroke="rgba(255,0,51,0.2)"
-                strokeWidth="0.5"
-                strokeDasharray="2 3"
-              />
-              <motion.line
-                x1="20"
-                y1="0"
-                x2="20"
-                y2="100"
                 stroke="#ff0033"
-                strokeWidth="0.6"
+                strokeWidth="2"
                 strokeLinecap="round"
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
                 style={{ filter: "drop-shadow(0 0 3px #ff0033) drop-shadow(0 0 6px rgba(255,0,51,0.6))" }}
-                initial={{ pathLength: 0, opacity: 0 }}
-                whileInView={{ pathLength: 1, opacity: 1 }}
+                initial={{ pathLength: 0 }}
+                whileInView={{ pathLength: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 3, ease: "easeInOut", repeat: Infinity, repeatType: "reverse", repeatDelay: 0.5 }}
               />
+              {/* flowing LED dot traveling step by step */}
+              <motion.circle
+                r="2"
+                fill="#ff4466"
+                style={{ filter: "drop-shadow(0 0 4px #ff0033) drop-shadow(0 0 8px #ff0033)" }}
+              >
+                <animateMotion dur="4s" repeatCount="indefinite" path={verticalPathD} rotate="auto" />
+              </motion.circle>
             </svg>
           </div>
 
@@ -148,9 +174,9 @@ export default function HowItWorks() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.5, delay: i * 0.15 }}
-                className="relative"
+                className="relative z-10"
               >
-                <div className="flex flex-col items-center text-center">
+                <div className="flex flex-row items-start gap-4 text-left sm:flex-col sm:items-center sm:text-center">
                   <div className="relative w-16 h-16 rounded-2xl bg-card border border-border flex items-center justify-center text-2xl mb-4 group hover:border-primary/40 transition-colors">
                     {step.icon}
                     <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center glow-red-sm">
