@@ -15,7 +15,7 @@ export default function QuickAccess({ currentUser }) {
     <div className="mb-6">
       <div className="grid grid-cols-6 gap-1 sm:gap-2">
         <div className="flex flex-col items-center justify-center gap-1 py-2.5 sm:py-3 px-1 rounded-xl bg-card border border-border min-w-0">
-          <NotificationBell user={currentUser} />
+          <NotificationBell user={currentUser} variant="bare" />
           <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground text-center leading-tight">
             Notifs
           </span>

@@ -32,7 +32,7 @@ function timeAgo(dateStr) {
   return new Date(dateStr).toLocaleDateString("fr-FR");
 }
 
-export default function NotificationBell({ user }) {
+export default function NotificationBell({ user, variant = "default" }) {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -122,7 +122,12 @@ export default function NotificationBell({ user }) {
       <button
         ref={bellRef}
         onClick={() => setOpen(o => !o)}
-        className="relative w-9 h-9 rounded-full bg-secondary border border-border flex items-center justify-center active:scale-95 transition-transform"
+        className={cn(
+          "relative flex items-center justify-center active:scale-95 transition-transform",
+          variant === "bare"
+            ? "w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0"
+            : "w-9 h-9 rounded-full bg-secondary border border-border"
+        )}
         aria-label="Notifications"
       >
         <Bell className={cn("w-4 h-4", unreadCount > 0 ? "text-primary" : "text-muted-foreground")} />
