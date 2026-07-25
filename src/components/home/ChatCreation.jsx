@@ -43,6 +43,35 @@ export default function ChatCreation({ selectedCategory, currentUser }) {
     };
   }, []);
 
+  const pickSystemVoice = (gender, lang) => {
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length === 0) return null;
+
+    const langPrefix = lang === "Anglais" ? "en" : "fr";
+    const langVoices = voices.filter(v => v.lang?.startsWith(langPrefix));
+    const pool = langVoices.length > 0 ? langVoices : voices;
+
+    // Heuristic name patterns to distinguish male/female system voices
+    const malePatterns = ["male", "daniel", "thomas", "alex", "jorge", "diego", "yannick", "lucas", "markus"];
+    const femalePatterns = ["female", "amelie", "marie", "anna", "victoria", "samantha", "tessa", "zira", "clara"];
+
+    const lower = pool.map(v => v.name.toLowerCase());
+    const isMale = gender === "Homme";
+
+    // Try exact gender match by name pattern
+    const patterns = isMale ? malePatterns : femalePatterns;
+    for (const p of patterns) {
+      const idx = lower.findIndex(n => n.includes(p));
+      if (idx !== -1) return pool[idx];
+    }
+
+    // Fallback: alternate voices by gender using index parity
+    // Even indices → male, odd → female (rough but gives variety)
+    const sortedPool = [...pool].sort((a, b) => a.name.localeCompare(b.name));
+    const half = Math.floor(sortedPool.length / 2);
+    return isMale ? sortedPool[0] || sortedPool[half] || pool[0] : sortedPool[half] || sortedPool[0] || pool[0];
+  };
+
   const previewVoice = (voiceObj) => {
     if (!("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
@@ -58,7 +87,12 @@ export default function ChatCreation({ selectedCategory, currentUser }) {
     utter.rate = voiceObj.speechConfig.rate;
     utter.pitch = voiceObj.speechConfig.pitch;
     utter.volume = 1;
-    utter.lang = language === "Wolof" ? "fr-FR" : language === "Anglais" ? "en-US" : "fr-FR";
+    utter.lang = language === "Anglais" ? "en-US" : "fr-FR";
+
+    // Select a distinct system voice based on gender
+    const sysVoice = pickSystemVoice(voiceObj.gender, language);
+    if (sysVoice) utter.voice = sysVoice;
+
     utter.onend = () => setPreviewingVoice(false);
     utter.onerror = () => setPreviewingVoice(false);
     speechRef.current = utter;
@@ -290,6 +324,9 @@ export default function ChatCreation({ selectedCategory, currentUser }) {
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-sm font-semibold text-white">{selected.label}</span>
+                          <span className="px-1.5 py-0.5 rounded-md bg-primary/15 border border-primary/30 text-[10px] font-semibold text-primary">
+                            {selected.gender}
+                          </span>
                           <span className="text-[10px] text-muted-foreground">— {selected.desc}</span>
                         </div>
                         <div className="flex gap-1.5">
