@@ -6,7 +6,7 @@ import { Home, Library, Clapperboard, Diamond, User, LogOut, Bell, MessageSquare
 import DiamondIcon from "@/components/DiamondIcon";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
-import NotificationBell from "@/components/NotificationBell";
+
 
 // Desktop sidebar uses all items; mobile bottom nav uses only the 4 main ones
 const navItems = [
@@ -78,7 +78,6 @@ export default function Layout() {
           <Link to="/">
             <Logo size="md" />
           </Link>
-          <NotificationBell user={currentUser} />
         </div>
 
         <nav className="flex-1 px-3 space-y-1">
@@ -142,7 +141,6 @@ export default function Layout() {
           <Logo size="sm" />
         </Link>
         <div className="flex items-center gap-2">
-          <NotificationBell user={currentUser} />
           <Link
             to="/app/diamonds"
             className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-card to-secondary border border-primary/30 hover:border-primary/60 transition-all duration-300 active:scale-95 group overflow-hidden">
