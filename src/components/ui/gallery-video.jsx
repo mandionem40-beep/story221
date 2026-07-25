@@ -113,7 +113,10 @@ export default function GalleryVideo({ src, poster, className, onReady, ...props
           alt=""
           aria-hidden="true"
           loading="eager"
-          className="absolute inset-0 w-full h-full object-cover"
+          className={cn(
+            "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
+            showVideo ? "opacity-0" : "opacity-100 animate-ken-burns"
+          )}
         />
       )}
       <video

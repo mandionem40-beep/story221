@@ -6,6 +6,7 @@ import { Home, Library, Clapperboard, Diamond, User, LogOut, Bell, MessageSquare
 import DiamondIcon from "@/components/DiamondIcon";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
+import NotificationBell from "@/components/NotificationBell";
 
 
 // Desktop sidebar uses all items; mobile bottom nav uses only the 4 main ones
@@ -150,17 +151,8 @@ export default function Layout() {
             <span className="text-sm font-bold text-white relative tabular-nums">{diamonds}</span>
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-primary animate-ping" />
           </Link>
-          
-
-
-
-
-
-
-
-
-          
-        </div>
+          <NotificationBell user={currentUser} variant="bare" />
+          </div>
       </header>
 
       {/* Main Content */}
