@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { MessageCircle, Facebook, Instagram, Music, Youtube, Copy, Check, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SnapchatIcon } from "@/components/social/SocialIcons";
 
 const PLATFORMS = [
   { name: "WhatsApp", icon: MessageCircle, color: "bg-green-500 hover:bg-green-600", url: (t, u) => `https://wa.me/?text=${encodeURIComponent(t)}%20${encodeURIComponent(u)}` },
@@ -8,6 +9,7 @@ const PLATFORMS = [
   { name: "Instagram", icon: Instagram, color: "bg-gradient-to-br from-purple-600 to-pink-500 hover:opacity-90", copy: true, url: () => "https://www.instagram.com/" },
   { name: "TikTok", icon: Music, color: "bg-black border border-white/20 hover:bg-black/80", copy: true, url: () => "https://www.tiktok.com/upload" },
   { name: "YouTube", icon: Youtube, color: "bg-red-600 hover:bg-red-700", copy: true, url: () => "https://www.youtube.com/upload" },
+  { name: "Snapchat", icon: SnapchatIcon, color: "bg-yellow-400 hover:bg-yellow-500", copy: true, url: (t, u) => `https://www.snapchat.com/scan?attachmentUrl=${encodeURIComponent(u)}` },
 ];
 
 export default function QuickShareButtons({ url, title, className }) {

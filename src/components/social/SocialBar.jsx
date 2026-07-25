@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { TikTokIcon, InstagramIcon, YouTubeIcon, FacebookIcon, XIcon, LinkedInIcon } from "./SocialIcons";
+import { TikTokIcon, InstagramIcon, YouTubeIcon, FacebookIcon, XIcon, LinkedInIcon, SnapchatIcon } from "./SocialIcons";
 
 const iconMap = {
   tiktok: TikTokIcon,
@@ -9,6 +9,7 @@ const iconMap = {
   facebook: FacebookIcon,
   x: XIcon,
   linkedin: LinkedInIcon,
+  snapchat: SnapchatIcon,
 };
 
 const sizeMap = {

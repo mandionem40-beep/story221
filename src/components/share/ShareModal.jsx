@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { X, Copy, Check, MessageCircle, Facebook, Instagram, Music, Share2, Loader2, Send } from "lucide-react";
+import { X, Copy, Check, MessageCircle, Facebook, Instagram, Music, Youtube, Share2, Loader2, Send } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { base44 } from "@/api/base44Client";
+import { SnapchatIcon } from "@/components/social/SocialIcons";
 
 export default function ShareModal({ url, title, mediaUrl, mediaType, onClose, onShared }) {
   const [copied, setCopied] = useState(false);
@@ -85,6 +86,18 @@ export default function ShareModal({ url, title, mediaUrl, mediaType, onClose, o
       color: "bg-gradient-to-br from-purple-600 to-pink-500 hover:opacity-90",
       onClick: () => openPlatform("https://www.instagram.com/", true),
     },
+    {
+      name: "YouTube",
+      icon: Youtube,
+      color: "bg-red-600 hover:bg-red-700",
+      onClick: () => openPlatform("https://www.youtube.com/upload", true),
+    },
+    {
+      name: "Snapchat",
+      icon: SnapchatIcon,
+      color: "bg-yellow-400 hover:bg-yellow-500",
+      onClick: () => openPlatform(`https://www.snapchat.com/scan?attachmentUrl=${encodedUrl}`, true),
+    },
   ];
 
   const hasNativeShare = typeof navigator !== "undefined" && !!navigator.share;
@@ -104,7 +117,7 @@ export default function ShareModal({ url, title, mediaUrl, mediaType, onClose, o
 
         <p className="text-xs text-muted-foreground mb-5 truncate bg-secondary px-3 py-2 rounded-lg">{url}</p>
 
-        <div className="grid grid-cols-4 gap-3 mb-5">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-5">
           {platforms.map((p) => (
             <button key={p.name} onClick={p.onClick} className="flex flex-col items-center gap-2 group">
               <div className={`w-14 h-14 rounded-2xl ${p.color} flex items-center justify-center transition-all group:scale-105`}>
