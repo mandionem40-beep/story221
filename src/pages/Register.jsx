@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { UserPlus, Mail, Lock, User, Phone, Loader2, Gift, CheckCircle2 } from "lucide-react";
+import { UserPlus, Mail, Lock, User, Phone, Loader2, Gift, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import ProfilePhotoUpload from "@/components/auth/ProfilePhotoUpload";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import AuthLayout from "@/components/AuthLayout";
@@ -33,6 +33,8 @@ export default function Register() {
   const [showOtp, setShowOtp] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -130,7 +132,7 @@ export default function Register() {
       if (refCode) {
         base44.functions.invoke("process-referral", { action: "track_signup" }).catch(() => {});
       }
-      window.location.href = "/app";
+      window.location.href = "/attribution-survey";
     } catch (err) {
       setError(err.message || "Code de vérification invalide");
     } finally {
@@ -280,7 +282,7 @@ export default function Register() {
           <ProfilePhotoUpload value={avatarUrl} onChange={setAvatarUrl} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="username">Nom d'utilisateur</Label>
+          <Label htmlFor="username">Nom d'utilisateur <span className="text-destructive">*</span></Label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
@@ -298,7 +300,7 @@ export default function Register() {
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">Email <span className="text-destructive">*</span></Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
@@ -342,37 +344,53 @@ export default function Register() {
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Mot de passe</Label>
+          <Label htmlFor="password">Mot de passe <span className="text-destructive">*</span></Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
               id="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               autoComplete="new-password"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="pl-10 h-12"
+              className="pl-10 h-12 pr-10"
               required
               minLength={6}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="confirm">Confirmer le mot de passe</Label>
+          <Label htmlFor="confirm">Confirmer le mot de passe <span className="text-destructive">*</span></Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
               id="confirm"
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               autoComplete="new-password"
               placeholder="••••••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="pl-10 h-12"
+              className="pl-10 h-12 pr-10"
               required
               minLength={6}
             />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              tabIndex={-1}
+            >
+              {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
         </div>
         <div className="flex items-start gap-2 pt-1">
