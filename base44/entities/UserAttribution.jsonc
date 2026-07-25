@@ -6,45 +6,33 @@
       "type": "string",
       "description": "ID of the user who answered the survey"
     },
-    "discovery_channel": {
+    "source": {
       "type": "string",
       "enum": [
-        "tiktok",
+        "ad",
+        "influencer",
+        "friend_recommendation"
+      ],
+      "description": "ad = Publicite Story221, influencer = via an influencer card, friend_recommendation = recommandation d'un ami"
+    },
+    "network": {
+      "type": "string",
+      "enum": [
         "facebook",
         "instagram",
-        "youtube",
+        "tiktok",
         "snapchat",
-        "x",
-        "linkedin",
-        "whatsapp",
-        "google",
-        "friend_recommendation",
-        "sponsored_ad",
-        "influencer",
-        "other"
-      ]
+        "youtube"
+      ],
+      "description": "Social network chosen in Q1 (not set for friend_recommendation)"
     },
     "influencer_id": {
       "type": "string",
-      "description": "MarketingInfluencer ID when channel is 'influencer'"
+      "description": "MarketingInfluencer ID when source=influencer"
     },
-    "ad_platform": {
+    "influencer_name": {
       "type": "string",
-      "enum": [
-        "tiktok_ads",
-        "facebook_ads",
-        "instagram_ads",
-        "youtube_ads",
-        "google_ads",
-        "snapchat_ads",
-        "linkedin_ads",
-        "other"
-      ],
-      "description": "Ad platform when channel is 'sponsored_ad'"
-    },
-    "campaign_id": {
-      "type": "string",
-      "description": "Linked MarketingCampaign ID (auto-matched for ad channel)"
+      "description": "Snapshot of influencer name for admin display"
     },
     "country": {
       "type": "string"
@@ -60,7 +48,7 @@
   },
   "required": [
     "user_id",
-    "discovery_channel"
+    "source"
   ],
   "rls": {
     "create": true,
