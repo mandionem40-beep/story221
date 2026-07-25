@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useOutletContext, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Upload, Users, Heart, Eye, Sparkles, Loader2, Edit, Save, X } from "lucide-react";
+import { Upload, Users, Heart, Eye, Sparkles, Loader2, Edit, Save, X, LogOut } from "lucide-react";
 import DiamondIcon from "@/components/DiamondIcon";
 import { Image } from "@/components/ui/image";
 import { toast } from "@/components/ui/use-toast";
@@ -202,6 +202,15 @@ export default function Profile() {
 
       {/* Referral Dashboard */}
       <ReferralDashboard currentUser={currentUser} />
+
+      {/* Logout */}
+      <button
+        onClick={() => base44.auth.logout("/login")}
+        className="w-full mt-8 py-3 rounded-xl bg-secondary border border-border text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-destructive/20 hover:border-destructive/50 transition-colors"
+      >
+        <LogOut className="w-4 h-4" />
+        Déconnexion
+      </button>
     </div>
   );
 }
