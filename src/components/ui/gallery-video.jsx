@@ -7,15 +7,16 @@ import {
   markVideoSeen,
 } from "@/lib/video-thumbnail";
 
-// Global semaphore — limits concurrent video downloads to avoid
-// bandwidth contention on mobile. Only N videos load at once; the
-// rest queue until a slot frees up.
-const MAX_CONCURRENT = 3;
+// Wave-based loader — loads videos in batches of 4.
+// The first 4 videos get full bandwidth and load fast; only when
+// ALL 4 in the current wave are done does the next batch of 4 start.
+// This ensures the top of the gallery is ready before anything else.
+const BATCH_SIZE = 4;
 let activeCount = 0;
 const waitQueue = [];
 
 function acquireSlot() {
-  if (activeCount < MAX_CONCURRENT) {
+  if (activeCount < BATCH_SIZE) {
     activeCount++;
     return Promise.resolve();
   }
@@ -24,9 +25,13 @@ function acquireSlot() {
 
 function releaseSlot() {
   activeCount = Math.max(0, activeCount - 1);
-  if (waitQueue.length > 0 && activeCount < MAX_CONCURRENT) {
-    activeCount++;
-    waitQueue.shift()();
+  // Only start the next wave when the current batch is fully released
+  if (activeCount === 0 && waitQueue.length > 0) {
+    const toRelease = Math.min(BATCH_SIZE, waitQueue.length);
+    for (let i = 0; i < toRelease; i++) {
+      activeCount++;
+      waitQueue.shift()();
+    }
   }
 }
 
