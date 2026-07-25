@@ -27,21 +27,26 @@ export default function InfluencerManager({ influencers, onRefresh }) {
 
   const handlePhotoUpload = async (file) => {
     if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Veuillez sélectionner une image", variant: "destructive" });
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "L'image dépasse 10 Mo", variant: "destructive" });
+      return;
+    }
     setUploadingPhoto(true);
     try {
-      // Client-side resize/compress before upload
-      const resized = await resizeImage(file, 400, 400);
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: resized });
-      setForm(prev => ({ ...prev, photo_url: file_url }));
-      toast({ title: "Photo ajoutée" });
+      const dataUrl = await resizeImage(file, 400, 0.85);
+      setForm(prev => ({ ...prev, photo_url: dataUrl }));
     } catch (err) {
-      toast({ title: "Erreur upload photo", description: err.message, variant: "destructive" });
+      toast({ title: "Erreur traitement image", description: err.message, variant: "destructive" });
     }
     setUploadingPhoto(false);
   };
 
-  const resizeImage = (file, maxW, maxH) => {
-    return new Promise((resolve) => {
+  const resizeImage = (file, maxSize, quality) => {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const img = new Image();
@@ -49,18 +54,21 @@ export default function InfluencerManager({ influencers, onRefresh }) {
           const canvas = document.createElement("canvas");
           let { width, height } = img;
           if (width > height) {
-            if (width > maxW) { height = (height * maxW) / width; width = maxW; }
+            if (width > maxSize) { height = Math.round(height * maxSize / width); width = maxSize; }
           } else {
-            if (height > maxH) { width = (width * maxH) / height; height = maxH; }
+            if (height > maxSize) { width = Math.round(width * maxSize / height); height = maxSize; }
           }
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
-          canvas.toBlob((blob) => resolve(new File([blob], file.name, { type: "image/jpeg" })), "image/jpeg", 0.85);
+          const isPng = file.type === "image/png";
+          resolve(canvas.toDataURL(isPng ? "image/png" : "image/jpeg", quality));
         };
+        img.onerror = () => reject(new Error("Image invalide"));
         img.src = e.target.result;
       };
+      reader.onerror = () => reject(new Error("Lecture du fichier échouée"));
       reader.readAsDataURL(file);
     });
   };
