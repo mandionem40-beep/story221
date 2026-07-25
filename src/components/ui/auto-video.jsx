@@ -19,7 +19,6 @@ import { getVideoThumbnail, getCachedThumbnail } from "@/lib/video-thumbnail";
  */
 export default function AutoVideo({
   src,
-  poster: posterProp,
   className,
   active: controlledActive,
   onReady,
@@ -28,14 +27,13 @@ export default function AutoVideo({
   const videoRef = useRef(null);
   const [visible, setVisible] = useState(true);
   const [playing, setPlaying] = useState(false);
-  // Static poster takes priority — instant, no canvas extraction needed
-  const [poster, setPoster] = useState(() => posterProp || getCachedThumbnail(src));
+  // Poster = TRUE frame extracted from the video itself (via canvas)
+  const [poster, setPoster] = useState(() => getCachedThumbnail(src));
 
   const isActive = controlledActive ?? visible;
 
-  // Only extract canvas thumbnail if NO static poster was provided
+  // Generate real video-frame thumbnail if not cached yet
   useEffect(() => {
-    if (posterProp) return; // static poster provided — skip extraction entirely
     let cancelled = false;
     if (!src) return;
     const cached = getCachedThumbnail(src);
@@ -47,7 +45,7 @@ export default function AutoVideo({
       if (!cancelled && url) setPoster(url);
     });
     return () => { cancelled = true; };
-  }, [src, posterProp]);
+  }, [src]);
 
   // Observe visibility to play/pause
   useEffect(() => {

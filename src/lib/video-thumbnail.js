@@ -123,8 +123,17 @@ export function getVideoThumbnail(videoUrl, seekTime = 0) {
       }
     };
 
-    // Capture as soon as the first frame is decoded (no seek needed — faster)
-    video.addEventListener("loadeddata", captureFrame, { once: true });
+    // Seek slightly past frame 0 to skip potential black intro frames,
+    // then capture on 'seeked' — gives a real, representative frame.
+    const onLoaded = () => {
+      try {
+        video.currentTime = 0.1;
+      } catch {
+        captureFrame();
+      }
+    };
+    video.addEventListener("loadeddata", onLoaded, { once: true });
+    video.addEventListener("seeked", captureFrame, { once: true });
     video.addEventListener("error", () => finish(null), { once: true });
     // Timeout: 10s (generous for weak connections)
     setTimeout(() => finish(null), 10000);

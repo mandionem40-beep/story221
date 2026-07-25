@@ -16,7 +16,6 @@ export default function UniverseCard({ category, selected, onSelect }) {
       {category.video_url ? (
         <AutoVideo
           src={category.video_url}
-          poster={category.image}
           className="absolute inset-0 w-full h-full"
         />
       ) : (
