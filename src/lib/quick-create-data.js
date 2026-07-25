@@ -218,11 +218,51 @@ export const quickDurations = [
 ];
 
 export const quickVoices = [
-  { id: "river", label: "River", desc: "Calme, neutre" },
-  { id: "honey", label: "Honey", desc: "Chaleureux, doux" },
-  { id: "sunny", label: "Sunny", desc: "Vif, entraînant" },
-  { id: "storm", label: "Storm", desc: "Formel, autoritaire" },
-  { id: "spark", label: "Spark", desc: "Énergique, rapide" },
+  {
+    id: "river",
+    label: "River",
+    desc: "Calme, neutre",
+    tone: "Posé",
+    rhythm: "Modéré",
+    description: "Voix équilibrée et stable. Parfaite pour les narrations documentaires, les récits informatifs et les présentations professionnelles. Apporte une dimension neutre et crédible.",
+    speechConfig: { rate: 0.9, pitch: 1.0 },
+  },
+  {
+    id: "honey",
+    label: "Honey",
+    desc: "Chaleureux, doux",
+    tone: "Doux",
+    rhythm: "Lent",
+    description: "Voix affectueuse et enveloppante. Idéale pour les histoires romantiques, les contes tendres et les moments émotionnels. Crée une proximité intime avec l'auditoire.",
+    speechConfig: { rate: 0.85, pitch: 1.15 },
+  },
+  {
+    id: "sunny",
+    label: "Sunny",
+    desc: "Vif, entraînant",
+    tone: "Brillant",
+    rhythm: "Rapide",
+    description: "Énergie positive et joyeuse. Parfaite pour les contenus dynamiques, les clips festifs et les présentations entraînantes. Communique l'enthousiasme et la bonne humeur.",
+    speechConfig: { rate: 1.1, pitch: 1.2 },
+  },
+  {
+    id: "storm",
+    label: "Storm",
+    desc: "Formel, autoritaire",
+    tone: "Grave",
+    rhythm: "Modéré",
+    description: "Voix puissante et commandante. Idéale pour les bandes-annonces, les récits épiques et les moments solennels. Impose le respect et capte l'attention dès les premiers mots.",
+    speechConfig: { rate: 0.85, pitch: 0.75 },
+  },
+  {
+    id: "spark",
+    label: "Spark",
+    desc: "Énergique, rapide",
+    tone: "Percutant",
+    rhythm: "Très rapide",
+    description: "Voix électrique et intense. Parfaite pour l'action, les moments de tension et les rythmes effrénés. Insuffle une urgence et une vivacité qui tiennent l'auditoire en haleine.",
+    speechConfig: { rate: 1.25, pitch: 0.9 },
+  },
 ];
 
 export const quickLanguages = [

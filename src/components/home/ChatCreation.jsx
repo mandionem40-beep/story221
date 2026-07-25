@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Send, Image as ImageIcon, Video as VideoIcon, ChevronDown, Upload, X, Loader2, Plus, SlidersHorizontal } from "lucide-react";
+import { Send, Image as ImageIcon, Video as VideoIcon, ChevronDown, Upload, X, Loader2, Plus, SlidersHorizontal, Volume2, Square } from "lucide-react";
 import DiamondIcon from "@/components/DiamondIcon";
 import { base44 } from "@/api/base44Client";
 import { quickDurations, quickLanguages, quickVoices, buildChatPrompt, calculateFreeTrial } from "@/lib/quick-create-data";
@@ -17,9 +17,11 @@ export default function ChatCreation({ selectedCategory, currentUser }) {
   const [voice, setVoice] = useState("river");
   const [mediaType, setMediaType] = useState("video");
   const [showUploadMenu, setShowUploadMenu] = useState(false);
+  const [previewingVoice, setPreviewingVoice] = useState(false);
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const uploadMenuRef = useRef(null);
+  const speechRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -30,6 +32,44 @@ export default function ChatCreation({ selectedCategory, currentUser }) {
     if (showUploadMenu) document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showUploadMenu]);
+
+  // Cleanup Web Speech on unmount
+  useEffect(() => {
+    return () => {
+      if (speechRef.current) {
+        window.speechSynthesis.cancel();
+        speechRef.current = null;
+      }
+    };
+  }, []);
+
+  const previewVoice = (voiceObj) => {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+
+    const samples = {
+      "Français": "Bonjour, je suis votre narrateur. Voici un aperçu de ma voix pour votre création.",
+      "Wolof": "Salaam aleekum, ma ngi tudd narrateur. Lii mooy biral sama baat.",
+      "Anglais": "Hello, I am your narrator. Here is a preview of my voice for your creation.",
+    };
+    const text = samples[language] || samples["Français"];
+
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = voiceObj.speechConfig.rate;
+    utter.pitch = voiceObj.speechConfig.pitch;
+    utter.volume = 1;
+    utter.lang = language === "Wolof" ? "fr-FR" : language === "Anglais" ? "en-US" : "fr-FR";
+    utter.onend = () => setPreviewingVoice(false);
+    utter.onerror = () => setPreviewingVoice(false);
+    speechRef.current = utter;
+    setPreviewingVoice(true);
+    window.speechSynthesis.speak(utter);
+  };
+
+  const stopPreview = () => {
+    window.speechSynthesis.cancel();
+    setPreviewingVoice(false);
+  };
 
   const cost = mediaType === "video" ? duration.cost : 5;
   const { covered, remaining } = calculateFreeTrial(cost, currentUser?.free_trial_used);
@@ -240,6 +280,47 @@ export default function ChatCreation({ selectedCategory, currentUser }) {
                   </button>
                 ))}
               </div>
+              {/* Voice presentation card — shown when a voice is selected */}
+              {(() => {
+                const selected = quickVoices.find(v => v.id === voice);
+                if (!selected) return null;
+                return (
+                  <div className="mt-2 p-3 rounded-xl bg-card border border-primary/30">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-semibold text-white">{selected.label}</span>
+                          <span className="text-[10px] text-muted-foreground">— {selected.desc}</span>
+                        </div>
+                        <div className="flex gap-1.5">
+                          <span className="px-2 py-0.5 rounded-md bg-secondary border border-border text-[10px] font-medium text-muted-foreground">
+                            Ton: {selected.tone}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-md bg-secondary border border-border text-[10px] font-medium text-muted-foreground">
+                            Rythme: {selected.rhythm}
+                          </span>
+                        </div>
+                      </div>
+                      {"speechSynthesis" in window && (
+                        <button
+                          onClick={() => previewingVoice ? stopPreview() : previewVoice(selected)}
+                          className={`flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold border transition-all ${
+                            previewingVoice
+                              ? "bg-destructive/10 border-destructive/40 text-destructive"
+                              : "bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"
+                          }`}
+                        >
+                          {previewingVoice ? <Square className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
+                          {previewingVoice ? "Stop" : "Écouter"}
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {selected.description}
+                    </p>
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>
