@@ -27,6 +27,66 @@ Deno.serve(async (req) => {
       return Response.json({ ok: true, matched: true });
     }
 
+    if (action === "get_stats") {
+      // Authenticated — return referral stats for the current user
+      const user = await base44.auth.me();
+      if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+
+      const referralCode = user.referral_code;
+      if (!referralCode) {
+        return Response.json({ clicks: 0, signups: 0, published: 0, rewards: 0, pendingRewards: 0, referrals: [] });
+      }
+
+      // Count clicks (service role — bypasses RLS)
+      const clicks = await base44.asServiceRole.entities.ReferralClick.filter({ referrer_id: user.id });
+
+      // Find all users referred by this code (service role — regular users can't list other users)
+      const allUsers = await base44.asServiceRole.entities.User.filter({ referred_by: referralCode });
+      const myReferrals = allUsers || [];
+      const referralUserIds = new Set(myReferrals.map(u => u.id));
+
+      // Find reels published by referred users
+      let publishedReels = [];
+      if (referralUserIds.size > 0) {
+        const allReels = await base44.asServiceRole.entities.Reel.list("-created_date", 500);
+        publishedReels = (allReels || []).filter(r => referralUserIds.has(r.created_by_id));
+      }
+      const publishedUserIds = new Set(publishedReels.map(r => r.created_by_id));
+      const publishedCount = publishedUserIds.size;
+
+      const rewardsEarned = publishedCount * REWARD_DIAMONDS;
+      const pendingRewards = (myReferrals.length - publishedCount) * REWARD_DIAMONDS;
+
+      // Build referral history
+      const reelsByCreator = {};
+      publishedReels.forEach(r => {
+        if (!reelsByCreator[r.created_by_id]) reelsByCreator[r.created_by_id] = [];
+        reelsByCreator[r.created_by_id].push(r);
+      });
+
+      const history = myReferrals.map(u => {
+        const userReels = reelsByCreator[u.id] || [];
+        const hasPublished = userReels.length > 0;
+        return {
+          id: u.id,
+          username: u.username || u.email?.split("@")[0] || "utilisateur",
+          avatar: u.avatar_url,
+          joinedDate: u.created_date,
+          status: hasPublished ? "published" : "signup",
+          publishedCount: userReels.length,
+        };
+      }).sort((a, b) => new Date(b.joinedDate) - new Date(a.joinedDate));
+
+      return Response.json({
+        clicks: clicks?.length || 0,
+        signups: myReferrals.length,
+        published: publishedCount,
+        rewards: rewardsEarned,
+        pendingRewards: pendingRewards > 0 ? pendingRewards : 0,
+        referrals: history,
+      });
+    }
+
     if (action === "process_reward") {
       // Authenticated — the referred user who just published their first Reel
       const user = await base44.auth.me();

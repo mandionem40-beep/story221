@@ -98,6 +98,7 @@ export default function CreateInfluencerContent({ influencer, onClose, onPublish
               total_views: reels.reduce((s, r) => s + (r.views || 0), 0),
             });
             toast({ title: "Publié !", description: `${influencer.name} a publié un nouveau contenu.` });
+            base44.functions.invoke("process-referral", { action: "process_reward" }).catch(() => {});
             refreshUser();
             onPublished();
           },

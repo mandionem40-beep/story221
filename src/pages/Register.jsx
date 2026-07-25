@@ -38,6 +38,15 @@ export default function Register() {
     return () => clearTimeout(t);
   }, [resendCooldown]);
 
+  // Track referral click when visiting with ?ref=CODE
+  useEffect(() => {
+    if (!refCode) return;
+    const clickKey = `ref_click_${refCode}`;
+    if (sessionStorage.getItem(clickKey)) return; // already tracked this session
+    sessionStorage.setItem(clickKey, "1");
+    base44.functions.invoke("process-referral", { action: "track_click", referral_code: refCode, source: "register_page" }).catch(() => {});
+  }, [refCode]);
+
   const fullPhone = `${phonePrefix}${phoneNumber.trim()}`;
   const detectedCountry = countryPrefixes.find((c) => c.prefix === phonePrefix);
 

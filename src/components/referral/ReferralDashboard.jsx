@@ -21,71 +21,32 @@ export default function ReferralDashboard({ currentUser }) {
   const ensureReferralCode = async () => {
     if (currentUser?.referral_code) {
       setReferralCode(currentUser.referral_code);
-      loadReferralData(currentUser.referral_code);
+      loadReferralData();
       return;
     }
     try {
       const code = generateReferralCode(currentUser?.username || currentUser?.email || "USER");
       await base44.auth.updateMe({ referral_code: code });
       setReferralCode(code);
-      loadReferralData(code);
+      loadReferralData();
     } catch {
       setLoading(false);
     }
   };
 
-  const loadReferralData = async (code) => {
-    if (!code || !currentUser?.id) { setLoading(false); return; }
+  const loadReferralData = async () => {
+    if (!currentUser?.id) { setLoading(false); return; }
     try {
-      const [clicks, allUsers, allGens, allReels] = await Promise.all([
-        base44.entities.ReferralClick.filter({ referrer_id: currentUser.id }),
-        base44.entities.User.list("-created_date", 500),
-        base44.entities.Generation.filter({ is_published: true }),
-        base44.entities.Reel.list("-created_date", 500),
-      ]);
-
-      // Filleuls = users referred by me
-      const myReferrals = (allUsers || []).filter(u => u.referred_by === code);
-      const referralUserIds = new Set(myReferrals.map(u => u.id));
-
-      // Published = referred users who have a published reel
-      const publishedReels = (allReels || []).filter(r => referralUserIds.has(r.created_by_id));
-      const publishedUserIds = new Set(publishedReels.map(r => r.created_by_id));
-      const publishedCount = publishedUserIds.size;
-
-      // Rewards = published referrals (each gives 5 diamonds)
-      const rewardsEarned = publishedCount * 5;
-      const pendingRewards = (myReferrals.length - publishedCount) * 5;
-
+      const res = await base44.functions.invoke("process-referral", { action: "get_stats" });
+      const data = res?.data || res || {};
       setStats({
-        clicks: clicks?.length || 0,
-        signups: myReferrals.length,
-        published: publishedCount,
-        rewards: rewardsEarned,
-        pendingRewards: pendingRewards > 0 ? pendingRewards : 0,
+        clicks: data.clicks || 0,
+        signups: data.signups || 0,
+        published: data.published || 0,
+        rewards: data.rewards || 0,
+        pendingRewards: data.pendingRewards || 0,
       });
-
-      // Build referral history with status
-      const reelsByCreator = {};
-      (allReels || []).forEach(r => {
-        if (!reelsByCreator[r.created_by_id]) reelsByCreator[r.created_by_id] = [];
-        reelsByCreator[r.created_by_id].push(r);
-      });
-
-      const history = myReferrals.map(u => {
-        const userReels = reelsByCreator[u.id] || [];
-        const hasPublished = userReels.length > 0;
-        return {
-          id: u.id,
-          username: u.username || u.email?.split("@")[0] || "utilisateur",
-          avatar: u.avatar_url,
-          joinedDate: u.created_date,
-          status: hasPublished ? "published" : "signup",
-          publishedCount: userReels.length,
-        };
-      }).sort((a, b) => new Date(b.joinedDate) - new Date(a.joinedDate));
-
-      setReferrals(history);
+      setReferrals(data.referrals || []);
     } catch { /* ignore */ }
     setLoading(false);
   };
