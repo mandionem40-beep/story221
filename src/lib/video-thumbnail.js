@@ -179,3 +179,30 @@ export function preloadThumbnails(urls) {
     if (url) getVideoThumbnail(url);
   });
 }
+
+// --- "Seen video" tracking — persisted across page navigations ---
+// Videos that have been loaded+played before get preload="auto" on next
+// visit (browser HTTP cache serves data instantly → no re-buffering).
+const SEEN_KEY = "video_seen_urls";
+
+export function isVideoSeen(videoUrl) {
+  try {
+    const seen = JSON.parse(localStorage.getItem(SEEN_KEY) || "[]");
+    return seen.includes(videoUrl);
+  } catch {
+    return false;
+  }
+}
+
+export function markVideoSeen(videoUrl) {
+  try {
+    const seen = JSON.parse(localStorage.getItem(SEEN_KEY) || "[]");
+    if (!seen.includes(videoUrl)) {
+      seen.push(videoUrl);
+      if (seen.length > 100) seen.shift();
+      localStorage.setItem(SEEN_KEY, JSON.stringify(seen));
+    }
+  } catch {
+    /* ignore */
+  }
+}

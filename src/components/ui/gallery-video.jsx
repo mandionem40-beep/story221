@@ -1,5 +1,11 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import {
+  getCachedThumbnail,
+  getVideoThumbnail,
+  isVideoSeen,
+  markVideoSeen,
+} from "@/lib/video-thumbnail";
 
 // Global semaphore — limits concurrent video downloads to avoid
 // bandwidth contention on mobile. Only N videos load at once; the
@@ -25,12 +31,14 @@ function releaseSlot() {
 }
 
 /**
- * GalleryVideo — ultra-light video player for grid galleries.
+ * GalleryVideo — video player with REAL frame extraction.
  *
- * - `poster` prop = static image (instant, no network for video)
- * - `preload="none"` initially → zero bandwidth until visible
+ * - Extracts a TRUE frame from the video itself (not a stock image)
+ * - Caches it in localStorage → instant on repeat visits, even offline-ish
+ * - `preload="auto"` for already-seen videos → browser HTTP cache = instant
+ * - `preload="none"` for new videos → zero bandwidth until visible
  * - IntersectionObserver (300px margin) → load + play when near viewport
- * - Concurrent load limiter (max 3) → no bandwidth contention on mobile
+ * - Concurrent load limiter (max 3) → no bandwidth contention
  * - `onCanPlay` fade-in → video appears only when enough data is buffered
  * - `onWaiting` → poster reappears during buffering stalls (no freeze)
  */
@@ -38,7 +46,13 @@ export default function GalleryVideo({ src, poster, className, onReady, ...props
   const videoRef = useRef(null);
   const [visible, setVisible] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  // Real frame from video (cached in localStorage) — falls back to `poster` prop
+  const [realThumbnail, setRealThumbnail] = useState(() => getCachedThumbnail(src));
   const slotHeldRef = useRef(false);
+
+  const effectivePoster = realThumbnail || poster;
+  // If the video has been seen before, preload immediately (HTTP cache = instant)
+  const seenBefore = src ? isVideoSeen(src) : false;
 
   useEffect(() => {
     const el = videoRef.current;
@@ -51,9 +65,31 @@ export default function GalleryVideo({ src, poster, className, onReady, ...props
     return () => obs.disconnect();
   }, []);
 
+  // Extract real frame from video when visible (if not already cached)
+  useEffect(() => {
+    if (!visible || !src || realThumbnail) return;
+    let cancelled = false;
+    getVideoThumbnail(src).then((thumb) => {
+      if (!cancelled && thumb) {
+        setRealThumbnail(thumb);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [visible, src, realThumbnail]);
+
   // Acquire a concurrent-load slot when visible, release on scroll-away
   useEffect(() => {
     if (!visible || !src) return;
+    // Seen videos don't need the semaphore — they load from HTTP cache
+    if (seenBefore) {
+      slotHeldRef.current = true;
+      const v = videoRef.current;
+      if (v) {
+        v.preload = "auto";
+        v.load();
+      }
+      return () => { slotHeldRef.current = false; };
+    }
     let cancelled = false;
     acquireSlot().then(() => {
       if (cancelled) {
@@ -74,7 +110,7 @@ export default function GalleryVideo({ src, poster, className, onReady, ...props
         releaseSlot();
       }
     };
-  }, [visible, src]);
+  }, [visible, src, seenBefore]);
 
   // Play / pause based on visibility
   useEffect(() => {
@@ -95,8 +131,9 @@ export default function GalleryVideo({ src, poster, className, onReady, ...props
 
   const handleCanPlay = useCallback(() => {
     setShowVideo(true);
+    if (src) markVideoSeen(src);
     onReady?.();
-  }, [onReady]);
+  }, [onReady, src]);
 
   // Poster reappears during buffering stalls — no frozen frame
   const handleWaiting = useCallback(() => {
@@ -107,9 +144,9 @@ export default function GalleryVideo({ src, poster, className, onReady, ...props
 
   return (
     <div className="absolute inset-0 bg-card overflow-hidden">
-      {poster && (
+      {effectivePoster && (
         <img
-          src={poster}
+          src={effectivePoster}
           alt=""
           aria-hidden="true"
           loading="eager"
@@ -125,7 +162,7 @@ export default function GalleryVideo({ src, poster, className, onReady, ...props
         loop
         muted
         playsInline
-        preload="none"
+        preload={seenBefore ? "auto" : "none"}
         disableRemotePlayback
         onCanPlay={handleCanPlay}
         onPlaying={handleCanPlay}
