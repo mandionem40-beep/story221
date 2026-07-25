@@ -16,6 +16,7 @@ export default function UniverseCard({ category, selected, onSelect }) {
       {category.video_url ? (
         <AutoVideo
           src={category.video_url}
+          poster={category.image}
           className="absolute inset-0 w-full h-full"
         />
       ) : (
@@ -23,7 +24,8 @@ export default function UniverseCard({ category, selected, onSelect }) {
           src={category.image}
           alt={category.label}
           className="absolute inset-0 w-full h-full object-cover animate-ken-burns"
-          loading="lazy"
+          loading="eager"
+          fetchpriority="high"
         />
       )}
 

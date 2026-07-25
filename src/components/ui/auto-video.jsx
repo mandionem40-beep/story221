@@ -19,6 +19,7 @@ import { getVideoThumbnail, getCachedThumbnail } from "@/lib/video-thumbnail";
  */
 export default function AutoVideo({
   src,
+  poster: posterProp,
   className,
   active: controlledActive,
   onReady,
@@ -27,12 +28,14 @@ export default function AutoVideo({
   const videoRef = useRef(null);
   const [visible, setVisible] = useState(true);
   const [playing, setPlaying] = useState(false);
-  const [poster, setPoster] = useState(() => getCachedThumbnail(src));
+  // Static poster takes priority — instant, no canvas extraction needed
+  const [poster, setPoster] = useState(() => posterProp || getCachedThumbnail(src));
 
   const isActive = controlledActive ?? visible;
 
-  // Generate thumbnail if not cached (only runs once per device per video)
+  // Only extract canvas thumbnail if NO static poster was provided
   useEffect(() => {
+    if (posterProp) return; // static poster provided — skip extraction entirely
     let cancelled = false;
     if (!src) return;
     const cached = getCachedThumbnail(src);
@@ -44,7 +47,7 @@ export default function AutoVideo({
       if (!cancelled && url) setPoster(url);
     });
     return () => { cancelled = true; };
-  }, [src]);
+  }, [src, posterProp]);
 
   // Observe visibility to play/pause
   useEffect(() => {
@@ -93,12 +96,16 @@ export default function AutoVideo({
 
   return (
     <div className="absolute inset-0 bg-card overflow-hidden">
-      {/* Poster layer — ALWAYS visible as background, never removed */}
+      {/* Poster layer — ALWAYS visible as background, never removed.
+          Uses fetchPriority="high" + loading="eager" so the image is
+          instant on first paint — zero black flash, zero loading state. */}
       {poster && (
         <img
           src={poster}
           alt=""
           aria-hidden="true"
+          loading="eager"
+          fetchpriority="high"
           className="absolute inset-0 w-full h-full object-cover"
         />
       )}
