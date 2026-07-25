@@ -15,7 +15,7 @@ const thumbnailCache = new Map(); // url → Promise<string|null>
 const resolvedValues = new Map(); // url → string (sync lookup)
 
 const STORAGE_PREFIX = "vthumb_";
-const MAX_STORAGE_SIZE = 40; // max thumbnails in localStorage
+const MAX_STORAGE_SIZE = 100; // enough for all universe + showcase videos
 
 function getStorageKey(videoUrl) {
   let hash = 0;
@@ -36,18 +36,29 @@ function getFromStorage(videoUrl) {
 
 function saveToStorage(videoUrl, dataUrl) {
   try {
-    // Evict oldest entries if at capacity
+    // If localStorage is getting full, evict oldest thumbnail entries
     const keys = Object.keys(localStorage).filter((k) =>
       k.startsWith(STORAGE_PREFIX)
     );
     if (keys.length >= MAX_STORAGE_SIZE) {
-      keys.slice(0, keys.length - MAX_STORAGE_SIZE + 1).forEach((k) =>
-        localStorage.removeItem(k)
-      );
+      // Evict roughly 20% of oldest entries to make room
+      const toRemove = Math.ceil(MAX_STORAGE_SIZE * 0.2);
+      keys.slice(0, toRemove).forEach((k) => localStorage.removeItem(k));
     }
     localStorage.setItem(getStorageKey(videoUrl), dataUrl);
   } catch {
-    // localStorage might be full — silently ignore
+    // localStorage might be full — try evicting half the thumbnails and retry once
+    try {
+      const keys = Object.keys(localStorage).filter((k) =>
+        k.startsWith(STORAGE_PREFIX)
+      );
+      keys.slice(0, Math.ceil(keys.length / 2)).forEach((k) =>
+        localStorage.removeItem(k)
+      );
+      localStorage.setItem(getStorageKey(videoUrl), dataUrl);
+    } catch {
+      // give up — thumbnail stays in memory cache only
+    }
   }
 }
 
