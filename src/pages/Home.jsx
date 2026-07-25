@@ -96,7 +96,7 @@ export default function Home() {
       </div>
 
       {/* Quick Access Shortcuts — after chat */}
-      <QuickAccess />
+      <QuickAccess currentUser={currentUser} />
 
       {/* Universe Gallery */}
       <UniverseGallery
