@@ -1,6 +1,39 @@
 import React, { useState, useRef } from "react";
-import { base44 } from "@/api/base44Client";
 import { Camera, Loader2, Link2 } from "lucide-react";
+
+/**
+ * Resizes an image file client-side using canvas and returns a compressed data URL.
+ * No server upload needed — works without integration credits.
+ */
+function resizeImage(file, maxSize = 256, quality = 0.8) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let { width, height } = img;
+        if (width > height) {
+          if (width > maxSize) { height = Math.round(height * maxSize / width); width = maxSize; }
+        } else {
+          if (height > maxSize) { width = Math.round(width * maxSize / height); height = maxSize; }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        // PNG if original is PNG (preserve transparency), else JPEG
+        const isPng = file.type === "image/png";
+        const dataUrl = canvas.toDataURL(isPng ? "image/png" : "image/jpeg", quality);
+        resolve(dataUrl);
+      };
+      img.onerror = () => reject(new Error("Image invalide"));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error("Lecture du fichier échouée"));
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function ProfilePhotoUpload({ value, onChange, googlePhotoUrl }) {
   const [uploading, setUploading] = useState(false);
@@ -10,19 +43,22 @@ export default function ProfilePhotoUpload({ value, onChange, googlePhotoUrl }) 
 
   const handleFile = async (file) => {
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      setError("L'image dépasse 5 Mo.");
+    if (!file.type.startsWith("image/")) {
+      setError("Veuillez sélectionner une image.");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setError("L'image dépasse 10 Mo.");
       return;
     }
     setUploading(true);
     setError("");
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      onChange(file_url);
+      const dataUrl = await resizeImage(file, 256, 0.8);
+      onChange(dataUrl);
       setShowUrlInput(false);
-    } catch {
-      setError("Upload indisponible, utilisez une URL d'image.");
-      setShowUrlInput(true);
+    } catch (err) {
+      setError(err.message || "Échec du traitement de l'image.");
     } finally {
       setUploading(false);
     }
@@ -34,7 +70,7 @@ export default function ProfilePhotoUpload({ value, onChange, googlePhotoUrl }) 
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-border bg-secondary flex items-center justify-center flex-shrink-0 group"
+          className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-border bg-secondary flex items-center justify-center flex-shrink-0"
         >
           {value ? (
             <img src={value} alt="" className="w-full h-full object-cover" />
