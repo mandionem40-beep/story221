@@ -128,10 +128,42 @@ Deno.serve(async (req) => {
         body: `${user.username || "Un filleul"} a publié son premier projet. Vous gagnez ${REWARD_DIAMONDS} 💎 !`,
         type: "referral_reward",
         read: false,
+        recipient_id: referrer.id,
+        source_user_id: user.id,
         created_by_id: referrer.id,
       });
 
       return Response.json({ ok: true, rewarded: true, diamonds: REWARD_DIAMONDS });
+    }
+
+    if (action === "track_signup") {
+      // Authenticated — the newly registered user with a referred_by code
+      const user = await base44.auth.me();
+      if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+
+      if (!user.referred_by) {
+        return Response.json({ ok: true, matched: false });
+      }
+
+      // Find referrer by the stored referral code
+      const referrers = await base44.asServiceRole.entities.User.filter({ referral_code: user.referred_by });
+      if (!referrers || referrers.length === 0) {
+        return Response.json({ ok: true, matched: false });
+      }
+      const referrer = referrers[0];
+
+      // Notify the referrer that someone signed up with their code
+      await base44.asServiceRole.entities.Notification.create({
+        title: "Nouveau filleul ! 🎉",
+        body: `${user.username || user.email?.split("@")[0] || "Quelqu'un"} s'est inscrit avec votre lien de parrainage.`,
+        type: "referral_signup",
+        read: false,
+        recipient_id: referrer.id,
+        source_user_id: user.id,
+        created_by_id: referrer.id,
+      });
+
+      return Response.json({ ok: true, matched: true });
     }
 
     return Response.json({ error: "Unknown action" }, { status: 400 });

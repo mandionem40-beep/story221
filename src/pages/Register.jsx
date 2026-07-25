@@ -126,6 +126,10 @@ export default function Register() {
         free_trial_used: false,
         role: "user",
       });
+      // Notify referrer that someone signed up with their code
+      if (refCode) {
+        base44.functions.invoke("process-referral", { action: "track_signup" }).catch(() => {});
+      }
       window.location.href = "/app";
     } catch (err) {
       setError(err.message || "Code de vérification invalide");
@@ -146,11 +150,13 @@ export default function Register() {
   };
 
   const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", "/complete-profile");
+    const dest = refCode ? `/complete-profile?ref=${refCode}` : "/complete-profile";
+    base44.auth.loginWithProvider("google", dest);
   };
 
   const handleApple = () => {
-    base44.auth.loginWithProvider("apple", "/complete-profile");
+    const dest = refCode ? `/complete-profile?ref=${refCode}` : "/complete-profile";
+    base44.auth.loginWithProvider("apple", dest);
   };
 
   if (showOtp) {

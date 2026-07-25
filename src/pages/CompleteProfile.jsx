@@ -74,6 +74,11 @@ export default function CompleteProfile() {
         referral_code: refCodeGen,
         referred_by: user?.referred_by || refCode || null,
       });
+      // Notify referrer if this user was referred
+      const finalRefCode = user?.referred_by || refCode;
+      if (finalRefCode) {
+        base44.functions.invoke("process-referral", { action: "track_signup" }).catch(() => {});
+      }
       toast({ title: "Profil complété !", description: "Bienvenue sur Story221." });
       window.location.href = user?.role === "admin" || user?.role === "super_admin" ? "/admin" : "/app";
     } catch (err) {

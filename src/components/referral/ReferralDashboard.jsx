@@ -12,7 +12,9 @@ export default function ReferralDashboard({ currentUser }) {
   const [showShare, setShowShare] = useState(false);
   const [referralCode, setReferralCode] = useState(currentUser?.referral_code || "");
 
-  const referralLink = `${window.location.origin}/register?ref=${referralCode || "—"}`;
+  const referralLink = referralCode
+    ? `${window.location.origin}/register?ref=${referralCode}`
+    : `${window.location.origin}/register`;
 
   useEffect(() => {
     ensureReferralCode();
