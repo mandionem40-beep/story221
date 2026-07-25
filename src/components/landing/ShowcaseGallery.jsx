@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Loader2 } from "lucide-react";
 import ShowcaseVideoCard from "@/components/landing/ShowcaseVideoCard";
-import { preloadVideos } from "@/lib/video-preloader";
 
 export default function ShowcaseGallery() {
   const [videos, setVideos] = useState([]);
@@ -13,10 +12,6 @@ export default function ShowcaseGallery() {
       try {
         const list = await base44.entities.ShowcaseVideo.filter({ active: true }, "display_order", 8);
         setVideos(list || []);
-        // Preload showcase videos + generate thumbnails immediately
-        if (list && list.length > 0) {
-          preloadVideos(list.map((v) => v.video_url).filter(Boolean));
-        }
       } catch { /* ignore */ }
       setLoading(false);
     };

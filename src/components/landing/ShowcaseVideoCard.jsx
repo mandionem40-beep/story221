@@ -1,5 +1,5 @@
 import { useState } from "react";
-import AutoVideo from "@/components/ui/auto-video";
+import GalleryVideo from "@/components/ui/gallery-video";
 
 export default function ShowcaseVideoCard({ video }) {
   const [error, setError] = useState(false);
@@ -11,10 +11,10 @@ export default function ShowcaseVideoCard({ video }) {
       <div className="pointer-events-none absolute -inset-2 rounded-3xl bg-primary/0 blur-xl transition-all duration-500 group-hover:bg-primary/25 group-hover:shadow-[0_0_40px_rgba(255,0,51,0.35)]" />
 
       <div className="relative aspect-[9/16] overflow-hidden bg-black">
-        {/* Video — no poster, no thumbnail, visible immediately */}
         {hasVideo ? (
-          <AutoVideo
+          <GalleryVideo
             src={video.video_url}
+            poster={video.thumbnail_url || undefined}
             onError={() => setError(true)}
             className="absolute inset-0 w-full h-full transition-transform duration-500 group-hover:scale-105"
           />
