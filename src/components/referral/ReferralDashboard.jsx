@@ -87,15 +87,19 @@ export default function ReferralDashboard({ currentUser }) {
       </div>
       <p className="text-sm text-muted-foreground mb-4">Invitez vos amis et gagnez 5 💎 pour chaque filleul qui publie son premier projet.</p>
 
-      {/* Referral link */}
-      <div className="flex items-center gap-2 p-3 rounded-xl bg-background border border-border mb-4">
+      {/* Referral link — mobile: button only, desktop: input + button */}
+      <div className="sm:flex sm:items-center sm:gap-2 sm:p-3 sm:rounded-xl sm:bg-background sm:border sm:border-border mb-4">
         <input
           value={referralLink}
           readOnly
-          className="flex-1 bg-transparent text-sm text-white truncate outline-none"
+          className="hidden sm:block flex-1 bg-transparent text-sm text-white truncate outline-none"
         />
-        <button onClick={copyLink} className="px-3 py-1.5 rounded-lg bg-secondary text-white text-sm font-medium flex items-center gap-1.5 hover:bg-secondary/70 transition-colors">
-          Copier
+        <button
+          onClick={copyLink}
+          className="w-full sm:w-auto px-4 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold flex items-center justify-center gap-2 glow-red-sm active:scale-[0.98] transition-all"
+        >
+          <Share2 className="w-4 h-4" />
+          Copier mon lien
         </button>
       </div>
 
