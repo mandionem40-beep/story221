@@ -5,13 +5,17 @@ import { getVideoThumbnail, getCachedThumbnail } from "@/lib/video-thumbnail";
 /**
  * AutoVideo — instant-play video with a real frame as poster.
  *
- * - Poster is a TRUE frame extracted from the video itself (via canvas),
- *   persisted to localStorage → instant on repeat visits, zero black cage.
- * - preload="auto" ALWAYS: browser starts downloading on mount.
- * - Poster stays visible until the video is ACTUALLY playing (onPlaying),
- *   not just "can play" — prevents any black flash on slow connections.
- * - If no poster yet (first visit), video element is visible at opacity-100
- *   so the browser shows its own first frame as soon as data arrives.
+ * The poster image is ALWAYS rendered as a background layer — it never
+ * disappears. The video element sits on top and fades in (opacity 0→100)
+ * only when it is actually playing. This guarantees zero black flash:
+ * the poster is visible the entire time until the video takes over.
+ *
+ * - Poster = TRUE frame extracted from the video (via canvas), persisted
+ *   to localStorage → instant on repeat visits, zero black cage.
+ * - Background is bg-card (dark, not pure black) so even without a poster
+ *   there is no jarring black screen.
+ * - preload="auto" always: browser starts downloading on mount.
+ * - GPU-accelerated: will-change + translateZ for smooth mobile playback.
  */
 export default function AutoVideo({
   src,
@@ -23,7 +27,6 @@ export default function AutoVideo({
   const videoRef = useRef(null);
   const [visible, setVisible] = useState(true);
   const [playing, setPlaying] = useState(false);
-  // Synchronous init: check memory cache + localStorage (instant on repeat visits)
   const [poster, setPoster] = useState(() => getCachedThumbnail(src));
 
   const isActive = controlledActive ?? visible;
@@ -40,9 +43,7 @@ export default function AutoVideo({
     getVideoThumbnail(src).then((url) => {
       if (!cancelled && url) setPoster(url);
     });
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [src]);
 
   // Observe visibility to play/pause
@@ -66,9 +67,7 @@ export default function AutoVideo({
       const p = v.play();
       if (p && p.catch) {
         p.catch(() => {
-          const retry = () => {
-            v.play().catch(() => {});
-          };
+          const retry = () => { v.play().catch(() => {}); };
           v.addEventListener("canplay", retry, { once: true });
         });
       }
@@ -85,27 +84,25 @@ export default function AutoVideo({
   };
 
   const handlePause = () => {
-    setPlaying(false);
+    // Don't set playing=false on every pause (e.g. buffering) —
+    // only hide if the video actually left the viewport.
+    // The IntersectionObserver handles pause when scrolling away.
   };
 
   if (!src) return null;
 
-  // Poster shows when: we have one AND video isn't actively playing yet
-  const showPoster = poster && !playing;
-
   return (
-    <>
-      {showPoster && (
+    <div className="absolute inset-0 bg-card overflow-hidden">
+      {/* Poster layer — ALWAYS visible as background, never removed */}
+      {poster && (
         <img
           src={poster}
           alt=""
           aria-hidden="true"
-          className={cn(
-            "absolute inset-0 w-full h-full object-cover",
-            className
-          )}
+          className="absolute inset-0 w-full h-full object-cover"
         />
       )}
+      {/* Video layer — fades in on top only when actually playing */}
       <video
         ref={videoRef}
         src={src}
@@ -116,18 +113,18 @@ export default function AutoVideo({
         preload="auto"
         onPlaying={handlePlaying}
         onPause={handlePause}
-        onWaiting={handlePause}
         className={cn(
-          "object-cover",
-          // If poster is showing, hide video until it's playing.
-          // If no poster, show video at full opacity so browser can
-          // display the first frame as soon as data arrives.
-          showPoster ? "opacity-0" : "opacity-100",
+          "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
+          playing ? "opacity-100" : "opacity-0",
           className
         )}
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+        style={{
+          willChange: "opacity",
+          transform: "translateZ(0)",
+          backfaceVisibility: "hidden",
+        }}
         {...props}
       />
-    </>
+    </div>
   );
 }

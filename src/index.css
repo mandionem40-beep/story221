@@ -94,4 +94,47 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  /* GPU acceleration for smooth mobile animations */
+  .gpu {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Contain layout/paint for video containers — prevents reflow cascades */
+  .contain-strict {
+    contain: strict;
+    content-visibility: auto;
+  }
+}
+
+@layer base {
+  /* Mobile performance: disable expensive backdrop-blur on small screens */
+  @media (max-width: 768px) {
+    .backdrop-blur-xl {
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+      background-color: hsl(var(--background) / 0.96);
+    }
+    .backdrop-blur-sm {
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+      background-color: hsl(var(--background) / 0.85);
+    }
+    .backdrop-blur {
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+    }
+  }
+
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }

@@ -77,25 +77,25 @@ module.exports = {
   				to: { height: '0' }
   			},
   			'pulse-glow': {
-  				'0%, 100%': { boxShadow: '0 0 20px rgba(255, 0, 51, 0.4), 0 0 60px rgba(255, 0, 51, 0.15)' },
-  				'50%': { boxShadow: '0 0 30px rgba(255, 0, 51, 0.6), 0 0 80px rgba(255, 0, 51, 0.25)' }
-  			},
-  			'fade-in-up': {
-  				from: { opacity: '0', transform: 'translateY(20px)' },
-  				to: { opacity: '1', transform: 'translateY(0)' }
-  			},
-  			'float': {
-  				'0%, 100%': { transform: 'translateY(0)' },
-  				'50%': { transform: 'translateY(-10px)' }
-  			},
-  			'shimmer': {
-  				'0%': { backgroundPosition: '-200% 0' },
-  				'100%': { backgroundPosition: '200% 0' }
-  			},
-  			'slide-up': {
-  				from: { transform: 'translateY(100%)', opacity: '0' },
-  				to: { transform: 'translateY(0)', opacity: '1' }
-  			}
+  					'0%, 100%': { opacity: '0.8' },
+  					'50%': { opacity: '1' }
+  				},
+  				'fade-in-up': {
+  					from: { opacity: '0', transform: 'translate3d(0, 20px, 0)' },
+  					to: { opacity: '1', transform: 'translate3d(0, 0, 0)' }
+  				},
+  				'float': {
+  					'0%, 100%': { transform: 'translate3d(0, 0, 0)' },
+  					'50%': { transform: 'translate3d(0, -10px, 0)' }
+  				},
+  				'shimmer': {
+  					'0%': { backgroundPosition: '-200% 0' },
+  					'100%': { backgroundPosition: '200% 0' }
+  				},
+  				'slide-up': {
+  					from: { transform: 'translate3d(0, 100%, 0)', opacity: '0' },
+  					to: { transform: 'translate3d(0, 0, 0)', opacity: '1' }
+  				}
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',

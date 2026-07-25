@@ -9,6 +9,13 @@ import { preloadAllVideos } from '@/lib/video-preloader'
 // HTTP cache is warm by the time any AutoVideo component mounts.
 preloadAllVideos();
 
+// Register Service Worker for PWA (installable app + offline support)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {});
+  });
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <App />
 )

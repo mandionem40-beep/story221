@@ -9,7 +9,7 @@ import { toast } from "@/components/ui/use-toast";
 import ShareModal from "@/components/share/ShareModal";
 import CommentThread from "@/components/reels/CommentThread";
 
-export default function ReelCard({ reel, currentUser, isActive, isNext }) {
+export default function ReelCard({ reel, currentUser, isActive, isNext, onEnded }) {
   const videoRef = useRef(null);
   const lastTapRef = useRef(0);
   const [isLiked, setIsLiked] = useState(false);
@@ -22,6 +22,7 @@ export default function ReelCard({ reel, currentUser, isActive, isNext }) {
   const [showHeart, setShowHeart] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
 
   const isOwner = reel.created_by_id === currentUser?.id;
   const shareUrl = `${window.location.origin}/reel?id=${reel.id}`;
@@ -51,9 +52,14 @@ export default function ReelCard({ reel, currentUser, isActive, isNext }) {
   useEffect(() => { loadData(); }, [loadData]);
 
   useEffect(() => {
-    if (!videoRef.current) return;
-    if (isActive && reel.video_url) videoRef.current.play().catch(() => {});
-    else videoRef.current.pause();
+    const v = videoRef.current;
+    if (!v) return;
+    if (isActive && reel.video_url) {
+      v.play().catch(() => {});
+    } else {
+      v.pause();
+      setVideoReady(false);
+    }
   }, [isActive, reel.video_url]);
 
   useEffect(() => {
@@ -167,12 +173,36 @@ export default function ReelCard({ reel, currentUser, isActive, isNext }) {
   return (
     <div className="relative h-full w-full flex items-center justify-center bg-black snap-start">
       {/* Video / Image with double-tap */}
-      <div className="relative h-full w-full" onClick={handleVideoTap}>
+      <div className="relative h-full w-full bg-card" onClick={handleVideoTap}>
+        {/* Thumbnail always visible as background layer — no black screen */}
+        {reel.thumbnail_url && (
+          <img
+            src={reel.thumbnail_url}
+            alt=""
+            aria-hidden="true"
+            className={cn(
+              "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
+              videoReady && reel.video_url ? "opacity-0" : "opacity-100"
+            )}
+          />
+        )}
         {reel.video_url ? (
-          <video ref={videoRef} src={reel.video_url} loop muted playsInline preload={preloadAttr} className="h-full w-full object-cover" />
-        ) : reel.thumbnail_url ? (
-          <Image src={reel.thumbnail_url} fittingType="fill" className="h-full w-full" />
-        ) : (
+          <video
+            ref={videoRef}
+            src={reel.video_url}
+            muted
+            playsInline
+            preload={preloadAttr}
+            poster={reel.thumbnail_url || undefined}
+            onPlaying={() => setVideoReady(true)}
+            onEnded={onEnded}
+            className={cn(
+              "absolute inset-0 h-full w-full object-cover transition-opacity duration-300",
+              videoReady ? "opacity-100" : "opacity-0"
+            )}
+            style={{ willChange: "opacity", transform: "translateZ(0)" }}
+          />
+        ) : reel.thumbnail_url ? null : (
           <div className="flex items-center justify-center h-full"><p className="text-muted-foreground">Contenu non disponible</p></div>
         )}
       </div>

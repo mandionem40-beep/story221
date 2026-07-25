@@ -64,6 +64,20 @@ export default function Reels() {
     }
   }, [reels.length, hasMore, loadingMore, page, activeTab, loadFeed]);
 
+  // Auto-advance to next reel when current video ends
+  const handleReelEnded = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const nextIndex = activeIndex + 1;
+    if (nextIndex < reels.length) {
+      container.scrollTo({
+        top: nextIndex * container.clientHeight,
+        behavior: "smooth",
+      });
+      setActiveIndex(nextIndex);
+    }
+  }, [activeIndex, reels.length]);
+
   if (loading) {
     return <div className="flex items-center justify-center h-screen"><Sparkles className="w-6 h-6 text-primary animate-pulse" /></div>;
   }
@@ -107,7 +121,7 @@ export default function Reels() {
       <div ref={containerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto snap-y snap-mandatory scrollbar-hide">
         {reels.map((reel, i) => (
           <div key={reel.id} className="h-full snap-start">
-            <ReelCard reel={reel} currentUser={currentUser} isActive={i === activeIndex} isNext={i === activeIndex + 1} />
+            <ReelCard reel={reel} currentUser={currentUser} isActive={i === activeIndex} isNext={i === activeIndex + 1} onEnded={handleReelEnded} />
           </div>
         ))}
         {loadingMore && (
