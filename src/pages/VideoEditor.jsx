@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Upload, Scissors, Send, Loader2, ChevronLeft, Wand2, Play } from "lucide-react";
+import { Upload, Scissors, Send, Loader2, ChevronLeft, Wand2, Play, Save, FolderOpen, Trash2, Clock } from "lucide-react";
 import DiamondIcon from "@/components/DiamondIcon";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -29,12 +29,67 @@ export default function VideoEditor() {
   const [result, setResult] = useState(null);
   const [adjustmentPrompt, setAdjustmentPrompt] = useState("");
   const [adjusting, setAdjusting] = useState(false);
+  const [drafts, setDrafts] = useState([]);
+  const [savingDraft, setSavingDraft] = useState(false);
+  const [showDrafts, setShowDrafts] = useState(false);
 
   useEffect(() => {
     base44.entities.MontagePreset.filter({ active: true }, "display_order", 10)
       .then(dbPresets => { if (dbPresets.length > 0) setPresets(dbPresets); })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    base44.entities.Draft.filter(
+      { source_type: "video_editor", created_by_id: currentUser.id },
+      "-created_date",
+      20
+    ).then(setDrafts).catch(() => {});
+  }, [currentUser?.id]);
+
+  const handleSaveDraft = async () => {
+    if (!prompt.trim()) {
+      toast({ title: "Rien à sauvegarder", description: "Écris d'abord ton prompt.", variant: "destructive" });
+      return;
+    }
+    setSavingDraft(true);
+    try {
+      const draft = await base44.entities.Draft.create({
+        title: prompt.substring(0, 60),
+        source_type: "video_editor",
+        prompt: prompt.trim(),
+        video_url: videoUrl || "",
+        preset_id: selectedPreset?.id || "",
+        preset_name: selectedPreset?.name || "",
+        media_type: "video",
+        duration_minutes: 1,
+      });
+      setDrafts(prev => [draft, ...prev]);
+      toast({ title: "Brouillon sauvegardé", description: "Tu pourras le reprendre plus tard." });
+    } catch {
+      toast({ title: "Erreur", description: "Sauvegarde échouée", variant: "destructive" });
+    }
+    setSavingDraft(false);
+  };
+
+  const loadDraft = (draft) => {
+    setVideoUrl(draft.video_url || "");
+    setPrompt(draft.prompt || "");
+    if (draft.preset_id) {
+      const preset = presets.find(p => p.id === draft.preset_id) || { id: draft.preset_id, name: draft.preset_name, emoji: "🎬", description: "" };
+      setSelectedPreset(preset);
+    }
+    setShowDrafts(false);
+    toast({ title: "Brouillon chargé", description: "Reprends où tu t'étais arrêté." });
+  };
+
+  const deleteDraft = async (id) => {
+    try {
+      await base44.entities.Draft.delete(id);
+      setDrafts(prev => prev.filter(d => d.id !== id));
+    } catch { /* ignore */ }
+  };
 
   const handleUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -200,8 +255,48 @@ export default function VideoEditor() {
         <ChevronLeft className="w-5 h-5" />
       </button>
 
-      <h1 className="text-2xl font-bold text-white mb-1">🎬 Montage Automatique</h1>
+      <div className="flex items-center justify-between mb-1">
+        <h1 className="text-2xl font-bold text-white">🎬 Montage Automatique</h1>
+        {drafts.length > 0 && (
+          <button
+            onClick={() => setShowDrafts(!showDrafts)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary border border-border text-xs font-medium text-muted-foreground hover:text-white hover:border-primary/40 transition-colors"
+          >
+            <FolderOpen className="w-3.5 h-3.5" />
+            Brouillons ({drafts.length})
+          </button>
+        )}
+      </div>
       <p className="text-sm text-muted-foreground mb-6">Importe ta vidéo, décris le style, l'IA monte tout.</p>
+
+      {/* Drafts list */}
+      {showDrafts && drafts.length > 0 && (
+        <div className="mb-6 space-y-2">
+          {drafts.map(d => (
+            <div key={d.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:border-primary/30 transition-colors">
+              <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white truncate">{d.title || "Sans titre"}</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {d.preset_name ? `${d.preset_name} · ` : ""}{d.video_url ? "Vidéo importée" : "Aucune vidéo"}
+                </p>
+              </div>
+              <button
+                onClick={() => loadDraft(d)}
+                className="px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/30 text-primary text-xs font-semibold hover:bg-primary/20 transition-colors flex-shrink-0"
+              >
+                Reprendre
+              </button>
+              <button
+                onClick={() => deleteDraft(d.id)}
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive transition-colors flex-shrink-0"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Upload */}
       <div className="mb-5">
@@ -262,15 +357,25 @@ export default function VideoEditor() {
         />
       </div>
 
-      {/* Generate */}
-      <button
-        onClick={handleGenerate}
-        disabled={!videoUrl || !prompt.trim()}
-        className="w-full h-12 rounded-2xl bg-primary text-white font-semibold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed glow-red-sm"
-      >
-        <Play className="w-4 h-4" />
-        Monter ({MONTAGE_COST} <DiamondIcon className="w-4 h-4" />)
-      </button>
+      {/* Generate + Save draft */}
+      <div className="flex gap-2">
+        <button
+          onClick={handleGenerate}
+          disabled={!videoUrl || !prompt.trim()}
+          className="flex-1 h-12 rounded-2xl bg-primary text-white font-semibold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed glow-red-sm"
+        >
+          <Play className="w-4 h-4" />
+          Monter ({MONTAGE_COST} <DiamondIcon className="w-4 h-4" />)
+        </button>
+        <button
+          onClick={handleSaveDraft}
+          disabled={!prompt.trim() || savingDraft}
+          className="h-12 px-4 rounded-2xl bg-secondary border border-border text-white font-semibold flex items-center justify-center gap-2 hover:border-primary/40 transition-colors disabled:opacity-50"
+          title="Sauvegarder en brouillon"
+        >
+          {savingDraft ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+        </button>
+      </div>
     </div>
   );
 }

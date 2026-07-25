@@ -1,0 +1,91 @@
+{
+  "name": "Draft",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Auto-generated from prompt snippet"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "video_editor",
+        "chat_creation"
+      ],
+      "default": "chat_creation"
+    },
+    "prompt": {
+      "type": "string"
+    },
+    "video_url": {
+      "type": "string",
+      "description": "Uploaded source video URL (video editor)"
+    },
+    "preset_id": {
+      "type": "string"
+    },
+    "preset_name": {
+      "type": "string"
+    },
+    "category_id": {
+      "type": "string",
+      "description": "Character category ID (chat creation)"
+    },
+    "category_label": {
+      "type": "string"
+    },
+    "category_emoji": {
+      "type": "string"
+    },
+    "media_type": {
+      "type": "string",
+      "enum": [
+        "video",
+        "image"
+      ],
+      "default": "video"
+    },
+    "duration_minutes": {
+      "type": "number",
+      "default": 1
+    },
+    "language": {
+      "type": "string",
+      "default": "Fran\u00e7ais"
+    },
+    "voice": {
+      "type": "string"
+    },
+    "music": {
+      "type": "string"
+    },
+    "format": {
+      "type": "string"
+    },
+    "reference_images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "reference_video": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "source_type",
+    "prompt"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

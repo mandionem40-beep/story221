@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Send, Image as ImageIcon, Video as VideoIcon, ChevronDown, Upload, X, Loader2, Plus, SlidersHorizontal, Volume2, Square } from "lucide-react";
+import { Send, Image as ImageIcon, Video as VideoIcon, ChevronDown, Upload, X, Loader2, Plus, SlidersHorizontal, Volume2, Square, Save, FolderOpen, Trash2, Clock } from "lucide-react";
 import DiamondIcon from "@/components/DiamondIcon";
 import { base44 } from "@/api/base44Client";
-import { quickDurations, quickLanguages, quickVoices, buildChatPrompt, calculateFreeTrial } from "@/lib/quick-create-data";
+import { characterCategories, quickDurations, quickLanguages, quickVoices, buildChatPrompt, calculateFreeTrial } from "@/lib/quick-create-data";
 
 // Cache system voices once — avoids calling getVoices() on every preview
 const _voicesCache = { loaded: false, voices: [] };
@@ -15,7 +15,7 @@ function getCachedVoices() {
   return _voicesCache.voices;
 }
 
-export default function ChatCreation({ selectedCategory, currentUser }) {
+export default function ChatCreation({ selectedCategory, currentUser, onSelectCategory }) {
   const navigate = useNavigate();
   const [prompt, setPrompt] = useState("");
   const [refImages, setRefImages] = useState([]);
@@ -28,10 +28,81 @@ export default function ChatCreation({ selectedCategory, currentUser }) {
   const [mediaType, setMediaType] = useState("video");
   const [showUploadMenu, setShowUploadMenu] = useState(false);
   const [previewingVoice, setPreviewingVoice] = useState(false);
+  const [drafts, setDrafts] = useState([]);
+  const [savingDraft, setSavingDraft] = useState(false);
+  const [showDrafts, setShowDrafts] = useState(false);
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const uploadMenuRef = useRef(null);
   const speechRef = useRef(null);
+  const draftsRef = useRef(null);
+
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    base44.entities.Draft.filter(
+      { source_type: "chat_creation", created_by_id: currentUser.id },
+      "-created_date",
+      10
+    ).then(setDrafts).catch(() => {});
+  }, [currentUser?.id]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (draftsRef.current && !draftsRef.current.contains(e.target)) {
+        setShowDrafts(false);
+      }
+    };
+    if (showDrafts) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showDrafts]);
+
+  const handleSaveDraft = async () => {
+    if (!prompt.trim()) return;
+    setSavingDraft(true);
+    try {
+      const draft = await base44.entities.Draft.create({
+        title: prompt.substring(0, 60),
+        source_type: "chat_creation",
+        prompt: prompt.trim(),
+        category_id: selectedCategory?.id || "",
+        category_label: selectedCategory?.label || "",
+        category_emoji: selectedCategory?.emoji || "",
+        media_type: mediaType,
+        duration_minutes: duration.minutes,
+        language,
+        voice,
+        reference_images: refImages,
+        reference_video: refVideo || "",
+      });
+      setDrafts(prev => [draft, ...prev]);
+    } catch { /* ignore */ }
+    setSavingDraft(false);
+  };
+
+  const loadDraft = (draft) => {
+    setPrompt(draft.prompt || "");
+    setMediaType(draft.media_type || "video");
+    if (draft.duration_minutes) {
+      const d = quickDurations.find(q => q.minutes === draft.duration_minutes);
+      if (d) setDuration(d);
+    }
+    if (draft.language) setLanguage(draft.language);
+    if (draft.voice) setVoice(draft.voice);
+    setRefImages(draft.reference_images || []);
+    setRefVideo(draft.reference_video || null);
+    if (draft.category_id && onSelectCategory) {
+      const cat = characterCategories.find(c => c.id === draft.category_id);
+      if (cat) onSelectCategory(cat);
+    }
+    setShowDrafts(false);
+  };
+
+  const deleteDraft = async (id) => {
+    try {
+      await base44.entities.Draft.delete(id);
+      setDrafts(prev => prev.filter(d => d.id !== id));
+    } catch { /* ignore */ }
+  };
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -168,8 +239,8 @@ export default function ChatCreation({ selectedCategory, currentUser }) {
   return (
     <div className="rounded-3xl bg-card border border-border p-4 sm:p-5">
       {/* Selected style indicator */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between mb-3 gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           {selectedCategory ? (
             <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-semibold">
               {selectedCategory.emoji} {selectedCategory.label}
@@ -179,24 +250,67 @@ export default function ChatCreation({ selectedCategory, currentUser }) {
           )}
         </div>
 
-        {/* Image / Video toggle */}
-        <div className="flex items-center gap-1 p-0.5 rounded-lg bg-secondary border border-border">
-          <button
-            onClick={() => setMediaType("image")}
-            className={`px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1 transition-all ${
-              mediaType === "image" ? "bg-primary text-white" : "text-muted-foreground"
-            }`}
-          >
-            <ImageIcon className="w-3 h-3" /> Image
-          </button>
-          <button
-            onClick={() => setMediaType("video")}
-            className={`px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1 transition-all ${
-              mediaType === "video" ? "bg-primary text-white" : "text-muted-foreground"
-            }`}
-          >
-            <VideoIcon className="w-3 h-3" /> Vidéo
-          </button>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Drafts button */}
+          {drafts.length > 0 && (
+            <div className="relative" ref={draftsRef}>
+              <button
+                onClick={() => setShowDrafts(!showDrafts)}
+                className="flex items-center gap-1 px-2 py-1 rounded-lg bg-secondary border border-border text-xs font-medium text-muted-foreground hover:text-white hover:border-primary/40 transition-colors"
+              >
+                <FolderOpen className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Brouillons</span>
+                <span className="px-1.5 py-0.5 rounded-md bg-primary/20 text-primary text-[10px] font-bold">{drafts.length}</span>
+              </button>
+              {showDrafts && (
+                <div className="absolute top-9 right-0 z-50 w-72 max-w-[calc(100vw-2rem)] rounded-xl bg-popover border border-border shadow-xl overflow-hidden max-h-80 overflow-y-auto">
+                  {drafts.map(d => (
+                    <div key={d.id} className="flex items-center gap-2 p-2.5 border-b border-border last:border-0 hover:bg-secondary/50 transition-colors">
+                      <Clock className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-white truncate">{d.title || "Sans titre"}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">
+                          {d.category_emoji} {d.category_label || "Sans univers"} · {d.media_type === "video" ? "Vidéo" : "Image"}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => loadDraft(d)}
+                        className="px-2 py-1 rounded-md bg-primary/10 border border-primary/30 text-primary text-[10px] font-semibold hover:bg-primary/20 transition-colors flex-shrink-0"
+                      >
+                        Reprendre
+                      </button>
+                      <button
+                        onClick={() => deleteDraft(d.id)}
+                        className="p-1 text-muted-foreground hover:text-destructive transition-colors flex-shrink-0"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Image / Video toggle */}
+          <div className="flex items-center gap-1 p-0.5 rounded-lg bg-secondary border border-border">
+            <button
+              onClick={() => setMediaType("image")}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1 transition-all ${
+                mediaType === "image" ? "bg-primary text-white" : "text-muted-foreground"
+              }`}
+            >
+              <ImageIcon className="w-3 h-3" /> Image
+            </button>
+            <button
+              onClick={() => setMediaType("video")}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium flex items-center gap-1 transition-all ${
+                mediaType === "video" ? "bg-primary text-white" : "text-muted-foreground"
+              }`}
+            >
+              <VideoIcon className="w-3 h-3" /> Vidéo
+            </button>
+          </div>
         </div>
       </div>
 
@@ -282,6 +396,18 @@ export default function ChatCreation({ selectedCategory, currentUser }) {
           <span className="truncate">{prompt.trim() && selectedCategory ? `Générer (${remaining > 0 ? remaining : 0} 💎)` : "Générer"}</span>
         </button>
       </div>
+
+      {/* Save draft link */}
+      {prompt.trim() && (
+        <button
+          onClick={handleSaveDraft}
+          disabled={savingDraft}
+          className="w-full mt-2 h-7 rounded-lg text-xs font-medium text-muted-foreground hover:text-primary flex items-center justify-center gap-1.5 transition-colors"
+        >
+          {savingDraft ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+          {savingDraft ? "Sauvegarde..." : "Sauvegarder en brouillon"}
+        </button>
+      )}
 
       {/* Collapsible settings */}
       {showSettings && (

@@ -82,7 +82,11 @@ export default function Home() {
 
       {/* Chat Creation Zone */}
       <div className="mb-6">
-        <ChatCreation selectedCategory={selectedCategory} currentUser={currentUser} />
+        <ChatCreation 
+          selectedCategory={selectedCategory} 
+          currentUser={currentUser}
+          onSelectCategory={(cat) => setSelectedCategory(cat)}
+        />
       </div>
 
       {/* Quick Access Shortcuts — after chat */}
