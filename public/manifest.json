@@ -34,20 +34,8 @@
     }
   ],
   "shortcuts": [
-    {
-      "name": "Créer",
-      "url": "/app/create",
-      "description": "Lancer une nouvelle création IA"
-    },
-    {
-      "name": "Reels",
-      "url": "/app/reels",
-      "description": "Parcourir le fil des Reels"
-    },
-    {
-      "name": "Diamants",
-      "url": "/app/diamonds",
-      "description": "Acheter des diamants"
-    }
+    { "name": "Créer", "url": "/app/create", "description": "Lancer une création IA" },
+    { "name": "Reels", "url": "/app/reels", "description": "Fil des Reels" },
+    { "name": "Diamants", "url": "/app/diamonds", "description": "Acheter des diamants" }
   ]
 }
