@@ -91,7 +91,9 @@ export async function sendNotification(base44, userId, title, body, type) {
       title,
       body,
       type: type || "system",
-      created_by_id: userId,
+      recipient_id: userId,
+      read: false,
+      grouped_count: 1,
     });
   } catch { /* notifications are non-critical */ }
 }

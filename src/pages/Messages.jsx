@@ -49,12 +49,7 @@ export default function Messages() {
     if (tab === "polls") loadPolls();
   }, [tab]);
 
-  useEffect(() => {
-    if (selected) {
-      const conv = conversations.find((c) => c.id === selected);
-      if (conv) setSelected(conv.id);
-    }
-  }, [conversations]);
+
 
   const selectedConv = conversations.find((c) => c.id === selected);
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+
 import { base44 } from "@/api/base44Client";
 import { createNotification } from "@/lib/notifications";
 import { trackInteraction, updateTrendingScore } from "@/lib/reels-feed";
@@ -23,6 +24,7 @@ export default function ReelCard({ reel, currentUser, isActive, isNext, onEnded 
   const [showMenu, setShowMenu] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
+  const viewedRef = useRef(false);
 
   const isOwner = reel.created_by_id === currentUser?.id;
   const shareUrl = `${window.location.origin}/reel?id=${reel.id}`;
@@ -63,13 +65,13 @@ export default function ReelCard({ reel, currentUser, isActive, isNext, onEnded 
   }, [isActive, reel.video_url]);
 
   useEffect(() => {
-    if (isActive && !reel._viewed) {
-      reel._viewed = true;
+    if (isActive && !viewedRef.current) {
+      viewedRef.current = true;
       base44.entities.Reel.update(reel.id, { views: (reel.views || 0) + 1 }).catch(() => {});
       trackInteraction(reel.id, "view", reel.created_by_id);
       updateTrendingScore(reel.id);
     }
-  }, [isActive, reel]);
+  }, [isActive, reel.id, reel.created_by_id, reel.views]);
 
   const handleLike = async () => {
     try {

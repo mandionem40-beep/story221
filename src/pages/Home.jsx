@@ -53,41 +53,29 @@ export default function Home() {
           onClick={() => navigate("/app/profile")}
           className="relative flex-shrink-0 group"
           aria-label="Voir mon profil">
-          
           <span className="absolute inset-0 rounded-full bg-primary/40 blur-md animate-pulse-glow" />
-          
-
-
-
-
-
-
-
-
-
-
-
-          
+          {currentUser?.avatar_url ? (
+            <img src={currentUser.avatar_url} alt="" className="relative w-10 h-10 rounded-full object-cover border-2 border-primary" />
+          ) : (
+            <div className="relative w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold border-2 border-primary">
+              {(currentUser?.username || currentUser?.full_name || "U").charAt(0).toUpperCase()}
+            </div>
+          )}
         </button>
       </div>
 
       {/* Balance badges */}
       <div className="flex items-center gap-2 mb-5">
-        
-
-
-
-
-
-
-
-        
-        {freeTrialAvailable &&
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+          <DiamondIcon className="w-4 h-4" />
+          <span className="text-sm font-bold text-primary">{diamonds}</span>
+        </div>
+        {freeTrialAvailable && (
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
             <Gift className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium text-primary">Essai gratuit (1 min)</span>
           </div>
-        }
+        )}
       </div>
 
       {/* Chat Creation Zone */}

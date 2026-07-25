@@ -56,6 +56,7 @@ export default function SuperAdmin() {
 
   useEffect(() => {
     if (user && user.role !== "admin" && user.role !== "super_admin") {
+      setLoading(false);
       return;
     }
     loadTabData(activeTab);

@@ -32,11 +32,15 @@ export default function Login() {
   };
 
   const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", "/app");
+    const ref = new URLSearchParams(window.location.search).get("ref");
+    const dest = ref ? `/complete-profile?ref=${ref}` : "/app";
+    base44.auth.loginWithProvider("google", dest);
   };
 
   const handleApple = () => {
-    base44.auth.loginWithProvider("apple", "/app");
+    const ref = new URLSearchParams(window.location.search).get("ref");
+    const dest = ref ? `/complete-profile?ref=${ref}` : "/app";
+    base44.auth.loginWithProvider("apple", dest);
   };
 
   return (
