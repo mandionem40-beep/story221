@@ -1,10 +1,12 @@
 {
+  "id": "/",
   "name": "Story221 — Studio IA Social",
   "short_name": "Story221",
   "description": "Le premier studio IA social d'Afrique. Créez des films, vidéos, séries et publicités à partir d'un simple prompt.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait-primary",
   "background_color": "#0A0A0A",
   "theme_color": "#ff0033",
@@ -16,13 +18,19 @@
       "src": "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/9ea955134_image.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/9ea955134_image.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/9ea955134_image.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [

@@ -29,6 +29,7 @@ import SuperAdmin from '@/pages/SuperAdmin';
 import VideoEditor from '@/pages/VideoEditor';
 import DemoGenerator from '@/pages/DemoGenerator';
 import PixelTracker from '@/components/PixelTracker';
+import InstallBanner from '@/components/InstallBanner';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -96,6 +97,7 @@ function App() {
           <AuthenticatedApp />
         </Router>
         <Toaster />
+        <InstallBanner />
       </QueryClientProvider>
     </AuthProvider>
   )
