@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Trash2, Save, Loader2, X } from "lucide-react";
+import { Plus, Trash2, Save, Loader2, X, Upload } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 const NETWORK_OPTIONS = [
@@ -19,9 +19,51 @@ export default function InfluencerManager({ influencers, onRefresh }) {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileInputRef = useRef(null);
   const [form, setForm] = useState({
     name: "", photo_url: "", primary_social: "tiktok", status: "active",
   });
+
+  const handlePhotoUpload = async (file) => {
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      // Client-side resize/compress before upload
+      const resized = await resizeImage(file, 400, 400);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: resized });
+      setForm(prev => ({ ...prev, photo_url: file_url }));
+      toast({ title: "Photo ajoutée" });
+    } catch (err) {
+      toast({ title: "Erreur upload photo", description: err.message, variant: "destructive" });
+    }
+    setUploadingPhoto(false);
+  };
+
+  const resizeImage = (file, maxW, maxH) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let { width, height } = img;
+          if (width > height) {
+            if (width > maxW) { height = (height * maxW) / width; width = maxW; }
+          } else {
+            if (height > maxH) { width = (width * maxH) / height; height = maxH; }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob((blob) => resolve(new File([blob], file.name, { type: "image/jpeg" })), "image/jpeg", 0.85);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
 
   const startEdit = (inf) => {
     setEditing(inf);
@@ -145,8 +187,39 @@ export default function InfluencerManager({ influencers, onRefresh }) {
                 </select>
               </div>
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">URL Photo</label>
-                <input value={form.photo_url} onChange={e => setForm({ ...form, photo_url: e.target.value })} placeholder="https://..." className="w-full h-10 rounded-lg bg-background border border-border px-3 text-sm text-white" />
+                <label className="text-xs text-muted-foreground mb-1 block">Photo</label>
+                <div className="flex items-center gap-3">
+                  {form.photo_url ? (
+                    <img src={form.photo_url} alt="" className="w-16 h-16 rounded-xl object-cover border border-border flex-shrink-0" />
+                  ) : (
+                    <div className="w-16 h-16 rounded-xl bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+                      <Upload className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={e => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f); e.target.value = ""; }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingPhoto}
+                      className="px-3 py-2 rounded-lg bg-secondary text-white text-sm font-medium hover:bg-secondary/80 disabled:opacity-50 flex items-center gap-1.5"
+                    >
+                      {uploadingPhoto ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                      {uploadingPhoto ? "Upload..." : form.photo_url ? "Changer" : "Téléverser"}
+                    </button>
+                    {form.photo_url && (
+                      <button type="button" onClick={() => setForm({ ...form, photo_url: "" })} className="ml-2 px-3 py-2 rounded-lg bg-destructive/10 text-destructive text-sm">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
               <div>
                 <label className="text-xs text-muted-foreground mb-1 block">Statut</label>
