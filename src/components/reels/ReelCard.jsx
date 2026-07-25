@@ -214,6 +214,11 @@ export default function ReelCard({ reel, currentUser, isActive, isNext, onEnded 
         </div>
       )}
 
+      {/* AI transparency label — required by Veo 3 SynthID policy */}
+      <div className="absolute top-3 left-3 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 pointer-events-none">
+        <span className="text-[9px] font-medium text-white/80">Contenu généré par IA</span>
+      </div>
+
       {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
 

@@ -43,6 +43,10 @@ export default function PublicReel() {
 
       {/* Video */}
       <div className="w-full max-w-md flex-1 flex items-center justify-center bg-black relative">
+        {/* AI transparency label */}
+        <div className="absolute top-3 left-3 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 pointer-events-none">
+          <span className="text-[9px] font-medium text-white/80">Contenu généré par IA</span>
+        </div>
         {reel.video_url ? (
           <video src={reel.video_url} controls autoPlay loop playsInline className="w-full h-full object-contain max-h-[70vh]" />
         ) : reel.thumbnail_url ? (
