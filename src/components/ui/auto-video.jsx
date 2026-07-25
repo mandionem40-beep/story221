@@ -5,17 +5,17 @@ import { getVideoThumbnail, getCachedThumbnail } from "@/lib/video-thumbnail";
 /**
  * AutoVideo — instant-play video with a real frame as poster.
  *
- * The poster image is ALWAYS rendered as a background layer — it never
- * disappears. The video element sits on top and fades in (opacity 0→100)
- * only when it is actually playing. This guarantees zero black flash:
- * the poster is visible the entire time until the video takes over.
+ * Optimized for mobile:
+ * - preload="none" initially → NO bandwidth used until the video
+ *   scrolls near the viewport. Only the poster (cached thumbnail)
+ *   is shown.
+ * - When the video enters the viewport (150px margin), preload
+ *   switches to "auto" and playback starts.
+ * - Pauses when scrolled away — frees CPU/GPU for visible videos.
+ * - Only visible videos download → no bandwidth contention on mobile.
  *
- * - Poster = TRUE frame extracted from the video (via canvas), persisted
- *   to localStorage → instant on repeat visits, zero black cage.
- * - Background is bg-card (dark, not pure black) so even without a poster
- *   there is no jarring black screen.
- * - preload="auto" always: browser starts downloading on mount.
- * - GPU-accelerated: will-change + translateZ for smooth mobile playback.
+ * The poster is a TRUE frame from the video, persisted to localStorage
+ * so it's instant on repeat visits (zero black flash).
  */
 export default function AutoVideo({
   src,
@@ -25,9 +25,9 @@ export default function AutoVideo({
   ...props
 }) {
   const videoRef = useRef(null);
-  const [visible, setVisible] = useState(true);
+  const preloadSetRef = useRef(false);
+  const [visible, setVisible] = useState(false);
   const [playing, setPlaying] = useState(false);
-  // Poster = TRUE frame extracted from the video itself (via canvas)
   const [poster, setPoster] = useState(() => getCachedThumbnail(src));
 
   const isActive = controlledActive ?? visible;
@@ -35,6 +35,7 @@ export default function AutoVideo({
   // Generate real video-frame thumbnail if not cached yet
   useEffect(() => {
     let cancelled = false;
+    preloadSetRef.current = false;
     if (!src) return;
     const cached = getCachedThumbnail(src);
     if (cached) {
@@ -54,7 +55,7 @@ export default function AutoVideo({
     if (!el) return;
     const obs = new IntersectionObserver(
       ([entry]) => setVisible(entry.isIntersecting),
-      { threshold: 0.01, rootMargin: "300px" }
+      { threshold: 0.01, rootMargin: "150px" }
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -65,6 +66,12 @@ export default function AutoVideo({
     const v = videoRef.current;
     if (!v || !src) return;
     if (isActive) {
+      // Switch from "none" to "auto" on first activation — triggers download
+      if (!preloadSetRef.current) {
+        v.preload = "auto";
+        v.load();
+        preloadSetRef.current = true;
+      }
       const p = v.play();
       if (p && p.catch) {
         p.catch(() => {
@@ -84,19 +91,11 @@ export default function AutoVideo({
     }
   };
 
-  const handlePause = () => {
-    // Don't set playing=false on every pause (e.g. buffering) —
-    // only hide if the video actually left the viewport.
-    // The IntersectionObserver handles pause when scrolling away.
-  };
-
   if (!src) return null;
 
   return (
     <div className="absolute inset-0 bg-card overflow-hidden">
-      {/* Poster layer — ALWAYS visible as background, never removed.
-          Uses fetchPriority="high" + loading="eager" so the image is
-          instant on first paint — zero black flash, zero loading state. */}
+      {/* Poster layer — ALWAYS visible as background, never removed. */}
       {poster && (
         <img
           src={poster}
@@ -111,13 +110,11 @@ export default function AutoVideo({
       <video
         ref={videoRef}
         src={src}
-        autoPlay
         loop
         muted
         playsInline
-        preload="auto"
+        preload="none"
         onPlaying={handlePlaying}
-        onPause={handlePause}
         className={cn(
           "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
           playing ? "opacity-100" : "opacity-0",

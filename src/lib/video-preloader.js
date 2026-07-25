@@ -27,10 +27,10 @@ const ALL_VIDEO_URLS = characterCategories
 export function preloadAllVideos() {
   if (typeof document === "undefined") return;
 
-  ALL_VIDEO_URLS.forEach((url, index) => {
-    // Stagger: first batch immediately, rest with short delays
-    const delay = index < 3 ? 0 : (index - 2) * 300;
-    setTimeout(() => preloadVideo(url), delay);
+  // Only preload the first 2 videos (above the fold on Home).
+  // The rest load on demand when AutoVideo scrolls them into view.
+  ALL_VIDEO_URLS.slice(0, 2).forEach((url) => {
+    preloadVideo(url);
   });
 }
 
@@ -68,8 +68,8 @@ export function preloadVideo(url) {
   }
 
   v.addEventListener("error", () => v.remove(), { once: true });
-  // Keep element alive for up to 90s to allow full download on slow connections
-  setTimeout(() => v.remove(), 90000);
+  // Keep element alive for up to 20s — enough for full download on 3G
+  setTimeout(() => v.remove(), 20000);
   document.body.appendChild(v);
 }
 
