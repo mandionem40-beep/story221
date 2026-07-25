@@ -40,9 +40,9 @@ export default function Layout() {
       setCurrentUser(freshUser);
     } catch {
 
+
       // fallback to auth context user
     }}, []);
-
   useEffect(() => {
     refreshUser();
   }, [refreshUser, location.pathname]);
@@ -152,16 +152,16 @@ export default function Layout() {
             <span className="text-sm font-bold text-white relative tabular-nums">{diamonds}</span>
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-primary animate-ping" />
           </Link>
-          <Link
-            to="/app/profile"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-secondary border border-border active:scale-95 transition-transform hidden">
-            
-            {avatarUrl ?
-            <img src={avatarUrl} alt="" className="w-5 h-5 rounded-full object-cover" /> :
+          
 
-            <User className="w-4 h-4 text-primary" />
-            }
-          </Link>
+
+
+
+
+
+
+
+          
         </div>
       </header>
 
