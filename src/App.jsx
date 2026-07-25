@@ -14,6 +14,7 @@ import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import CompleteProfile from '@/pages/CompleteProfile';
+import AttributionSurvey from '@/pages/AttributionSurvey';
 import Layout from '@/components/dashboard/Layout';
 import Home from '@/pages/Home';
 import Create from '@/pages/Create';
@@ -66,6 +67,7 @@ const AuthenticatedApp = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route path="/complete-profile" element={<CompleteProfile />} />
+        <Route path="/attribution-survey" element={<AttributionSurvey />} />
         <Route element={<Layout />}>
           <Route path="/app" element={<Home />} />
           <Route path="/app/create" element={<Create />} />

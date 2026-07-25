@@ -19,6 +19,7 @@ import FinanceTab from "@/components/admin/FinanceTab";
 import FeedConfigTab from "@/components/admin/FeedConfigTab";
 import PlacesTab from "@/components/admin/PlacesTab";
 import AiReferencesTab from "@/components/admin/AiReferencesTab";
+import MarketingAnalyticsTab from "@/components/admin/MarketingAnalyticsTab";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: BarChart3 },
@@ -41,6 +42,7 @@ const tabs = [
   { id: "places", label: "Lieux Réels", icon: MapPin },
   { id: "ai_refs", label: "Biblio. Réf. IA", icon: Library },
   { id: "messages", label: "Messagerie", icon: Mail },
+  { id: "marketing", label: "Marketing", icon: TrendingUp },
 ];
 
 export default function SuperAdmin() {
@@ -132,6 +134,8 @@ export default function SuperAdmin() {
         result = {};  // MessagesAdmin loads its own data
       } else if (tab === "ai_refs") {
         result = {};  // AiReferencesTab loads its own data
+      } else if (tab === "marketing") {
+        result = {};  // MarketingAnalyticsTab loads its own data
       }
       setData(result);
     } catch { /* ignore */ }
@@ -702,6 +706,11 @@ export default function SuperAdmin() {
             {/* Messages tab */}
             {activeTab === "messages" && (
               <MessagesAdmin />
+            )}
+
+            {/* Marketing Analytics tab */}
+            {activeTab === "marketing" && (
+              <MarketingAnalyticsTab />
             )}
 
             {/* Settings tab */}

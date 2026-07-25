@@ -67,6 +67,10 @@
     "referral_rewarded": {
       "type": "boolean",
       "default": false
+    },
+    "attribution_completed": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

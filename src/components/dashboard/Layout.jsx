@@ -54,6 +54,10 @@ export default function Layout() {
     if (currentUser.role === "admin" || currentUser.role === "super_admin") return;
     if (!currentUser.username || !currentUser.phone || !currentUser.avatar_url) {
       navigate("/complete-profile", { replace: true });
+      return;
+    }
+    if (!currentUser.attribution_completed) {
+      navigate("/attribution-survey", { replace: true });
     }
   }, [currentUser, navigate]);
 

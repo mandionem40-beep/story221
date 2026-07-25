@@ -1,0 +1,110 @@
+{
+  "name": "UserAttribution",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who answered the survey"
+    },
+    "discovery_channel": {
+      "type": "string",
+      "enum": [
+        "tiktok",
+        "facebook",
+        "instagram",
+        "youtube",
+        "snapchat",
+        "x",
+        "linkedin",
+        "whatsapp",
+        "google",
+        "friend_recommendation",
+        "sponsored_ad",
+        "influencer",
+        "other"
+      ]
+    },
+    "influencer_id": {
+      "type": "string",
+      "description": "MarketingInfluencer ID when channel is 'influencer'"
+    },
+    "ad_platform": {
+      "type": "string",
+      "enum": [
+        "tiktok_ads",
+        "facebook_ads",
+        "instagram_ads",
+        "youtube_ads",
+        "google_ads",
+        "snapchat_ads",
+        "linkedin_ads",
+        "other"
+      ],
+      "description": "Ad platform when channel is 'sponsored_ad'"
+    },
+    "campaign_id": {
+      "type": "string",
+      "description": "Linked MarketingCampaign ID (auto-matched for ad channel)"
+    },
+    "country": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Snapshot of user email for admin search"
+    },
+    "user_username": {
+      "type": "string",
+      "description": "Snapshot of username for admin display"
+    }
+  },
+  "required": [
+    "user_id",
+    "discovery_channel"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

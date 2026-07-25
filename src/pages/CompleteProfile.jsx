@@ -32,7 +32,8 @@ export default function CompleteProfile() {
       if (u?.avatar_url) setAvatarUrl(u.avatar_url);
       // Check if profile already complete
       if (u?.username && u?.phone && u?.avatar_url) {
-        navigate(u.role === "admin" || u.role === "super_admin" ? "/admin" : "/app", { replace: true });
+        const dest = u.role === "admin" || u.role === "super_admin" ? "/admin" : (u.attribution_completed ? "/app" : "/attribution-survey");
+        navigate(dest, { replace: true });
         return;
       }
       setLoading(false);
@@ -80,7 +81,8 @@ export default function CompleteProfile() {
         base44.functions.invoke("process-referral", { action: "track_signup" }).catch(() => {});
       }
       toast({ title: "Profil complété !", description: "Bienvenue sur Story221." });
-      window.location.href = user?.role === "admin" || user?.role === "super_admin" ? "/admin" : "/app";
+      const dest = user?.role === "admin" || user?.role === "super_admin" ? "/admin" : "/attribution-survey";
+      window.location.href = dest;
     } catch (err) {
       setError(err.message || "Échec de l'enregistrement");
     } finally {
