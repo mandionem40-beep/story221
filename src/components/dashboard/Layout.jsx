@@ -10,23 +10,23 @@ import NotificationBell from "@/components/NotificationBell";
 
 // Desktop sidebar uses all items; mobile bottom nav uses only the 4 main ones
 const navItems = [
-  { label: "Accueil", icon: Home, path: "/app" },
-  { label: "Bibliothèque", icon: Library, path: "/app/library" },
-  { label: "Reels", icon: Clapperboard, path: "/app/reels" },
-  { label: "Montage", icon: Scissors, path: "/app/editor" },
-  { label: "Démo", icon: Globe, path: "/app/demo" },
-  { label: "Influenceurs", icon: Star, path: "/app/influencers" },
-  { label: "Messages", icon: MessageSquare, path: "/app/messages" },
-  { label: "Diamants", icon: DiamondIcon, path: "/app/diamonds" },
-];
+{ label: "Accueil", icon: Home, path: "/app" },
+{ label: "Bibliothèque", icon: Library, path: "/app/library" },
+{ label: "Reels", icon: Clapperboard, path: "/app/reels" },
+{ label: "Montage", icon: Scissors, path: "/app/editor" },
+{ label: "Démo", icon: Globe, path: "/app/demo" },
+{ label: "Influenceurs", icon: Star, path: "/app/influencers" },
+{ label: "Messages", icon: MessageSquare, path: "/app/messages" },
+{ label: "Diamants", icon: DiamondIcon, path: "/app/diamonds" }];
+
 
 // Mobile bottom nav — only 4 main buttons
 const mobileNavItems = [
-  { label: "Accueil", icon: Home, path: "/app" },
-  { label: "Bibliothèque", icon: Library, path: "/app/library" },
-  { label: "Reels", icon: Clapperboard, path: "/app/reels" },
-  { label: "Diamants", icon: DiamondIcon, path: "/app/diamonds" },
-];
+{ label: "Accueil", icon: Home, path: "/app" },
+{ label: "Bibliothèque", icon: Library, path: "/app/library" },
+{ label: "Reels", icon: Clapperboard, path: "/app/reels" },
+{ label: "Diamants", icon: DiamondIcon, path: "/app/diamonds" }];
+
 
 export default function Layout() {
   const { user, logout, checkUserAuth } = useAuth();
@@ -39,9 +39,9 @@ export default function Layout() {
       const freshUser = await base44.auth.me();
       setCurrentUser(freshUser);
     } catch {
+
       // fallback to auth context user
-    }
-  }, []);
+    }}, []);
 
   useEffect(() => {
     refreshUser();
@@ -82,42 +82,42 @@ export default function Layout() {
         </div>
 
         <nav className="flex-1 px-3 space-y-1">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                isActive(item.path)
-                  ? "bg-primary text-white glow-red-sm"
-                  : "text-muted-foreground hover:text-white hover:bg-secondary"
-              )}
-            >
+          {navItems.map((item) =>
+          <Link
+            key={item.path}
+            to={item.path}
+            className={cn(
+              "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
+              isActive(item.path) ?
+              "bg-primary text-white glow-red-sm" :
+              "text-muted-foreground hover:text-white hover:bg-secondary"
+            )}>
+            
               <item.icon className="w-5 h-5" />
               {item.label}
             </Link>
-          ))}
-          {isAdmin && (
-            <Link
-              to="/admin"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-white hover:bg-secondary transition-all mt-4 border-t border-border pt-4"
-            >
+          )}
+          {isAdmin &&
+          <Link
+            to="/admin"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-white hover:bg-secondary transition-all mt-4 border-t border-border pt-4">
+            
               <Bell className="w-5 h-5" />
               Admin
             </Link>
-          )}
+          }
         </nav>
 
         {/* User card */}
         <div className="p-3 border-t border-border">
           <Link to="/app/profile" className="flex items-center gap-3 p-3 rounded-xl hover:bg-secondary transition-colors">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt="" className="w-9 h-9 rounded-full object-cover" />
-            ) : (
-              <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold">
+            {avatarUrl ?
+            <img src={avatarUrl} alt="" className="w-9 h-9 rounded-full object-cover" /> :
+
+            <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold">
                 {username.charAt(0).toUpperCase()}
               </div>
-            )}
+            }
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white truncate">{username}</p>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
@@ -128,8 +128,8 @@ export default function Layout() {
           </Link>
           <button
             onClick={handleLogout}
-            className="w-full mt-1 flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors"
-          >
+            className="w-full mt-1 flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors">
+            
             <LogOut className="w-4 h-4" />
             Déconnexion
           </button>
@@ -145,8 +145,8 @@ export default function Layout() {
           <NotificationBell user={currentUser} />
           <Link
             to="/app/diamonds"
-            className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-card to-secondary border border-primary/30 hover:border-primary/60 transition-all duration-300 active:scale-95 group overflow-hidden"
-          >
+            className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-card to-secondary border border-primary/30 hover:border-primary/60 transition-all duration-300 active:scale-95 group overflow-hidden">
+            
             <span className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/25 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
             <DiamondIcon className="w-4 h-4 relative animate-pulse drop-shadow-[0_0_4px_rgba(255,0,51,0.8)]" />
             <span className="text-sm font-bold text-white relative tabular-nums">{diamonds}</span>
@@ -154,13 +154,13 @@ export default function Layout() {
           </Link>
           <Link
             to="/app/profile"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-secondary border border-border active:scale-95 transition-transform"
-          >
-            {avatarUrl ? (
-              <img src={avatarUrl} alt="" className="w-5 h-5 rounded-full object-cover" />
-            ) : (
-              <User className="w-4 h-4 text-primary" />
-            )}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-secondary border border-border active:scale-95 transition-transform hidden">
+            
+            {avatarUrl ?
+            <img src={avatarUrl} alt="" className="w-5 h-5 rounded-full object-cover" /> :
+
+            <User className="w-4 h-4 text-primary" />
+            }
           </Link>
         </div>
       </header>
@@ -173,21 +173,21 @@ export default function Layout() {
       {/* Mobile Bottom Nav — 4 main buttons only */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-t border-border">
         <div className="flex items-center justify-around h-16 px-2">
-          {mobileNavItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={cn(
-                "flex flex-col items-center justify-center gap-0.5 flex-1 h-full rounded-lg transition-colors",
-                isActive(item.path) ? "text-primary" : "text-muted-foreground"
-              )}
-            >
+          {mobileNavItems.map((item) =>
+          <Link
+            key={item.path}
+            to={item.path}
+            className={cn(
+              "flex flex-col items-center justify-center gap-0.5 flex-1 h-full rounded-lg transition-colors",
+              isActive(item.path) ? "text-primary" : "text-muted-foreground"
+            )}>
+            
               <item.icon className="w-5 h-5" />
               <span className="text-[10px] font-medium">{item.label}</span>
             </Link>
-          ))}
+          )}
         </div>
       </nav>
-    </div>
-  );
+    </div>);
+
 }
