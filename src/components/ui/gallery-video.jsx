@@ -1,22 +1,44 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
+
+// Global semaphore — limits concurrent video downloads to avoid
+// bandwidth contention on mobile. Only N videos load at once; the
+// rest queue until a slot frees up.
+const MAX_CONCURRENT = 3;
+let activeCount = 0;
+const waitQueue = [];
+
+function acquireSlot() {
+  if (activeCount < MAX_CONCURRENT) {
+    activeCount++;
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => waitQueue.push(resolve));
+}
+
+function releaseSlot() {
+  activeCount = Math.max(0, activeCount - 1);
+  if (waitQueue.length > 0 && activeCount < MAX_CONCURRENT) {
+    activeCount++;
+    waitQueue.shift()();
+  }
+}
 
 /**
  * GalleryVideo — ultra-light video player for grid galleries.
  *
- * Replaces AutoVideo's canvas-thumbnail approach with a simple static
- * poster image + lazy video load. Zero canvas extraction, zero
- * localStorage, zero CPU overhead — instant first paint on mobile.
- *
  * - `poster` prop = static image (instant, no network for video)
  * - `preload="none"` initially → zero bandwidth until visible
- * - IntersectionObserver (300px margin) → play when near viewport
- * - Pause when scrolled away → frees CPU/GPU
+ * - IntersectionObserver (300px margin) → load + play when near viewport
+ * - Concurrent load limiter (max 3) → no bandwidth contention on mobile
+ * - `onCanPlay` fade-in → video appears only when enough data is buffered
+ * - `onWaiting` → poster reappears during buffering stalls (no freeze)
  */
 export default function GalleryVideo({ src, poster, className, onReady, ...props }) {
   const videoRef = useRef(null);
   const [visible, setVisible] = useState(false);
-  const [playing, setPlaying] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const slotHeldRef = useRef(false);
 
   useEffect(() => {
     const el = videoRef.current;
@@ -29,14 +51,36 @@ export default function GalleryVideo({ src, poster, className, onReady, ...props
     return () => obs.disconnect();
   }, []);
 
+  // Acquire a concurrent-load slot when visible, release on scroll-away
   useEffect(() => {
-    const v = videoRef.current;
-    if (!v || !src) return;
-    if (visible) {
-      if (v.preload === "none") {
+    if (!visible || !src) return;
+    let cancelled = false;
+    acquireSlot().then(() => {
+      if (cancelled) {
+        releaseSlot();
+        return;
+      }
+      slotHeldRef.current = true;
+      const v = videoRef.current;
+      if (v) {
         v.preload = "auto";
         v.load();
       }
+    });
+    return () => {
+      cancelled = true;
+      if (slotHeldRef.current) {
+        slotHeldRef.current = false;
+        releaseSlot();
+      }
+    };
+  }, [visible, src]);
+
+  // Play / pause based on visibility
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || !src) return;
+    if (visible && slotHeldRef.current) {
       const p = v.play();
       if (p && p.catch) {
         p.catch(() => {
@@ -49,12 +93,15 @@ export default function GalleryVideo({ src, poster, className, onReady, ...props
     }
   }, [visible, src]);
 
-  const handlePlaying = () => {
-    if (!playing) {
-      setPlaying(true);
-      onReady?.();
-    }
-  };
+  const handleCanPlay = useCallback(() => {
+    setShowVideo(true);
+    onReady?.();
+  }, [onReady]);
+
+  // Poster reappears during buffering stalls — no frozen frame
+  const handleWaiting = useCallback(() => {
+    setShowVideo(false);
+  }, []);
 
   if (!src) return null;
 
@@ -76,10 +123,13 @@ export default function GalleryVideo({ src, poster, className, onReady, ...props
         muted
         playsInline
         preload="none"
-        onPlaying={handlePlaying}
+        disableRemotePlayback
+        onCanPlay={handleCanPlay}
+        onPlaying={handleCanPlay}
+        onWaiting={handleWaiting}
         className={cn(
           "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
-          playing ? "opacity-100" : "opacity-0",
+          showVideo ? "opacity-100" : "opacity-0",
           className
         )}
         style={{

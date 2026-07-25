@@ -197,6 +197,7 @@ export default function ReelCard({ reel, currentUser, isActive, isNext, onEnded 
             preload={preloadAttr}
             poster={reel.thumbnail_url || undefined}
             onPlaying={() => setVideoReady(true)}
+            onWaiting={() => setVideoReady(false)}
             onEnded={onEnded}
             className={cn(
               "absolute inset-0 h-full w-full object-cover transition-opacity duration-300",
