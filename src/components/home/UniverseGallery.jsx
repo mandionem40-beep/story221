@@ -1,7 +1,10 @@
+import { memo, useCallback } from "react";
 import { characterCategories } from "@/lib/quick-create-data";
 import UniverseCard from "./UniverseCard";
 
-export default function UniverseGallery({ selectedId, onSelect }) {
+function UniverseGallery({ selectedId, onSelect }) {
+  const handleSelect = useCallback((cat) => onSelect(cat), [onSelect]);
+
   return (
     <div>
       <h2 className="text-lg font-bold text-white mb-1">🎬 Galerie d'univers</h2>
@@ -12,10 +15,12 @@ export default function UniverseGallery({ selectedId, onSelect }) {
             key={cat.id}
             category={cat}
             selected={selectedId === cat.id}
-            onSelect={onSelect}
+            onSelect={handleSelect}
           />
         ))}
       </div>
     </div>
   );
 }
+
+export default memo(UniverseGallery);

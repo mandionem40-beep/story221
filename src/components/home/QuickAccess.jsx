@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Scissors, Globe, Star, MessageSquare, Zap } from "lucide-react";
 
@@ -9,7 +10,7 @@ const shortcuts = [
   { label: "Vidéo Rapide", icon: Zap, path: "/app/quick-create", highlighted: true },
 ];
 
-export default function QuickAccess({ currentUser }) {
+function QuickAccess() {
   return (
     <div className="mb-6">
       <div className="grid grid-cols-5 gap-1 sm:gap-2">
@@ -36,3 +37,5 @@ export default function QuickAccess({ currentUser }) {
     </div>
   );
 }
+
+export default memo(QuickAccess);

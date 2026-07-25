@@ -5,6 +5,16 @@ import DiamondIcon from "@/components/DiamondIcon";
 import { base44 } from "@/api/base44Client";
 import { quickDurations, quickLanguages, quickVoices, buildChatPrompt, calculateFreeTrial } from "@/lib/quick-create-data";
 
+// Cache system voices once — avoids calling getVoices() on every preview
+const _voicesCache = { loaded: false, voices: [] };
+function getCachedVoices() {
+  if (!_voicesCache.loaded) {
+    _voicesCache.voices = window.speechSynthesis?.getVoices() ?? [];
+    if (_voicesCache.voices.length > 0) _voicesCache.loaded = true;
+  }
+  return _voicesCache.voices;
+}
+
 export default function ChatCreation({ selectedCategory, currentUser }) {
   const navigate = useNavigate();
   const [prompt, setPrompt] = useState("");
@@ -44,7 +54,7 @@ export default function ChatCreation({ selectedCategory, currentUser }) {
   }, []);
 
   const pickSystemVoice = (gender, lang) => {
-    const voices = window.speechSynthesis.getVoices();
+    const voices = getCachedVoices();
     if (voices.length === 0) return null;
 
     const langPrefix = lang === "Anglais" ? "en" : "fr";

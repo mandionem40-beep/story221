@@ -108,6 +108,12 @@
     contain: strict;
     content-visibility: auto;
   }
+
+  /* Skip rendering off-screen sections until scrolled near — huge paint win */
+  .content-visibility-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 500px;
+  }
 }
 
 @layer base {

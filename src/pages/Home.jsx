@@ -1,13 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useOutletContext, Link } from "react-router-dom";
-import { Sparkles, Gift, Zap } from "lucide-react";
+import { Sparkles, Gift } from "lucide-react";
 import DiamondIcon from "@/components/DiamondIcon";
 import { base44 } from "@/api/base44Client";
 import { Image } from "@/components/ui/image";
 import UniverseGallery from "@/components/home/UniverseGallery";
 import ChatCreation from "@/components/home/ChatCreation";
 import QuickAccess from "@/components/home/QuickAccess";
-import { characterCategories } from "@/lib/quick-create-data";
 
 export default function Home() {
   const { currentUser } = useOutletContext();
@@ -16,29 +15,32 @@ export default function Home() {
   const [recentGens, setRecentGens] = useState([]);
 
   useEffect(() => {
+    if (!currentUser?.id) return;
+    let cancelled = false;
     const loadRecent = async () => {
       try {
         const gens = await base44.entities.Generation.filter(
-          { created_by_id: currentUser?.id },
+          { created_by_id: currentUser.id },
           "-created_date",
           4
         );
-        setRecentGens(gens || []);
+        if (!cancelled) setRecentGens(gens || []);
       } catch {/* empty state is fine */}
     };
     loadRecent();
-  }, [currentUser]);
+    return () => { cancelled = true; };
+  }, [currentUser?.id]);
 
   const diamonds = currentUser?.diamonds ?? 0;
   const freeTrialAvailable = !currentUser?.free_trial_used;
 
-  const handleSelectCategory = (cat) => {
+  const handleSelectCategory = useCallback((cat) => {
     if (cat.redirect) {
       navigate(cat.redirect);
     } else {
       setSelectedCategory(cat);
     }
-  };
+  }, [navigate]);
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 lg:py-8">
@@ -55,7 +57,7 @@ export default function Home() {
           aria-label="Voir mon profil">
           <span className="absolute inset-0 rounded-full bg-primary/40 blur-md animate-pulse-glow" />
           {currentUser?.avatar_url ? (
-            <img src={currentUser.avatar_url} alt="" className="relative w-10 h-10 rounded-full object-cover border-2 border-primary" />
+            <Image src={currentUser.avatar_url} fittingType="fill" className="relative w-10 h-10 rounded-full border-2 border-primary" />
           ) : (
             <div className="relative w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold border-2 border-primary">
               {(currentUser?.username || currentUser?.full_name || "U").charAt(0).toUpperCase()}
@@ -84,19 +86,19 @@ export default function Home() {
       </div>
 
       {/* Quick Access Shortcuts — after chat */}
-      <QuickAccess currentUser={currentUser} />
+      <QuickAccess />
 
       {/* Universe Gallery */}
-      <UniverseGallery
-        selectedId={selectedCategory?.id}
-        onSelect={handleSelectCategory} />
-      
-
+      <div className="content-visibility-auto contain-intrinsic-size">
+        <UniverseGallery
+          selectedId={selectedCategory?.id}
+          onSelect={handleSelectCategory} />
+      </div>
 
 
       {/* Recent creations */}
       {recentGens.length > 0 &&
-      <div className="mt-8">
+      <div className="mt-8 content-visibility-auto contain-intrinsic-size">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Créations récentes</h3>
             <Link to="/app/library" className="text-sm text-primary hover:underline">Tout voir</Link>

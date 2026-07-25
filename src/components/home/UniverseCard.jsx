@@ -1,7 +1,8 @@
+import { memo } from "react";
 import { Sparkles } from "lucide-react";
 import GalleryVideo from "@/components/ui/gallery-video";
 
-export default function UniverseCard({ category, selected, onSelect }) {
+function UniverseCard({ category, selected, onSelect }) {
   const isRedirect = !!category.redirect;
 
   return (
@@ -53,3 +54,5 @@ export default function UniverseCard({ category, selected, onSelect }) {
     </button>
   );
 }
+
+export default memo(UniverseCard);
