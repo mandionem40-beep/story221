@@ -46,6 +46,15 @@ export default function Layout() {
     refreshUser();
   }, [refreshUser, location.pathname]);
 
+  // Redirect to profile completion if missing required fields (not for admins)
+  useEffect(() => {
+    if (!currentUser) return;
+    if (currentUser.role === "admin" || currentUser.role === "super_admin") return;
+    if (!currentUser.username || !currentUser.phone || !currentUser.avatar_url) {
+      navigate("/complete-profile", { replace: true });
+    }
+  }, [currentUser, navigate]);
+
   const handleLogout = () => {
     logout();
   };

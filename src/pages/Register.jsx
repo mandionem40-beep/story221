@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { UserPlus, Mail, Lock, User, Phone, Loader2, Gift, CheckCircle2 } from "lucide-react";
+import ProfilePhotoUpload from "@/components/auth/ProfilePhotoUpload";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
@@ -25,6 +26,7 @@ export default function Register() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [acceptCGU, setAcceptCGU] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -74,6 +76,10 @@ export default function Register() {
       setError("Le mot de passe doit comporter au moins 6 caractères.");
       return;
     }
+    if (!avatarUrl) {
+      setError("La photo de profil est obligatoire.");
+      return;
+    }
     if (!acceptCGU) {
       setError("Vous devez accepter les Conditions d'utilisation et la Politique de confidentialité.");
       return;
@@ -113,6 +119,7 @@ export default function Register() {
         phone: fullPhone,
         phone_country: detectedCountry?.country || "Sénégal",
         country: detectedCountry?.country || "Sénégal",
+        avatar_url: avatarUrl,
         referral_code: refCodeGen,
         referred_by: refCode || null,
         diamonds: 0,
@@ -139,11 +146,11 @@ export default function Register() {
   };
 
   const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", "/app");
+    base44.auth.loginWithProvider("google", "/complete-profile");
   };
 
   const handleApple = () => {
-    base44.auth.loginWithProvider("apple", "/app");
+    base44.auth.loginWithProvider("apple", "/complete-profile");
   };
 
   if (showOtp) {
@@ -262,6 +269,10 @@ export default function Register() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label>Photo de profil <span className="text-destructive">*</span></Label>
+          <ProfilePhotoUpload value={avatarUrl} onChange={setAvatarUrl} />
+        </div>
         <div className="space-y-2">
           <Label htmlFor="username">Nom d'utilisateur</Label>
           <div className="relative">
