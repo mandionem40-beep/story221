@@ -15,7 +15,9 @@ const NETWORK_LABELS = {
   facebook: "Facebook", instagram: "Instagram", tiktok: "TikTok", snapchat: "Snapchat", youtube: "YouTube",
 };
 
-const MAX_DATA_URL_LENGTH = 60000;
+// Les data URLs base64 sont stockées directement en champ entité — doivent rester petites
+// pour ne pas faire échouer les opérations create/update/delete.
+const MAX_DATA_URL_LENGTH = 5000;
 
 function resizeImage(file) {
   return new Promise((resolve, reject) => {
@@ -23,36 +25,37 @@ function resizeImage(file) {
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
+        // Toujours JPEG (PNG gonfle la taille), dimensions max 80px (affiché à 40-64px)
         const steps = [
-          { size: 256, quality: 0.8 },
-          { size: 192, quality: 0.7 },
-          { size: 150, quality: 0.6 },
-          { size: 120, quality: 0.5 },
-          { size: 96, quality: 0.4 },
+          { size: 80, quality: 0.5 },
+          { size: 64, quality: 0.4 },
+          { size: 48, quality: 0.35 },
+          { size: 32, quality: 0.3 },
         ];
-        const usePng = file.type === "image/png";
         for (const step of steps) {
           const canvas = document.createElement("canvas");
           let { width, height } = img;
           if (width > height) {
-            if (width > step.size) { height = Math.round(height * step.size / width); width = step.size; }
+            height = Math.round(height * step.size / width);
+            width = step.size;
           } else {
-            if (height > step.size) { width = Math.round(width * step.size / height); height = step.size; }
+            width = Math.round(width * step.size / height);
+            height = step.size;
           }
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
-          const dataUrl = canvas.toDataURL(usePng ? "image/png" : "image/jpeg", step.quality);
+          const dataUrl = canvas.toDataURL("image/jpeg", step.quality);
           if (dataUrl.length <= MAX_DATA_URL_LENGTH) { resolve(dataUrl); return; }
         }
-        // Dernier recours : la plus petite compression possible
+        // Dernier recours : 24px qualité minimale
         const canvas = document.createElement("canvas");
-        canvas.width = 64;
-        canvas.height = 64;
+        canvas.width = 24;
+        canvas.height = 24;
         const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, 64, 64);
-        resolve(canvas.toDataURL("image/jpeg", 0.3));
+        ctx.drawImage(img, 0, 0, 24, 24);
+        resolve(canvas.toDataURL("image/jpeg", 0.2));
       };
       img.onerror = () => reject(new Error("Image invalide"));
       img.src = e.target.result;
@@ -135,8 +138,9 @@ export default function InfluencerManager({ influencers, onRefresh }) {
       await base44.entities.MarketingInfluencer.delete(id);
       toast({ title: "Influenceur supprimé" });
       onRefresh();
-    } catch {
-      toast({ title: "Erreur", variant: "destructive" });
+    } catch (err) {
+      toast({ title: "Erreur de suppression", description: err.message, variant: "destructive" });
+      onRefresh();
     }
   };
 
