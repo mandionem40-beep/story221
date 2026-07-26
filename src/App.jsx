@@ -34,7 +34,7 @@ import PixelTracker from '@/components/PixelTracker';
 import InstallBanner from '@/components/InstallBanner';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -49,11 +49,9 @@ const AuthenticatedApp = () => {
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
-      return null;
     }
+    // auth_required is no longer set — expired tokens are cleared silently
+    // and ProtectedRoute handles redirects for protected pages.
   }
 
   // Render the main app

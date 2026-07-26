@@ -23,22 +23,24 @@ export const AuthProvider = ({ children }) => {
       setIsLoadingPublicSettings(true);
       setAuthError(null);
       
-      // First, check app public settings (with token if available)
-      // This will tell us if auth is required, user not registered, etc.
+      // Fetch public settings WITHOUT token — this is a public endpoint.
+      // Sending an expired token here causes a 403 auth_required that
+      // wrongly redirects the user to login even on public pages.
       const appClient = createAxiosClient({
         baseURL: `/api/apps/public`,
         headers: {
           'X-App-Id': appParams.appId
         },
-        token: appParams.token, // Include token if available
+        token: null,
         interceptResponses: true
       });
       
       try {
         const publicSettings = await appClient.get(`/prod/public-settings/by-id/${appParams.appId}`);
         setAppPublicSettings(publicSettings);
+        setIsLoadingPublicSettings(false);
         
-        // If we got the app public settings successfully, check if user is authenticated
+        // Now check if the user has a stored token and try to validate it
         const storedToken = appParams.token || localStorage.getItem('base44_access_token') || localStorage.getItem('token');
         if (storedToken) {
           await checkUserAuth();
@@ -47,52 +49,45 @@ export const AuthProvider = ({ children }) => {
           setIsAuthenticated(false);
           setAuthChecked(true);
         }
-        setIsLoadingPublicSettings(false);
       } catch (appError) {
         console.error('App state check failed:', appError);
-        
-        // Handle app-level errors
-        if (appError.status === 403 && appError.data?.extra_data?.reason) {
-          const reason = appError.data.extra_data.reason;
-          if (reason === 'auth_required') {
-            setAuthError({
-              type: 'auth_required',
-              message: 'Authentication required'
-            });
-          } else if (reason === 'user_not_registered') {
-            setAuthError({
-              type: 'user_not_registered',
-              message: 'User not registered for this app'
-            });
-          } else {
-            setAuthError({
-              type: reason,
-              message: appError.message
-            });
-          }
-        } else {
-          setAuthError({
-            type: 'unknown',
-            message: appError.message || 'Failed to load app'
-          });
-        }
         setIsLoadingPublicSettings(false);
         setIsLoadingAuth(false);
+        setAuthChecked(true);
+        
+        // Only treat user_not_registered as a hard error — auth_required
+        // on public settings means the token is expired; we just clear it
+        // and let the user browse public pages without forcing a redirect.
+        if (appError.status === 403 && appError.data?.extra_data?.reason === 'user_not_registered') {
+          setAuthError({
+            type: 'user_not_registered',
+            message: 'User not registered for this app'
+          });
+        } else {
+          // For any other error, mark as not authenticated but don't block the app
+          setIsAuthenticated(false);
+          clearStoredTokens();
+        }
       }
     } catch (error) {
       console.error('Unexpected error:', error);
-      setAuthError({
-        type: 'unknown',
-        message: error.message || 'An unexpected error occurred'
-      });
       setIsLoadingPublicSettings(false);
       setIsLoadingAuth(false);
+      setAuthChecked(true);
+      setIsAuthenticated(false);
     }
+  };
+
+  const clearStoredTokens = () => {
+    try {
+      localStorage.removeItem('base44_access_token');
+      localStorage.removeItem('token');
+      localStorage.removeItem('base44_token');
+    } catch { /* ignore */ }
   };
 
   const checkUserAuth = async () => {
     try {
-      // Now check if the user is authenticated
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
       setUser(currentUser);
@@ -107,12 +102,13 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(false);
       setAuthChecked(true);
       
-      // If user auth fails, it might be an expired token
+      // Token is expired or invalid — clear it so the user isn't stuck
+      // in a loop of failed auth checks on every page load.
       if (error.status === 401 || error.status === 403) {
-        setAuthError({
-          type: 'auth_required',
-          message: 'Authentication required'
-        });
+        clearStoredTokens();
+        // Don't set authError — let the user browse public pages.
+        // ProtectedRoute will redirect to /login only when they try
+        // to access a protected page.
       }
     }
   };
