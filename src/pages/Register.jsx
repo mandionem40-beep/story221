@@ -126,7 +126,7 @@ export default function Register() {
         referred_by: refCode || null,
         diamonds: 0,
         free_trial_used: false,
-        role: "user",
+        role: "user"
       });
       // Notify referrer that someone signed up with their code
       if (refCode) {
@@ -166,21 +166,21 @@ export default function Register() {
       <AuthLayout
         icon={Mail}
         title="Vérifiez votre email"
-        subtitle={`Un code a été envoyé à ${email}`}
-      >
-        {error && (
-          <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+        subtitle={`Un code a été envoyé à ${email}`}>
+        
+        {error &&
+        <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
             {error}
           </div>
-        )}
+        }
         <div className="flex justify-center mb-6">
           <InputOTP
             maxLength={6}
             value={otpCode}
             onChange={setOtpCode}
             autoFocus
-            autoComplete="one-time-code"
-          >
+            autoComplete="one-time-code">
+            
             <InputOTPGroup>
               <InputOTPSlot index={0} />
               <InputOTPSlot index={1} />
@@ -194,22 +194,22 @@ export default function Register() {
         <Button
           className="w-full h-12 font-medium"
           onClick={handleVerify}
-          disabled={loading || otpCode.length < 6}
-        >
-          {loading ? (
-            <>
+          disabled={loading || otpCode.length < 6}>
+          
+          {loading ?
+          <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               Vérification...
-            </>
-          ) : (
-            "Vérifier"
-          )}
+            </> :
+
+          "Vérifier"
+          }
         </Button>
         <div className="mt-4 p-3 rounded-lg bg-secondary/50 border border-border space-y-1">
           <p className="text-xs text-muted-foreground text-center">
             💡 Pas de code ? Vérifiez vos <strong>Spams</strong> / Courriers indésirables.
           </p>
-          <p className="text-xs text-muted-foreground text-center">
+          <p className="text-xs text-muted-foreground text-center hidden">
             Ajoutez <strong className="text-foreground">app@base44.com</strong> à vos contacts pour garantir la réception.
           </p>
         </div>
@@ -218,13 +218,13 @@ export default function Register() {
           <button
             onClick={handleResend}
             disabled={resendCooldown > 0}
-            className="text-primary font-medium hover:underline disabled:text-muted-foreground disabled:no-underline"
-          >
+            className="text-primary font-medium hover:underline disabled:text-muted-foreground disabled:no-underline">
+            
             {resendCooldown > 0 ? `Renvoyer dans ${resendCooldown}s` : "Renvoyer"}
           </button>
         </p>
-      </AuthLayout>
-    );
+      </AuthLayout>);
+
   }
 
   return (
@@ -233,29 +233,29 @@ export default function Register() {
       title="Créer mon compte"
       subtitle="Rejoignez le premier studio IA social d'Afrique"
       footer={
-        <>
+      <>
           Déjà un compte ?{" "}
           <Link to="/login" className="text-primary font-medium hover:underline">
             Se connecter
           </Link>
         </>
-      }
-    >
+      }>
+      
       {/* Social login */}
       <div className="grid grid-cols-2 gap-3 mb-6">
         <Button
           variant="outline"
           className="h-12 text-sm font-medium"
-          onClick={handleGoogle}
-        >
+          onClick={handleGoogle}>
+          
           <GoogleIcon className="w-5 h-5 mr-2" />
           Google
         </Button>
         <Button
           variant="outline"
           className="h-12 text-sm font-medium"
-          onClick={handleApple}
-        >
+          onClick={handleApple}>
+          
           <AppleIcon className="w-5 h-5 mr-2" />
           Apple
         </Button>
@@ -270,11 +270,11 @@ export default function Register() {
         </div>
       </div>
 
-      {error && (
-        <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+      {error &&
+      <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
           {error}
         </div>
-      )}
+      }
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
@@ -295,8 +295,8 @@ export default function Register() {
               className="pl-10 h-12"
               required
               minLength={3}
-              maxLength={30}
-            />
+              maxLength={30} />
+            
           </div>
         </div>
         <div className="space-y-2">
@@ -311,8 +311,8 @@ export default function Register() {
               value={email}
               onChange={(e) => setEmail(e.target.value.trim())}
               className="pl-10 h-12"
-              required
-            />
+              required />
+            
           </div>
         </div>
         <div className="space-y-2">
@@ -332,16 +332,16 @@ export default function Register() {
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value.replace(/[^\d\s]/g, ""))}
                 className="pl-10 h-12"
-                required
-              />
+                required />
+              
             </div>
           </div>
-          {detectedCountry && (
-            <div className="flex items-center gap-1.5 text-xs text-primary">
+          {detectedCountry &&
+          <div className="flex items-center gap-1.5 text-xs text-primary">
               <CheckCircle2 className="w-3.5 h-3.5" />
               {detectedCountry.flag} {detectedCountry.country}
             </div>
-          )}
+          }
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">Mot de passe <span className="text-destructive">*</span></Label>
@@ -356,14 +356,14 @@ export default function Register() {
               onChange={(e) => setPassword(e.target.value)}
               className="pl-10 h-12 pr-10"
               required
-              minLength={6}
-            />
+              minLength={6} />
+            
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              tabIndex={-1}
-            >
+              tabIndex={-1}>
+              
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
@@ -381,14 +381,14 @@ export default function Register() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="pl-10 h-12 pr-10"
               required
-              minLength={6}
-            />
+              minLength={6} />
+            
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              tabIndex={-1}
-            >
+              tabIndex={-1}>
+              
               {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
@@ -398,8 +398,8 @@ export default function Register() {
             id="cgu"
             checked={acceptCGU}
             onCheckedChange={setAcceptCGU}
-            className="mt-0.5"
-          />
+            className="mt-0.5" />
+          
           <label htmlFor="cgu" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
             J'accepte les{" "}
             <a href="#" className="text-primary hover:underline">Conditions d'utilisation</a>
@@ -416,16 +416,16 @@ export default function Register() {
         </div>
 
         <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
-          {loading ? (
-            <>
+          {loading ?
+          <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               Création...
-            </>
-          ) : (
-            "Créer mon compte"
-          )}
+            </> :
+
+          "Créer mon compte"
+          }
         </Button>
       </form>
-    </AuthLayout>
-  );
+    </AuthLayout>);
+
 }
