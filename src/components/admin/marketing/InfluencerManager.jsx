@@ -113,7 +113,7 @@ export default function InfluencerManager({ influencers, onRefresh }) {
     }
     setSaving(true);
     try {
-      const payload = { ...form, display_order: editing?.display_order ?? influencers.length };
+      const payload = { ...form, status: form.status || "active", display_order: editing?.display_order ?? influencers.length };
       if (editing) {
         await base44.entities.MarketingInfluencer.update(editing.id, payload);
       } else {

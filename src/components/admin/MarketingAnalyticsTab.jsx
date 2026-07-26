@@ -25,18 +25,18 @@ export default function MarketingAnalyticsTab() {
 
   const loadData = async () => {
     try {
-      const [attrs, infls, usrs, txs, gens] = await Promise.all([
+      const results = await Promise.allSettled([
         base44.entities.UserAttribution.list("-created_date", 500),
         base44.entities.MarketingInfluencer.list("display_order", 200),
         base44.entities.User.list("-created_date", 500),
         base44.entities.Transaction.list("-created_date", 500),
         base44.entities.Generation.list("-created_date", 500),
       ]);
-      setAttributions(attrs || []);
-      setInfluencers(infls || []);
-      setUsers(usrs || []);
-      setTransactions(txs || []);
-      setGenerations(gens || []);
+      if (results[0].status === "fulfilled") setAttributions(results[0].value || []);
+      if (results[1].status === "fulfilled") setInfluencers(results[1].value || []);
+      if (results[2].status === "fulfilled") setUsers(results[2].value || []);
+      if (results[3].status === "fulfilled") setTransactions(results[3].value || []);
+      if (results[4].status === "fulfilled") setGenerations(results[4].value || []);
     } catch {
       toast({ title: "Erreur de chargement", variant: "destructive" });
     }
@@ -45,9 +45,10 @@ export default function MarketingAnalyticsTab() {
 
   useEffect(() => {
     loadData();
-    // Real-time: auto-refresh when new attribution is created
-    const unsub = base44.entities.UserAttribution.subscribe(() => { loadData(); });
-    return unsub;
+    // Real-time: auto-refresh when new attribution or influencer is created/updated
+    const unsubAttrs = base44.entities.UserAttribution.subscribe(() => { loadData(); });
+    const unsubInfls = base44.entities.MarketingInfluencer.subscribe(() => { loadData(); });
+    return () => { unsubAttrs(); unsubInfls(); };
   }, []);
 
   const stats = useMemo(() => {
