@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Send, Image as ImageIcon, Video as VideoIcon, ChevronDown, Upload, X, Loader2, Plus, SlidersHorizontal, Volume2, Square, Save, FolderOpen, Trash2, Clock } from "lucide-react";
 import DiamondIcon from "@/components/DiamondIcon";
 import { base44 } from "@/api/base44Client";
+import { toast } from "@/components/ui/use-toast";
 import { characterCategories, quickDurations, quickLanguages, quickVoices, buildChatPrompt, calculateFreeTrial } from "@/lib/quick-create-data";
 
 // Cache system voices once — avoids calling getVoices() on every preview
@@ -200,7 +201,9 @@ export default function ChatCreation({ selectedCategory, currentUser, onSelectCa
         urls.push(res.file_url);
       }
       setRefImages(prev => [...prev, ...urls]);
-    } catch { /* ignore */ }
+    } catch {
+      toast({ title: "Upload échoué", description: "Impossible d'envoyer l'image. Réessayez plus tard.", variant: "destructive" });
+    }
     setUploading(false);
     e.target.value = "";
   };
@@ -212,7 +215,9 @@ export default function ChatCreation({ selectedCategory, currentUser, onSelectCa
     try {
       const res = await base44.integrations.Core.UploadFile({ file });
       setRefVideo(res.file_url);
-    } catch { /* ignore */ }
+    } catch {
+      toast({ title: "Upload échoué", description: "Impossible d'envoyer la vidéo. Réessayez plus tard.", variant: "destructive" });
+    }
     setUploading(false);
     e.target.value = "";
   };
@@ -393,7 +398,7 @@ export default function ChatCreation({ selectedCategory, currentUser, onSelectCa
           className="w-1/2 h-9 rounded-lg bg-primary text-white text-sm font-semibold flex items-center justify-center gap-1.5 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed glow-red-sm flex-shrink-0"
         >
           <Send className="w-3.5 h-3.5 flex-shrink-0" />
-          <span className="truncate">{prompt.trim() && selectedCategory ? `Générer (${remaining > 0 ? remaining : 0} 💎)` : "Générer"}</span>
+          <span className="truncate">{prompt.trim() && selectedCategory ? `Générer (${cost} 💎)` : "Générer"}</span>
         </button>
       </div>
 

@@ -78,25 +78,27 @@ export default function MarketingAnalyticsTab() {
       color: NETWORK_COLORS[net],
     })).filter(d => d.value > 0);
 
-    // Influencer ranking
+    // Influencer ranking — all influencers, with per-network breakdown
+    const NETS = ["facebook", "instagram", "tiktok", "snapchat", "youtube"];
     const inflStats = influencers.map(inf => {
       const infAttrs = attributions.filter(a => a.influencer_id === inf.id);
       const userIds = new Set(infAttrs.map(a => a.user_id));
       const infUsers = users.filter(u => userIds.has(u.id));
-      // Active = has generated at least 1 video
       const activeUsers = infUsers.filter(u => generations.some(g => g.created_by_id === u.id)).length;
       const infTxs = transactions.filter(t => userIds.has(t.created_by_id));
       const creditPurchases = infTxs.length;
       const revenue = infTxs.reduce((sum, t) => sum + (t.amount_fcfa || 0), 0);
       const videos = generations.filter(g => userIds.has(g.created_by_id)).length;
       const conversionRate = infAttrs.length > 0 ? Math.round((activeUsers / infAttrs.length) * 100) : 0;
+      const byNetwork = {};
+      NETS.forEach(net => { byNetwork[net] = infAttrs.filter(a => a.network === net).length; });
       return {
         id: inf.id, name: inf.name, photo_url: inf.photo_url, social: inf.primary_social,
-        signups: infAttrs.length, activeUsers, videos, creditPurchases, revenue, conversionRate,
+        signups: infAttrs.length, byNetwork, activeUsers, videos, creditPurchases, revenue, conversionRate,
       };
-    }).filter(s => s.signups > 0).sort((a, b) => b.signups - a.signups);
+    }).sort((a, b) => b.signups - a.signups);
 
-    return { total, sourceData, adCount: adAttributions.length, adByNetwork, inflStats, influencerCount: attributions.filter(a => a.source === "influencer").length, friendCount: attributions.filter(a => a.source === "friend_recommendation").length };
+    return { total, sourceData, adCount: adAttributions.length, adByNetwork, inflStats, networks: NETS, influencerCount: attributions.filter(a => a.source === "influencer").length, friendCount: attributions.filter(a => a.source === "friend_recommendation").length };
   }, [attributions, influencers, users, transactions, generations]);
 
   const exportCSV = () => {
@@ -203,27 +205,37 @@ export default function MarketingAnalyticsTab() {
         </div>
       </Section>
 
-      {/* Influenceurs ranking */}
+      {/* Influenceurs ranking — per-network breakdown */}
       <Section title="🏆 Influenceurs">
         {stats.inflStats.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">Aucune inscription via influenceur pour le moment.</p>
+          <p className="text-sm text-muted-foreground text-center py-8">Aucun influenceur enregistré.</p>
         ) : (
           <div className="space-y-2">
             {stats.inflStats.map((inf, i) => (
-              <div key={inf.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
-                <span className={`text-sm font-bold w-6 text-center ${i < 3 ? "text-yellow-500" : "text-muted-foreground"}`}>{i + 1}</span>
-                <InfluencerAvatar photo_url={inf.photo_url} name={inf.name} size="sm" />
-                <div className="flex-1 min-w-0">
-                  <span className="text-sm font-semibold text-white truncate block">{inf.name}</span>
-                  <span className="text-[10px] text-muted-foreground">{NETWORK_LABELS[inf.social] || inf.social}</span>
+              <div key={inf.id} className="p-3 rounded-xl bg-card border border-border">
+                <div className="flex items-center gap-3">
+                  <span className={`text-sm font-bold w-6 text-center ${i < 3 ? "text-yellow-500" : "text-muted-foreground"}`}>{i + 1}</span>
+                  <InfluencerAvatar photo_url={inf.photo_url} name={inf.name} size="sm" />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-semibold text-white truncate block">{inf.name}</span>
+                    <span className="text-[10px] text-muted-foreground">{NETWORK_LABELS[inf.social] || inf.social}</span>
+                  </div>
+                  <div className="flex gap-3 text-[10px] text-muted-foreground text-center">
+                    <div><p className="text-sm font-bold text-white">{inf.signups}</p><p>Total</p></div>
+                    <div><p className="text-sm font-bold text-green-400">{inf.activeUsers}</p><p>actifs</p></div>
+                    <div><p className="text-sm font-bold text-blue-400">{inf.videos}</p><p>vidéos</p></div>
+                    <div><p className="text-sm font-bold text-purple-400">{inf.creditPurchases}</p><p>achats</p></div>
+                    <div><p className="text-sm font-bold text-green-400">{inf.revenue.toLocaleString("fr-FR")}</p><p>FCFA</p></div>
+                    <div><p className="text-sm font-bold text-primary">{inf.conversionRate}%</p><p>convers.</p></div>
+                  </div>
                 </div>
-                <div className="flex gap-3 text-[10px] text-muted-foreground text-center">
-                  <div><p className="text-sm font-bold text-white">{inf.signups}</p><p>inscriptions</p></div>
-                  <div><p className="text-sm font-bold text-green-400">{inf.activeUsers}</p><p>actifs</p></div>
-                  <div><p className="text-sm font-bold text-blue-400">{inf.videos}</p><p>vidéos</p></div>
-                  <div><p className="text-sm font-bold text-purple-400">{inf.creditPurchases}</p><p>achats</p></div>
-                  <div><p className="text-sm font-bold text-green-400">{inf.revenue.toLocaleString("fr-FR")}</p><p>FCFA</p></div>
-                  <div><p className="text-sm font-bold text-primary">{inf.conversionRate}%</p><p>convers.</p></div>
+                {/* Per-network signup breakdown */}
+                <div className="flex flex-wrap gap-1.5 mt-2 pl-9">
+                  {stats.networks.map(net => (
+                    <span key={net} className={`px-2 py-0.5 rounded-md text-[10px] font-medium border ${inf.byNetwork[net] > 0 ? "bg-primary/10 border-primary/30 text-primary" : "bg-secondary border-border text-muted-foreground/50"}`}>
+                      {NETWORK_LABELS[net]}: {inf.byNetwork[net] || 0}
+                    </span>
+                  ))}
                 </div>
               </div>
             ))}
