@@ -48,14 +48,14 @@ export default function AttributionSurvey() {
     }).catch(() => navigate("/login", { replace: true }));
   }, [navigate]);
 
-  // Load influencers when a social network is selected
+  // Load ALL active influencers when a social network is selected
+  // Influencers are present on every network — we don't filter by platform.
+  // The selected network is recorded separately as how the user discovered Story221.
   useEffect(() => {
     if (!network || network === "friend_recommendation") return;
     setLoadingInfluencers(true);
     base44.entities.MarketingInfluencer.filter({ status: "active" }, "display_order", 200)
-      .then(all => {
-        setInfluencers(all.filter(i => i.primary_social === network));
-      })
+      .then(all => setInfluencers(all))
       .catch(() => setInfluencers([]))
       .finally(() => setLoadingInfluencers(false));
   }, [network]);
@@ -213,7 +213,7 @@ export default function AttributionSurvey() {
                 {/* Influencer cards */}
                 {influencers.length === 0 && !loadingInfluencers ? (
                   <p className="col-span-full text-sm text-muted-foreground text-center py-4">
-                    Aucun influenceur {NETWORK_LABELS[network]} enregistré. Sélectionnez « Publicité Story221 » si vous avez vu une pub.
+                    Aucun influenceur enregistré. Sélectionnez « Publicité Story221 » si vous avez vu une pub.
                   </p>
                 ) : (
                   influencers.map(inf => (
@@ -226,7 +226,6 @@ export default function AttributionSurvey() {
                       <InfluencerAvatar photo_url={inf.photo_url} name={inf.name} size="lg" />
                       <div className="text-center">
                         <span className="text-sm font-semibold text-white block truncate max-w-[120px]">{inf.name}</span>
-                        <span className="text-[10px] text-muted-foreground">{NETWORK_LABELS[inf.primary_social] || inf.primary_social}</span>
                       </div>
                     </button>
                   ))
