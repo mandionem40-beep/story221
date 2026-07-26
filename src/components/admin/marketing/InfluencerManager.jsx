@@ -196,7 +196,7 @@ export default function InfluencerManager({ influencers, onRefresh }) {
               </div>
               <div>
                 <label className="text-xs text-muted-foreground mb-1 block">Photo</label>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 mb-2">
                   {form.photo_url ? (
                     <img src={form.photo_url} alt="" className="w-16 h-16 rounded-xl object-cover border border-border flex-shrink-0" />
                   ) : (
@@ -204,7 +204,7 @@ export default function InfluencerManager({ influencers, onRefresh }) {
                       <Upload className="w-5 h-5 text-muted-foreground" />
                     </div>
                   )}
-                  <div className="flex-1">
+                  <div className="flex-1 flex flex-wrap items-center gap-2">
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -219,14 +219,24 @@ export default function InfluencerManager({ influencers, onRefresh }) {
                       className="px-3 py-2 rounded-lg bg-secondary text-white text-sm font-medium hover:bg-secondary/80 disabled:opacity-50 flex items-center gap-1.5"
                     >
                       {uploadingPhoto ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                      {uploadingPhoto ? "Upload..." : form.photo_url ? "Changer" : "Téléverser"}
+                      {uploadingPhoto ? "..." : form.photo_url ? "Changer" : "Téléverser"}
                     </button>
                     {form.photo_url && (
-                      <button type="button" onClick={() => setForm({ ...form, photo_url: "" })} className="ml-2 px-3 py-2 rounded-lg bg-destructive/10 text-destructive text-sm">
+                      <button type="button" onClick={() => setForm({ ...form, photo_url: "" })} className="px-3 py-2 rounded-lg bg-destructive/10 text-destructive text-sm">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     )}
                   </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">ou URL:</span>
+                  <input
+                    type="url"
+                    value={form.photo_url && !form.photo_url.startsWith("data:") ? form.photo_url : ""}
+                    onChange={e => setForm({ ...form, photo_url: e.target.value })}
+                    placeholder="https://exemple.com/photo.jpg"
+                    className="flex-1 h-9 rounded-lg bg-background border border-border px-3 text-sm text-white"
+                  />
                 </div>
               </div>
               <div>
