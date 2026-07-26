@@ -14,6 +14,14 @@ const NETWORK_COLORS = {
   facebook: "#1877F2", instagram: "#E4405F", tiktok: "#69C9D0", snapchat: "#FFFC00", youtube: "#FF0000",
 };
 
+const NETWORK_LOGOS = {
+  facebook: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/3f9f53832_image.png",
+  instagram: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/5ae3919ed_image.png",
+  tiktok: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/ca745f450_image.png",
+  snapchat: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/fd5e01d57_image.png",
+  youtube: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/025362379_image.png",
+};
+
 export default function MarketingAnalyticsTab() {
   const [loading, setLoading] = useState(true);
   const [attributions, setAttributions] = useState([]);
@@ -236,8 +244,8 @@ export default function MarketingAnalyticsTab() {
                         const has = count > 0;
                         return (
                           <div key={net} className={`flex flex-col items-center gap-1 py-2 rounded-lg border ${has ? "border-primary/30 bg-primary/5" : "border-border bg-secondary/30"}`}>
-                            <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ background: has ? NETWORK_COLORS[net] : "transparent" }}>
-                              <span className="text-[8px] font-bold text-white">{NETWORK_LABELS[net].charAt(0)}</span>
+                            <div className="w-6 h-6 rounded-lg flex items-center justify-center overflow-hidden">
+                              <img src={NETWORK_LOGOS[net]} alt={NETWORK_LABELS[net]} className="w-full h-full object-contain" />
                             </div>
                             <span className={`text-sm font-bold leading-none ${has ? "text-white" : "text-muted-foreground/40"}`}>{count}</span>
                             <span className="text-[8px] text-muted-foreground">{NETWORK_LABELS[net]}</span>
