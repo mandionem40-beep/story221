@@ -142,9 +142,14 @@ export default function InfluencerManager({ influencers, onRefresh }) {
 
   const toggleStatus = async (inf) => {
     const newStatus = inf.status === "active" ? "inactive" : "active";
-    await base44.entities.MarketingInfluencer.update(inf.id, { status: newStatus });
-    toast({ title: newStatus === "active" ? "Influenceur réactivé" : "Influenceur désactivé" });
-    onRefresh();
+    try {
+      await base44.entities.MarketingInfluencer.update(inf.id, { status: newStatus });
+      toast({ title: newStatus === "active" ? "Influenceur réactivé" : "Influenceur désactivé" });
+      onRefresh();
+    } catch (err) {
+      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+      onRefresh();
+    }
   };
 
   return (
