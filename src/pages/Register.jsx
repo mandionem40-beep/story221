@@ -110,10 +110,11 @@ export default function Register() {
     setLoading(true);
     try {
       const cleanEmail = email.trim().toLowerCase();
-      // 1. Verify the OTP code — verifyOtp returns access_token and sets it internally.
-      //    Do NOT call loginViaEmailPassword afterwards — it creates a broken session.
+      // 1. Verify the OTP code
       await base44.auth.verifyOtp({ email: cleanEmail, otpCode });
-      // 2. Update profile with form data (role & full_name are built-ins, cannot be overridden)
+      // 2. Log in — loginViaEmailPassword sets the auth token (verifyOtp does NOT)
+      await base44.auth.loginViaEmailPassword(cleanEmail, password);
+      // 3. Update profile with form data (role is a built-in, cannot be overridden)
       const refCodeGen = generateReferralCode(username.trim());
       await base44.auth.updateMe({
         username: username.trim(),
@@ -130,6 +131,7 @@ export default function Register() {
       if (refCode) {
         base44.functions.invoke("process-referral", { action: "track_signup" }).catch(() => {});
       }
+      // 4. Hard redirect — auth provider must re-initialize with the new token
       window.location.href = "/attribution-survey";
     } catch (err) {
       setError(err.message || "Code de vérification invalide");
