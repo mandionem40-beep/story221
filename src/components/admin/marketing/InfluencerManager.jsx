@@ -15,6 +15,33 @@ const NETWORK_LABELS = {
   facebook: "Facebook", instagram: "Instagram", tiktok: "TikTok", snapchat: "Snapchat", youtube: "YouTube",
 };
 
+function resizeImage(file, maxSize, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let { width, height } = img;
+        if (width > height) {
+          if (width > maxSize) { height = Math.round(height * maxSize / width); width = maxSize; }
+        } else {
+          if (height > maxSize) { width = Math.round(width * maxSize / height); height = maxSize; }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL(file.type === "image/png" ? "image/png" : "image/jpeg", quality));
+      };
+      img.onerror = () => reject(new Error("Image invalide"));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error("Lecture du fichier échouée"));
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function InfluencerManager({ influencers, onRefresh }) {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -31,50 +58,15 @@ export default function InfluencerManager({ influencers, onRefresh }) {
       toast({ title: "Veuillez sélectionner une image", variant: "destructive" });
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      toast({ title: "L'image dépasse 10 Mo", variant: "destructive" });
-      return;
-    }
     setUploadingPhoto(true);
     try {
-      const dataUrl = await resizeImage(file, 200, 0.7);
-      if (dataUrl.length > 100000) {
-        toast({ title: "Image trop lourde", description: "Utilisez l'option URL ou une image plus petite", variant: "destructive" });
-        return;
-      }
+      const dataUrl = await resizeImage(file, 150, 0.65);
       setForm(prev => ({ ...prev, photo_url: dataUrl }));
     } catch (err) {
       toast({ title: "Erreur traitement image", description: err.message, variant: "destructive" });
+    } finally {
+      setUploadingPhoto(false);
     }
-    setUploadingPhoto(false);
-  };
-
-  const resizeImage = (file, maxSize, quality) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          let { width, height } = img;
-          if (width > height) {
-            if (width > maxSize) { height = Math.round(height * maxSize / width); width = maxSize; }
-          } else {
-            if (height > maxSize) { width = Math.round(width * maxSize / height); height = maxSize; }
-          }
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, width, height);
-          const isPng = file.type === "image/png";
-          resolve(canvas.toDataURL(isPng ? "image/png" : "image/jpeg", quality));
-        };
-        img.onerror = () => reject(new Error("Image invalide"));
-        img.src = e.target.result;
-      };
-      reader.onerror = () => reject(new Error("Lecture du fichier échouée"));
-      reader.readAsDataURL(file);
-    });
   };
 
   const startEdit = (inf) => {
