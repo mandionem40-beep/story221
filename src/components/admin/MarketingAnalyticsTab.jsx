@@ -208,35 +208,56 @@ export default function MarketingAnalyticsTab() {
         {stats.inflStats.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">Aucun influenceur enregistré.</p>
         ) : (
-          <div className="space-y-2">
-            {stats.inflStats.map((inf, i) => (
-              <div key={inf.id} className="p-3 rounded-xl bg-card border border-border">
-                <div className="flex items-center gap-3">
-                  <span className={`text-sm font-bold w-6 text-center ${i < 3 ? "text-yellow-500" : "text-muted-foreground"}`}>{i + 1}</span>
-                  <InfluencerAvatar photo_url={inf.photo_url} name={inf.name} size="sm" />
-                  <div className="flex-1 min-w-0">
-                    <span className="text-sm font-semibold text-white truncate block">{inf.name}</span>
-                    <span className="text-[10px] text-muted-foreground">{NETWORK_LABELS[inf.social] || inf.social}</span>
+          <div className="space-y-3">
+            {stats.inflStats.map((inf, i) => {
+              const activeNets = stats.networks.filter(n => inf.byNetwork[n] > 0);
+              return (
+                <div key={inf.id} className="p-4 rounded-xl bg-card border border-border">
+                  {/* Header: rank + avatar + name + totals */}
+                  <div className="flex items-center gap-3">
+                    <span className={`text-base font-bold w-6 text-center ${i < 3 ? "text-yellow-500" : "text-muted-foreground"}`}>{i + 1}</span>
+                    <InfluencerAvatar photo_url={inf.photo_url} name={inf.name} size="md" />
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm font-semibold text-white truncate block">{inf.name}</span>
+                      <span className="text-[10px] text-muted-foreground">{NETWORK_LABELS[inf.social] || inf.social}</span>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xl font-bold text-white leading-none">{inf.signups}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">inscrits</p>
+                    </div>
                   </div>
-                  <div className="flex gap-3 text-[10px] text-muted-foreground text-center">
-                    <div><p className="text-sm font-bold text-white">{inf.signups}</p><p>Total</p></div>
-                    <div><p className="text-sm font-bold text-green-400">{inf.activeUsers}</p><p>actifs</p></div>
-                    <div><p className="text-sm font-bold text-blue-400">{inf.videos}</p><p>vidéos</p></div>
-                    <div><p className="text-sm font-bold text-purple-400">{inf.creditPurchases}</p><p>achats</p></div>
-                    <div><p className="text-sm font-bold text-green-400">{inf.revenue.toLocaleString("fr-FR")}</p><p>FCFA</p></div>
-                    <div><p className="text-sm font-bold text-primary">{inf.conversionRate}%</p><p>convers.</p></div>
+
+                  {/* Per-network breakdown */}
+                  <div className="mt-3 pt-3 border-t border-border">
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Inscrits par réseau</p>
+                    <div className="grid grid-cols-5 gap-2">
+                      {stats.networks.map(net => {
+                        const count = inf.byNetwork[net] || 0;
+                        const has = count > 0;
+                        return (
+                          <div key={net} className={`flex flex-col items-center gap-1 py-2 rounded-lg border ${has ? "border-primary/30 bg-primary/5" : "border-border bg-secondary/30"}`}>
+                            <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ background: has ? NETWORK_COLORS[net] : "transparent" }}>
+                              <span className="text-[8px] font-bold text-white">{NETWORK_LABELS[net].charAt(0)}</span>
+                            </div>
+                            <span className={`text-sm font-bold leading-none ${has ? "text-white" : "text-muted-foreground/40"}`}>{count}</span>
+                            <span className="text-[8px] text-muted-foreground">{NETWORK_LABELS[net]}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Secondary metrics */}
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 pt-3 border-t border-border text-[10px] text-muted-foreground">
+                    <span>✅ Actifs: <strong className="text-green-400">{inf.activeUsers}</strong></span>
+                    <span>🎬 Vidéos: <strong className="text-blue-400">{inf.videos}</strong></span>
+                    <span>💎 Achats: <strong className="text-purple-400">{inf.creditPurchases}</strong></span>
+                    <span>💰 Revenu: <strong className="text-green-400">{inf.revenue.toLocaleString("fr-FR")}</strong> FCFA</span>
+                    <span>📈 Conversion: <strong className="text-primary">{inf.conversionRate}%</strong></span>
                   </div>
                 </div>
-                {/* Per-network signup breakdown */}
-                <div className="flex flex-wrap gap-1.5 mt-2 pl-9">
-                  {stats.networks.map(net => (
-                    <span key={net} className={`px-2 py-0.5 rounded-md text-[10px] font-medium border ${inf.byNetwork[net] > 0 ? "bg-primary/10 border-primary/30 text-primary" : "bg-secondary border-border text-muted-foreground/50"}`}>
-                      {NETWORK_LABELS[net]}: {inf.byNetwork[net] || 0}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </Section>
