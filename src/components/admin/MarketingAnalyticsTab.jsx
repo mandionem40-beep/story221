@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, Users, Megaphone, TrendingUp, Trophy, DollarSign, Video, Download } from "lucide-react";
+import { Loader2, Users, Megaphone, TrendingUp, Download } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import InfluencerManager from "@/components/admin/marketing/InfluencerManager";
 import InfluencerAvatar from "@/components/admin/marketing/InfluencerAvatar";
@@ -13,8 +13,6 @@ const NETWORK_LABELS = {
 const NETWORK_COLORS = {
   facebook: "#1877F2", instagram: "#E4405F", tiktok: "#69C9D0", snapchat: "#FFFC00", youtube: "#FF0000",
 };
-
-const COLOR_PALETTE = ["#ff0033", "#ff4466", "#4ade80", "#22d3ee", "#60a5fa", "#a78bfa"];
 
 export default function MarketingAnalyticsTab() {
   const [loading, setLoading] = useState(true);
