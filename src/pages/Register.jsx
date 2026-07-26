@@ -110,15 +110,13 @@ export default function Register() {
     setLoading(true);
     try {
       const cleanEmail = email.trim().toLowerCase();
-      // 1. Verify the OTP code
+      // 1. Verify the OTP code — verifyOtp returns access_token and sets it internally.
+      //    Do NOT call loginViaEmailPassword afterwards — it creates a broken session.
       await base44.auth.verifyOtp({ email: cleanEmail, otpCode });
-      // 2. Log in — loginViaEmailPassword returns { access_token } and calls setToken internally
-      await base44.auth.loginViaEmailPassword(cleanEmail, password);
-      // 3. Update profile with form data
+      // 2. Update profile with form data (role & full_name are built-ins, cannot be overridden)
       const refCodeGen = generateReferralCode(username.trim());
       await base44.auth.updateMe({
         username: username.trim(),
-        full_name: username.trim(),
         phone: fullPhone,
         phone_country: detectedCountry?.country || "Sénégal",
         country: detectedCountry?.country || "Sénégal",
@@ -126,8 +124,7 @@ export default function Register() {
         referral_code: refCodeGen,
         referred_by: refCode || null,
         diamonds: 0,
-        free_trial_used: false,
-        role: "user"
+        free_trial_used: false
       });
       // Notify referrer that someone signed up with their code
       if (refCode) {
