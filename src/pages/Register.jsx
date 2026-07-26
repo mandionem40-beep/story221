@@ -209,9 +209,9 @@ export default function Register() {
           <p className="text-xs text-muted-foreground text-center">
             💡 Pas de code ? Vérifiez vos <strong>Spams</strong> / Courriers indésirables.
           </p>
-          <p className="text-xs text-muted-foreground text-center hidden">
-            Ajoutez <strong className="text-foreground">app@base44.com</strong> à vos contacts pour garantir la réception.
-          </p>
+          
+
+          
         </div>
         <p className="text-center text-sm text-muted-foreground mt-4">
           Pas reçu le code ?{" "}
