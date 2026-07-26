@@ -37,7 +37,11 @@ export default function InfluencerManager({ influencers, onRefresh }) {
     }
     setUploadingPhoto(true);
     try {
-      const dataUrl = await resizeImage(file, 400, 0.85);
+      const dataUrl = await resizeImage(file, 200, 0.7);
+      if (dataUrl.length > 100000) {
+        toast({ title: "Image trop lourde", description: "Utilisez l'option URL ou une image plus petite", variant: "destructive" });
+        return;
+      }
       setForm(prev => ({ ...prev, photo_url: dataUrl }));
     } catch (err) {
       toast({ title: "Erreur traitement image", description: err.message, variant: "destructive" });
