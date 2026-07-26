@@ -15,24 +15,44 @@ const NETWORK_LABELS = {
   facebook: "Facebook", instagram: "Instagram", tiktok: "TikTok", snapchat: "Snapchat", youtube: "YouTube",
 };
 
-function resizeImage(file, maxSize, quality) {
+const MAX_DATA_URL_LENGTH = 60000;
+
+function resizeImage(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let { width, height } = img;
-        if (width > height) {
-          if (width > maxSize) { height = Math.round(height * maxSize / width); width = maxSize; }
-        } else {
-          if (height > maxSize) { width = Math.round(width * maxSize / height); height = maxSize; }
+        const steps = [
+          { size: 256, quality: 0.8 },
+          { size: 192, quality: 0.7 },
+          { size: 150, quality: 0.6 },
+          { size: 120, quality: 0.5 },
+          { size: 96, quality: 0.4 },
+        ];
+        const usePng = file.type === "image/png";
+        for (const step of steps) {
+          const canvas = document.createElement("canvas");
+          let { width, height } = img;
+          if (width > height) {
+            if (width > step.size) { height = Math.round(height * step.size / width); width = step.size; }
+          } else {
+            if (height > step.size) { width = Math.round(width * step.size / height); height = step.size; }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL(usePng ? "image/png" : "image/jpeg", step.quality);
+          if (dataUrl.length <= MAX_DATA_URL_LENGTH) { resolve(dataUrl); return; }
         }
-        canvas.width = width;
-        canvas.height = height;
+        // Dernier recours : la plus petite compression possible
+        const canvas = document.createElement("canvas");
+        canvas.width = 64;
+        canvas.height = 64;
         const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL(file.type === "image/png" ? "image/png" : "image/jpeg", quality));
+        ctx.drawImage(img, 0, 0, 64, 64);
+        resolve(canvas.toDataURL("image/jpeg", 0.3));
       };
       img.onerror = () => reject(new Error("Image invalide"));
       img.src = e.target.result;
@@ -60,7 +80,7 @@ export default function InfluencerManager({ influencers, onRefresh }) {
     }
     setUploadingPhoto(true);
     try {
-      const dataUrl = await resizeImage(file, 150, 0.65);
+      const dataUrl = await resizeImage(file);
       setForm(prev => ({ ...prev, photo_url: dataUrl }));
     } catch (err) {
       toast({ title: "Erreur traitement image", description: err.message, variant: "destructive" });
