@@ -109,11 +109,12 @@ export default function Register() {
     setError("");
     setLoading(true);
     try {
-      const result = await base44.auth.verifyOtp({ email: email.trim().toLowerCase(), otpCode });
-      if (!result?.access_token) {
-        throw new Error("Réponse invalide du serveur. Veuillez réessayer.");
-      }
-      base44.auth.setToken(result.access_token);
+      const cleanEmail = email.trim().toLowerCase();
+      // 1. Verify the OTP code
+      await base44.auth.verifyOtp({ email: cleanEmail, otpCode });
+      // 2. Log in — loginViaEmailPassword returns { access_token } and calls setToken internally
+      await base44.auth.loginViaEmailPassword(cleanEmail, password);
+      // 3. Update profile with form data
       const refCodeGen = generateReferralCode(username.trim());
       await base44.auth.updateMe({
         username: username.trim(),
