@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Loader2, ArrowRight, ArrowLeft, Check, Megaphone, Users } from "lucide-react";
 import Logo from "@/components/Logo";
+import InfluencerAvatar from "@/components/admin/marketing/InfluencerAvatar";
 import { toast } from "@/components/ui/use-toast";
 
 /* --- Official platform logos (uploaded brand assets) --- */
@@ -222,13 +223,7 @@ export default function AttributionSurvey() {
                       disabled={submitting}
                       className="group relative flex flex-col items-center gap-3 p-5 rounded-2xl border-2 border-border bg-card hover:border-primary/40 transition-all gpu"
                     >
-                      {inf.photo_url ? (
-                        <img src={inf.photo_url} alt={inf.name} className="w-14 h-14 rounded-2xl object-cover transition-transform group-hover:scale-110" />
-                      ) : (
-                        <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center text-xl font-bold text-primary transition-transform group-hover:scale-110">
-                          {inf.name.charAt(0).toUpperCase()}
-                        </div>
-                      )}
+                      <InfluencerAvatar photo_url={inf.photo_url} name={inf.name} size="lg" />
                       <div className="text-center">
                         <span className="text-sm font-semibold text-white block truncate max-w-[120px]">{inf.name}</span>
                         <span className="text-[10px] text-muted-foreground">{NETWORK_LABELS[inf.primary_social] || inf.primary_social}</span>

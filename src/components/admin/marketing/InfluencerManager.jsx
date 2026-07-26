@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Plus, Trash2, Save, Loader2, X, Upload } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import InfluencerAvatar from "@/components/admin/marketing/InfluencerAvatar";
 
 const NETWORK_OPTIONS = [
   { id: "facebook", label: "Facebook" },
@@ -171,13 +172,7 @@ export default function InfluencerManager({ influencers, onRefresh }) {
         <div className="space-y-2">
           {influencers.map(inf => (
             <div key={inf.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
-              {inf.photo_url ? (
-                <img src={inf.photo_url} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
-              ) : (
-                <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center font-bold text-primary flex-shrink-0">
-                  {inf.name.charAt(0).toUpperCase()}
-                </div>
-              )}
+              <InfluencerAvatar photo_url={inf.photo_url} name={inf.name} size="sm" />
               <div className="flex-1 min-w-0">
                 <span className="text-sm font-medium text-white block truncate">{inf.name}</span>
                 <span className="text-[10px] text-muted-foreground">{NETWORK_LABELS[inf.primary_social] || inf.primary_social}</span>
@@ -223,7 +218,7 @@ export default function InfluencerManager({ influencers, onRefresh }) {
                 <label className="text-xs text-muted-foreground mb-1 block">Photo</label>
                 <div className="flex items-center gap-3 mb-2">
                   {form.photo_url ? (
-                    <img src={form.photo_url} alt="" className="w-16 h-16 rounded-xl object-cover border border-border flex-shrink-0" />
+                    <InfluencerAvatar photo_url={form.photo_url} name={form.name || "?"} size="md" />
                   ) : (
                     <div className="w-16 h-16 rounded-xl bg-secondary border border-border flex items-center justify-center flex-shrink-0">
                       <Upload className="w-5 h-5 text-muted-foreground" />

@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Loader2, Users, Megaphone, TrendingUp, Trophy, DollarSign, Video, Download } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import InfluencerManager from "@/components/admin/marketing/InfluencerManager";
+import InfluencerAvatar from "@/components/admin/marketing/InfluencerAvatar";
 import { toast } from "@/components/ui/use-toast";
 
 const NETWORK_LABELS = {
@@ -211,11 +212,7 @@ export default function MarketingAnalyticsTab() {
             {stats.inflStats.map((inf, i) => (
               <div key={inf.id} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
                 <span className={`text-sm font-bold w-6 text-center ${i < 3 ? "text-yellow-500" : "text-muted-foreground"}`}>{i + 1}</span>
-                {inf.photo_url ? (
-                  <img src={inf.photo_url} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary flex-shrink-0">{inf.name.charAt(0)}</div>
-                )}
+                <InfluencerAvatar photo_url={inf.photo_url} name={inf.name} size="sm" />
                 <div className="flex-1 min-w-0">
                   <span className="text-sm font-semibold text-white truncate block">{inf.name}</span>
                   <span className="text-[10px] text-muted-foreground">{NETWORK_LABELS[inf.social] || inf.social}</span>
