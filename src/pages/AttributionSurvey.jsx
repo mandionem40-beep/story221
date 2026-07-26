@@ -8,15 +8,17 @@ import { toast } from "@/components/ui/use-toast";
 
 /* --- Official platform logos (uploaded brand assets) --- */
 const LOGOS = {
-  facebook: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/066535f28_image.png",
-  tiktok: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/33db99c72_image.png",
-  snapchat: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/d42efa20b_image.png",
-  youtube: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/81e828f46_image.png",
+  facebook: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/3f9f53832_image.png",
+  instagram: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/5ae3919ed_image.png",
+  tiktok: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/ca745f450_image.png",
+  snapchat: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/fd5e01d57_image.png",
+  youtube: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/025362379_image.png",
+  friend: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/4c267390e_image.png",
 };
 
 const NETWORKS = [
   { id: "facebook", label: "Facebook", logo: LOGOS.facebook },
-  { id: "instagram", label: "Instagram", logo: null },
+  { id: "instagram", label: "Instagram", logo: LOGOS.instagram },
   { id: "tiktok", label: "TikTok", logo: LOGOS.tiktok },
   { id: "snapchat", label: "Snapchat", logo: LOGOS.snapchat },
   { id: "youtube", label: "YouTube", logo: LOGOS.youtube },
@@ -150,8 +152,8 @@ export default function AttributionSurvey() {
                 onClick={() => { setNetwork("friend_recommendation"); }}
                 className="group relative flex flex-col items-center gap-3 p-5 rounded-2xl border-2 border-border bg-card hover:border-primary/40 transition-all gpu"
               >
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-primary/15 transition-transform group-hover:scale-110">
-                  <Users className="w-7 h-7 text-primary" />
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden transition-transform group-hover:scale-110">
+                  <img src={LOGOS.friend} alt="Recommandation d'un ami" className="w-full h-full object-contain" />
                 </div>
                 <span className="text-sm font-semibold text-white text-center">Recommandation d'un ami</span>
               </button>
@@ -163,8 +165,8 @@ export default function AttributionSurvey() {
         {step === 1 && network === "friend_recommendation" && (
           <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4" onClick={() => setNetwork(null)}>
             <div className="bg-popover border border-border rounded-3xl p-6 w-full max-w-sm text-center" onClick={e => e.stopPropagation()}>
-              <div className="w-16 h-16 rounded-full bg-primary/15 flex items-center justify-center mx-auto mb-4">
-                <Users className="w-8 h-8 text-primary" />
+              <div className="w-20 h-20 rounded-2xl flex items-center justify-center overflow-hidden mx-auto mb-4">
+                <img src={LOGOS.friend} alt="Recommandation d'un ami" className="w-full h-full object-contain" />
               </div>
               <h3 className="text-lg font-bold text-white mb-1">Recommandation d'un ami</h3>
               <p className="text-sm text-muted-foreground mb-5">Merci ! Vous pouvez continuer vers Story221.</p>
@@ -223,7 +225,7 @@ export default function AttributionSurvey() {
                       disabled={submitting}
                       className="group relative flex flex-col items-center gap-3 p-5 rounded-2xl border-2 border-border bg-card hover:border-primary/40 transition-all gpu"
                     >
-                      <InfluencerAvatar photo_url={inf.photo_url} name={inf.name} size="lg" />
+                      <InfluencerAvatar photo_url={inf.photo_url} name={inf.name} size="xl" />
                       <div className="text-center">
                         <span className="text-sm font-semibold text-white block truncate max-w-[120px]">{inf.name}</span>
                       </div>

@@ -14,6 +14,7 @@ export default function InfluencerAvatar({ photo_url, name, size = "md" }) {
     sm: "w-10 h-10 rounded-lg text-sm",
     md: "w-12 h-12 rounded-xl text-base",
     lg: "w-14 h-14 rounded-2xl text-xl",
+    xl: "w-24 h-24 rounded-3xl text-3xl",
   };
 
   const cls = sizeClasses[size] || sizeClasses.md;
