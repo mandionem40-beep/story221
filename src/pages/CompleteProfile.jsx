@@ -92,7 +92,7 @@ export default function CompleteProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-6 h-6 text-primary animate-spin" />
       </div>
     );

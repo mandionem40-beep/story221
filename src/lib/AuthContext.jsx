@@ -31,12 +31,11 @@ export const AuthProvider = ({ children }) => {
       setIsLoadingPublicSettings(true);
       setAuthError(null);
 
-      const storedToken = appParams.token || localStorage.getItem('base44_access_token') || localStorage.getItem('token');
-
+      // Public settings endpoint is public — never send a token to avoid 403 rejections
       const appClient = createAxiosClient({
         baseURL: `/api/apps/public`,
         headers: { 'X-App-Id': appParams.appId },
-        token: storedToken || null,
+        token: null,
         interceptResponses: true
       });
 
@@ -51,14 +50,13 @@ export const AuthProvider = ({ children }) => {
           setAuthChecked(true);
           return;
         }
-        // For auth_required or other errors, clear expired token but continue
-        if (appError.status === 401 || appError.status === 403) {
-          clearStoredTokens();
-        }
+        // Other errors (network, 500, etc.) — continue without public settings
       }
 
       setIsLoadingPublicSettings(false);
 
+      // Check user auth if token exists
+      const storedToken = appParams.token || localStorage.getItem('base44_access_token') || localStorage.getItem('token');
       if (storedToken) {
         await checkUserAuth();
       } else {
