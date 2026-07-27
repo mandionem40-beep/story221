@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import { Loader2, ArrowRight, ArrowLeft, Check, Megaphone, Users } from "lucide-react";
 import Logo from "@/components/Logo";
 import InfluencerAvatar from "@/components/admin/marketing/InfluencerAvatar";
@@ -31,6 +32,7 @@ const NETWORK_LABELS = {
 
 export default function AttributionSurvey() {
   const navigate = useNavigate();
+  const { checkUserAuth } = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -80,6 +82,7 @@ export default function AttributionSurvey() {
       }
       await base44.entities.UserAttribution.create(payload);
       await base44.auth.updateMe({ attribution_completed: true });
+      await checkUserAuth();
       toast({ title: "Bienvenue sur Story221 !", description: "Merci pour votre réponse." });
       navigate(user.role === "admin" || user.role === "super_admin" ? "/admin" : "/app", { replace: true });
     } catch (err) {

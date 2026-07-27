@@ -50,6 +50,7 @@ export default function Reels() {
     setHasMore(true);
     setActiveIndex(0);
     loadFeed(activeTab, 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   const handleScroll = useCallback(() => {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +15,7 @@ import { toast } from "@/components/ui/use-toast";
 
 export default function CompleteProfile() {
   const navigate = useNavigate();
+  const { checkUserAuth } = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -81,8 +83,9 @@ export default function CompleteProfile() {
         base44.functions.invoke("process-referral", { action: "track_signup" }).catch(() => {});
       }
       toast({ title: "Profil complété !", description: "Bienvenue sur Story221." });
+      await checkUserAuth();
       const dest = user?.role === "admin" || user?.role === "super_admin" ? "/admin" : "/attribution-survey";
-      window.location.href = dest;
+      navigate(dest, { replace: true });
     } catch (err) {
       setError(err.message || "Échec de l'enregistrement");
     } finally {

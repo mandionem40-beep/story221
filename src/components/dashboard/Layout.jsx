@@ -6,6 +6,7 @@ import { Home, Library, Clapperboard, Diamond, User, LogOut, Bell, MessageSquare
 import DiamondIcon from "@/components/DiamondIcon";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/Logo";
+import { Image } from "@/components/ui/image";
 import NotificationBell from "@/components/NotificationBell";
 
 
@@ -40,13 +41,13 @@ export default function Layout() {
       const freshUser = await base44.auth.me();
       setCurrentUser(freshUser);
     } catch {
-
-
       // fallback to auth context user
-    }}, []);
+    }
+  }, []);
   useEffect(() => {
     refreshUser();
-  }, [refreshUser, location.pathname]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   // Redirect to profile completion if missing required fields (not for admins)
   useEffect(() => {
@@ -116,7 +117,7 @@ export default function Layout() {
         <div className="p-3 border-t border-border">
           <Link to="/app/profile" className="flex items-center gap-3 p-3 rounded-xl hover:bg-secondary transition-colors">
             {avatarUrl ?
-            <img src={avatarUrl} alt="" className="w-9 h-9 rounded-full object-cover" /> :
+            <Image src={avatarUrl} fittingType="fill" className="w-9 h-9 rounded-full" /> :
 
             <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold">
                 {username.charAt(0).toUpperCase()}
