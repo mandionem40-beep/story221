@@ -44,7 +44,7 @@ export default function AttributionSurvey() {
       if (!u) { navigate("/login", { replace: true }); return; }
       setUser(u);
       if (u.attribution_completed) {
-        window.location.href = u.role === "admin" || u.role === "super_admin" ? "/admin" : "/app";
+        navigate(u.role === "admin" || u.role === "super_admin" ? "/admin" : "/app", { replace: true });
         return;
       }
       setLoading(false);
@@ -81,7 +81,7 @@ export default function AttributionSurvey() {
       await base44.entities.UserAttribution.create(payload);
       await base44.auth.updateMe({ attribution_completed: true });
       toast({ title: "Bienvenue sur Story221 !", description: "Merci pour votre réponse." });
-      window.location.href = user.role === "admin" || user.role === "super_admin" ? "/admin" : "/app";
+      navigate(user.role === "admin" || user.role === "super_admin" ? "/admin" : "/app", { replace: true });
     } catch (err) {
       toast({ title: "Erreur", description: "Veuillez réessayer.", variant: "destructive" });
     }

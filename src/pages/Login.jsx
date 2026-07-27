@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +11,8 @@ import GoogleIcon from "@/components/GoogleIcon";
 import AppleIcon from "@/components/AppleIcon";
 
 export default function Login() {
+  const navigate = useNavigate();
+  const { checkUserAuth } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -23,7 +26,8 @@ export default function Login() {
     try {
       await base44.auth.loginViaEmailPassword(email, password);
       const me = await base44.auth.me();
-      window.location.href = me?.role === "super_admin" || me?.role === "admin" ? "/admin" : "/app";
+      await checkUserAuth();
+      navigate(me?.role === "super_admin" || me?.role === "admin" ? "/admin" : "/app", { replace: true });
     } catch (err) {
       setError(err.message || "Email ou mot de passe incorrect");
     } finally {
