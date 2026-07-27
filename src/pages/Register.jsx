@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +20,8 @@ import { countryPrefixes, detectCountryFromPhone, isValidPhone } from "@/lib/pho
 export default function Register() {
   const urlParams = useMemo(() => new URLSearchParams(window.location.search), []);
   const refCode = urlParams.get("ref");
+  const navigate = useNavigate();
+  const { checkUserAuth } = useAuth();
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -114,25 +117,31 @@ export default function Register() {
       await base44.auth.verifyOtp({ email: cleanEmail, otpCode });
       // 2. Log in — loginViaEmailPassword sets the auth token (verifyOtp does NOT)
       await base44.auth.loginViaEmailPassword(cleanEmail, password);
-      // 3. Update profile with form data (role is a built-in, cannot be overridden)
-      const refCodeGen = generateReferralCode(username.trim());
-      await base44.auth.updateMe({
-        username: username.trim(),
-        phone: fullPhone,
-        phone_country: detectedCountry?.country || "Sénégal",
-        country: detectedCountry?.country || "Sénégal",
-        avatar_url: avatarUrl,
-        referral_code: refCodeGen,
-        referred_by: refCode || null,
-        diamonds: 0,
-        free_trial_used: false
-      });
-      // Notify referrer that someone signed up with their code
+      // 3. Update profile (non-blocking — user is already authenticated at this point)
+      try {
+        const refCodeGen = generateReferralCode(username.trim());
+        await base44.auth.updateMe({
+          username: username.trim(),
+          phone: fullPhone,
+          phone_country: detectedCountry?.country || "Sénégal",
+          country: detectedCountry?.country || "Sénégal",
+          avatar_url: avatarUrl,
+          referral_code: refCodeGen,
+          referred_by: refCode || null,
+          diamonds: 0,
+          free_trial_used: false
+        });
+      } catch (profileErr) {
+        console.error("Profile update failed:", profileErr);
+      }
+      // Notify referrer (non-blocking)
       if (refCode) {
         base44.functions.invoke("process-referral", { action: "track_signup" }).catch(() => {});
       }
-      // 4. Hard redirect — auth provider must re-initialize with the new token
-      window.location.href = "/attribution-survey";
+      // 4. Refresh auth state in-memory (avoids full page reload / black loading screen)
+      await checkUserAuth();
+      // 5. Navigate to attribution survey
+      navigate("/attribution-survey", { replace: true });
     } catch (err) {
       setError(err.message || "Code de vérification invalide");
     } finally {
