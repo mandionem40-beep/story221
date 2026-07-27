@@ -113,11 +113,13 @@ export default function Register() {
     setLoading(true);
     try {
       const cleanEmail = email.trim().toLowerCase();
-      // 1. Verify the OTP code
-      await base44.auth.verifyOtp({ email: cleanEmail, otpCode });
-      // 2. Log in — loginViaEmailPassword sets the auth token (verifyOtp does NOT)
-      await base44.auth.loginViaEmailPassword(cleanEmail, password);
-      // 3. Update profile (non-blocking — user is already authenticated at this point)
+      // 1. Verify the OTP code — returns access_token
+      const otpResult = await base44.auth.verifyOtp({ email: cleanEmail, otpCode });
+      // 2. Set token manually (avoids loginViaEmailPassword hard-redirect that would
+      //    break the SPA flow and skip profile update → "Accès refusé" 403)
+      const token = otpResult?.access_token || otpResult;
+      if (token) base44.auth.setToken(token);
+      // 3. Update profile — must run BEFORE navigation so the User entity exists
       try {
         const refCodeGen = generateReferralCode(username.trim());
         await base44.auth.updateMe({
