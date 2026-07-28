@@ -18,6 +18,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [socialLoading, setSocialLoading] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,12 +37,14 @@ export default function Login() {
   };
 
   const handleGoogle = () => {
+    setSocialLoading("google");
     const ref = new URLSearchParams(window.location.search).get("ref");
     const dest = ref ? `/complete-profile?ref=${ref}` : "/app";
     base44.auth.loginWithProvider("google", dest);
   };
 
   const handleApple = () => {
+    setSocialLoading("apple");
     const ref = new URLSearchParams(window.location.search).get("ref");
     const dest = ref ? `/complete-profile?ref=${ref}` : "/app";
     base44.auth.loginWithProvider("apple", dest);
@@ -66,17 +69,27 @@ export default function Login() {
           variant="outline"
           className="h-12 text-sm font-medium"
           onClick={handleGoogle}
+          disabled={socialLoading !== null}
         >
-          <GoogleIcon className="w-5 h-5 mr-2" />
-          Google
+          {socialLoading === "google" ? (
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+          ) : (
+            <GoogleIcon className="w-5 h-5 mr-2" />
+          )}
+          {socialLoading === "google" ? "Redirection..." : "Google"}
         </Button>
         <Button
           variant="outline"
           className="h-12 text-sm font-medium"
           onClick={handleApple}
+          disabled={socialLoading !== null}
         >
-          <AppleIcon className="w-5 h-5 mr-2" />
-          Apple
+          {socialLoading === "apple" ? (
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+          ) : (
+            <AppleIcon className="w-5 h-5 mr-2" />
+          )}
+          {socialLoading === "apple" ? "Redirection..." : "Apple"}
         </Button>
       </div>
 

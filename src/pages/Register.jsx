@@ -38,6 +38,7 @@ export default function Register() {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [socialLoading, setSocialLoading] = useState(null);
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -163,11 +164,13 @@ export default function Register() {
   };
 
   const handleGoogle = () => {
+    setSocialLoading("google");
     const dest = refCode ? `/complete-profile?ref=${refCode}` : "/complete-profile";
     base44.auth.loginWithProvider("google", dest);
   };
 
   const handleApple = () => {
+    setSocialLoading("apple");
     const dest = refCode ? `/complete-profile?ref=${refCode}` : "/complete-profile";
     base44.auth.loginWithProvider("apple", dest);
   };
@@ -257,18 +260,26 @@ export default function Register() {
         <Button
           variant="outline"
           className="h-12 text-sm font-medium"
-          onClick={handleGoogle}>
-          
-          <GoogleIcon className="w-5 h-5 mr-2" />
-          Google
+          onClick={handleGoogle}
+          disabled={socialLoading !== null}>
+          {socialLoading === "google" ? (
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+          ) : (
+            <GoogleIcon className="w-5 h-5 mr-2" />
+          )}
+          {socialLoading === "google" ? "Redirection..." : "Google"}
         </Button>
         <Button
           variant="outline"
           className="h-12 text-sm font-medium"
-          onClick={handleApple}>
-          
-          <AppleIcon className="w-5 h-5 mr-2" />
-          Apple
+          onClick={handleApple}
+          disabled={socialLoading !== null}>
+          {socialLoading === "apple" ? (
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+          ) : (
+            <AppleIcon className="w-5 h-5 mr-2" />
+          )}
+          {socialLoading === "apple" ? "Redirection..." : "Apple"}
         </Button>
       </div>
 
