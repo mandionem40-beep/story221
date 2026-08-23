@@ -8,6 +8,7 @@ import DiamondIcon from "@/components/DiamondIcon";
 import { styles, formats, voices, musics, resolutions, languages, adSectors, calculateCost, getContentType } from "@/lib/generation-utils";
 import { base44 } from "@/api/base44Client";
 import { toast } from "@/components/ui/use-toast";
+import FormSelect from "@/components/create/FormSelect";
 
 export default function CreateForm({ type, onTypeChange, user, onSubmit, initialPrompt = "", initialDuration = 1, initialStyle = "", initialLanguage = "" }) {
   const [prompt, setPrompt] = useState(initialPrompt);
@@ -96,16 +97,14 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit, initial
       {/* Type selector */}
       <div>
         <Label className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Type de création</Label>
-        <select
+        <FormSelect
           value={type}
-          onChange={(e) => onTypeChange(e.target.value)}
-          className="w-full h-11 rounded-xl bg-card border border-border px-3 text-sm text-white"
-        >
-          {["video","image","film","serie","anime","cartoon","ad","storyboard","story","music_clip","voice","character","influencer"].map(t => {
+          onValueChange={onTypeChange}
+          options={["video","image","film","serie","anime","cartoon","ad","storyboard","story","music_clip","voice","character","influencer"].map(t => {
             const c = getContentType(t);
-            return <option key={t} value={t}>{c.label}</option>;
+            return { value: t, label: c.label };
           })}
-        </select>
+        />
       </div>
 
       {/* Prompt */}
@@ -201,9 +200,7 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit, initial
       {/* Style */}
       <div>
         <Label className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Style visuel</Label>
-        <select value={style} onChange={(e) => setStyle(e.target.value)} className="w-full h-11 rounded-xl bg-card border border-border px-3 text-sm text-white">
-          {styles.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
+        <FormSelect value={style} onValueChange={setStyle} options={styles.map(s => ({ value: s, label: s }))} />
       </div>
 
       {/* Format */}
@@ -229,26 +226,20 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit, initial
       {["video","film","serie","anime","cartoon","ad","music_clip","voice"].includes(type) && (
         <div>
           <Label className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Voix</Label>
-          <select value={voice} onChange={(e) => setVoice(e.target.value)} className="w-full h-11 rounded-xl bg-card border border-border px-3 text-sm text-white">
-            {voices.map(v => <option key={v.id} value={v.id}>{v.label}</option>)}
-          </select>
+          <FormSelect value={voice} onValueChange={setVoice} options={voices.map(v => ({ value: v.id, label: v.label }))} />
         </div>
       )}
 
       {/* Music */}
       <div>
         <Label className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Musique</Label>
-        <select value={music} onChange={(e) => setMusic(e.target.value)} className="w-full h-11 rounded-xl bg-card border border-border px-3 text-sm text-white">
-          {musics.map(m => <option key={m} value={m}>{m}</option>)}
-        </select>
+        <FormSelect value={music} onValueChange={setMusic} options={musics.map(m => ({ value: m, label: m }))} />
       </div>
 
       {/* Resolution */}
       <div>
         <Label className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Résolution</Label>
-        <select value={resolution} onChange={(e) => setResolution(e.target.value)} className="w-full h-11 rounded-xl bg-card border border-border px-3 text-sm text-white">
-          {resolutions.map(r => <option key={r} value={r}>{r}</option>)}
-        </select>
+        <FormSelect value={resolution} onValueChange={setResolution} options={resolutions.map(r => ({ value: r, label: r }))} />
       </div>
 
       {/* Ad-specific fields */}
@@ -257,9 +248,7 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit, initial
           <p className="text-sm font-semibold text-primary">Options Publicité</p>
           <div>
             <Label className="text-xs text-muted-foreground mb-1.5 block">Secteur</Label>
-            <select value={adSector} onChange={(e) => setAdSector(e.target.value)} className="w-full h-11 rounded-xl bg-background border border-border px-3 text-sm text-white">
-              {adSectors.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
-            </select>
+            <FormSelect value={adSector} onValueChange={setAdSector} options={adSectors.map(s => ({ value: s.id, label: s.label }))} className="bg-background" />
           </div>
           <div>
             <Label className="text-xs text-muted-foreground mb-1.5 block">Nom de la marque</Label>

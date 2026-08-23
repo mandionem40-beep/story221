@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { useOutletContext, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Upload, Users, Heart, Eye, Sparkles, Loader2, Edit, Save, X, LogOut } from "lucide-react";
+import { Upload, Users, Heart, Eye, Sparkles, Loader2, Edit, Save, X, LogOut, Trash2 } from "lucide-react";
 import DiamondIcon from "@/components/DiamondIcon";
 import { Image } from "@/components/ui/image";
 import { toast } from "@/components/ui/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import ReferralDashboard from "@/components/referral/ReferralDashboard";
 import NotificationPreferences from "@/components/NotificationPreferences";
 
@@ -18,6 +20,9 @@ export default function Profile() {
   const [avatarUrl, setAvatarUrl] = useState(currentUser?.avatar_url || "");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadStats();
@@ -86,6 +91,17 @@ export default function Profile() {
       toast({ title: "Erreur", description: "Impossible de mettre à jour.", variant: "destructive" });
     }
     setSaving(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      await base44.entities.User.delete(currentUser?.id);
+      await base44.auth.logout("/");
+    } catch (err) {
+      toast({ title: "Erreur", description: "Impossible de supprimer le compte. Contactez le support.", variant: "destructive" });
+      setDeleting(false);
+    }
   };
 
   const diamonds = currentUser?.diamonds ?? 0;
@@ -211,6 +227,46 @@ export default function Profile() {
         <LogOut className="w-4 h-4" />
         Déconnexion
       </button>
+
+      {/* Delete account */}
+      <button
+        onClick={() => { setDeleteDialogOpen(true); setDeleteConfirmText(""); }}
+        className="w-full mt-3 py-3 rounded-xl bg-transparent border border-destructive/30 text-destructive text-sm font-medium flex items-center justify-center gap-2 hover:bg-destructive/10 transition-colors"
+      >
+        <Trash2 className="w-4 h-4" />
+        Supprimer mon compte
+      </button>
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Supprimer définitivement le compte</DialogTitle>
+            <DialogDescription>
+              Cette action est irréversible. Toutes vos créations, diamants et données seront perdus. Pour confirmer, tapez <span className="font-bold text-destructive">SUPPRIMER</span> ci-dessous.
+            </DialogDescription>
+          </DialogHeader>
+          <input
+            value={deleteConfirmText}
+            onChange={(e) => setDeleteConfirmText(e.target.value)}
+            placeholder="SUPPRIMER"
+            className="w-full h-11 rounded-xl bg-card border border-border px-3 text-sm text-white"
+            disabled={deleting}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={deleting}>
+              Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              disabled={deleteConfirmText !== "SUPPRIMER" || deleting}
+            >
+              {deleting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Supprimer définitivement
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -142,31 +142,33 @@ export default function Layout() {
       </aside>
 
       {/* Mobile Top Bar */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-background/80 backdrop-blur-xl border-b border-border flex items-center justify-between px-4">
-        <Link to="/">
-          <Logo size="sm" />
-        </Link>
-        <div className="flex items-center gap-2">
-          <Link
-            to="/app/diamonds"
-            className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-card to-secondary border border-primary/30 hover:border-primary/60 transition-all duration-300 active:scale-95 group overflow-hidden">
-            
-            <span className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/25 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-            <DiamondIcon className="w-4 h-4 relative animate-pulse drop-shadow-[0_0_4px_rgba(255,0,51,0.8)]" />
-            <span className="text-sm font-bold text-white relative tabular-nums">{diamonds}</span>
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-primary animate-ping" />
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border pt-[env(safe-area-inset-top)]">
+        <div className="h-14 flex items-center justify-between px-4">
+          <Link to="/">
+            <Logo size="sm" />
           </Link>
-          <NotificationBell user={currentUser} variant="bare" />
+          <div className="flex items-center gap-2">
+            <Link
+              to="/app/diamonds"
+              className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-card to-secondary border border-primary/30 hover:border-primary/60 transition-all duration-300 active:scale-95 group overflow-hidden">
+              
+              <span className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/25 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+              <DiamondIcon className="w-4 h-4 relative animate-pulse drop-shadow-[0_0_4px_rgba(255,0,51,0.8)]" />
+              <span className="text-sm font-bold text-white relative tabular-nums">{diamonds}</span>
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-primary animate-ping" />
+            </Link>
+            <NotificationBell user={currentUser} variant="bare" />
           </div>
+        </div>
       </header>
 
       {/* Main Content */}
-      <main className="lg:ml-64 pt-14 lg:pt-0 pb-20 lg:pb-0 min-h-screen">
+      <main className="lg:ml-64 pt-[calc(3.5rem+env(safe-area-inset-top))] lg:pt-0 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0 min-h-screen">
         <Outlet context={{ currentUser, refreshUser }} />
       </main>
 
       {/* Mobile Bottom Nav — 4 main buttons only */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-t border-border">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-t border-border pb-[env(safe-area-inset-bottom)]">
         <div className="flex items-center justify-around h-16 px-2">
           {mobileNavItems.map((item) =>
           <Link
