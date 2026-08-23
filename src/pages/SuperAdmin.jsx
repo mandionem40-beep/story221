@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
-import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video, Share2, Mail, Cpu, Gift, Building2, MessageCircle, MousePointerClick, Zap, Wallet, Film, MapPin, Library } from "lucide-react";
+import { Users, Package, CreditCard, Clapperboard, BarChart3, ScrollText, Flag, Settings, ShieldAlert, Loader2, Trash2, CheckCircle, Plus, Save, Sparkles, TrendingUp, Video, Share2, Mail, Cpu, Brain, Gift, Building2, MessageCircle, MousePointerClick, Zap, Wallet, Film, MapPin, Library } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import AnalyticsTab from "@/components/admin/AnalyticsTab";
 import AdjustCreditsDialog from "@/components/admin/AdjustCreditsDialog";
@@ -20,6 +20,7 @@ import FeedConfigTab from "@/components/admin/FeedConfigTab";
 import PlacesTab from "@/components/admin/PlacesTab";
 import AiReferencesTab from "@/components/admin/AiReferencesTab";
 import MarketingAnalyticsTab from "@/components/admin/MarketingAnalyticsTab";
+import AIIntelligenceTab from "@/components/admin/AIIntelligenceTab";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: BarChart3 },
@@ -31,6 +32,7 @@ const tabs = [
   { id: "showcase", label: "Vitrine", icon: Video },
   { id: "reports", label: "Modération", icon: Flag },
   { id: "ai", label: "IA", icon: Cpu },
+  { id: "ai_intel", label: "Intelligence IA", icon: Brain },
   { id: "referral", label: "Parrainage", icon: Gift },
   { id: "logs", label: "Logs", icon: ScrollText },
   { id: "analytics", label: "Analytics", icon: TrendingUp },
@@ -674,6 +676,10 @@ export default function SuperAdmin() {
 
             {activeTab === "ai_refs" && (
               <AiReferencesTab />
+            )}
+
+            {activeTab === "ai_intel" && (
+              <AIIntelligenceTab />
             )}
 
             {/* Analytics tab */}

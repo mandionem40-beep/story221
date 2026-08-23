@@ -1,0 +1,110 @@
+{
+  "name": "FailurePattern",
+  "type": "object",
+  "properties": {
+    "error_type": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "character_continuity",
+        "decor_continuity",
+        "narrative",
+        "video_continuity",
+        "audio",
+        "generation_error",
+        "prompt_quality",
+        "other"
+      ],
+      "default": "other"
+    },
+    "step": {
+      "type": "string",
+      "description": "Pipeline step where the failure tends to occur"
+    },
+    "model": {
+      "type": "string"
+    },
+    "lesson": {
+      "type": "string",
+      "description": "Short instruction Claude must follow to avoid repeating this failure"
+    },
+    "description": {
+      "type": "string"
+    },
+    "occurrence_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "display_order": {
+      "type": "integer",
+      "default": 0
+    }
+  },
+  "required": [
+    "lesson"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

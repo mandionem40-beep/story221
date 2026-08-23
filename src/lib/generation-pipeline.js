@@ -1,15 +1,33 @@
 import { base44 } from "@/api/base44Client";
+import { assembleMemoryContext, enrichPromptWithMemory } from "@/lib/creative-memory";
 
 // Frontend pipeline - calls the backend generate-media function
 // Real-time progress is handled via Generation entity subscription (see Create.jsx)
+// Creative memory (project continuity + user preferences + known failures) is
+// injected into the prompt on the client, so Claude benefits from accumulated
+// learning without any backend function change.
 
 export async function runGenerationPipeline(config, callbacks) {
-  const { prompt, type, options, generationId, mode, previousGeneration } = config;
+  const { prompt, type, options, generationId, mode, previousGeneration, projectKey } = config;
   const { onComplete, onError } = callbacks;
 
   try {
+    // Enrich the prompt with creative memory (additive — never blocks generation)
+    let enrichedPrompt = prompt;
+    try {
+      const memoryContext = await assembleMemoryContext({
+        projectKey,
+        type,
+        style: options?.style,
+        language: options?.language,
+      });
+      enrichedPrompt = enrichPromptWithMemory(prompt, memoryContext);
+    } catch (memErr) {
+      console.warn("Creative memory assembly failed (non-blocking):", memErr);
+    }
+
     const response = await base44.functions.invoke("generate-media", {
-      prompt,
+      prompt: enrichedPrompt,
       type,
       options,
       generationId,

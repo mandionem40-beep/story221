@@ -1,0 +1,79 @@
+{
+  "name": "CorrectionRecord",
+  "type": "object",
+  "properties": {
+    "generation_id": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "enum": [
+        "character",
+        "face",
+        "realism",
+        "voice",
+        "decor",
+        "style",
+        "duration",
+        "dialogue",
+        "continuity",
+        "other"
+      ],
+      "default": "other"
+    },
+    "detail": {
+      "type": "string",
+      "description": "What the user wanted changed and why"
+    },
+    "from_state": {
+      "type": "string"
+    },
+    "to_state": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "generation_id",
+    "reason"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "name": "GenerationSatisfaction",
+  "type": "object",
+  "properties": {
+    "generation_id": {
+      "type": "string"
+    },
+    "rating": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "improvement_tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Personnage",
+          "Sc\u00e9nario",
+          "R\u00e9alisme",
+          "Voix",
+          "Animation",
+          "Cam\u00e9ra",
+          "D\u00e9cor",
+          "Dialogue",
+          "Coh\u00e9rence",
+          "Autre"
+        ]
+      },
+      "default": []
+    },
+    "comment": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "generation_id",
+    "rating"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
