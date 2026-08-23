@@ -47,12 +47,17 @@
 
   html {
     scroll-behavior: smooth;
-    overscroll-behavior-y: none;
+    overscroll-behavior: none;
   }
 
   body {
     @apply bg-background text-foreground font-body antialiased;
-    overscroll-behavior-y: none;
+    overscroll-behavior: none;
+  }
+
+  /* Layout scrolling wrappers — prevent overscroll rubber-banding */
+  main {
+    overscroll-behavior: none;
   }
 
   /* Disable text selection on interactive UI elements (buttons, tabs, nav, cards) */

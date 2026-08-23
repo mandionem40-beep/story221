@@ -174,6 +174,12 @@ export default function Layout() {
           <Link
             key={item.path}
             to={item.path}
+            onClick={() => {
+              if (isActive(item.path)) {
+                navigate(item.path);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+            }}
             className={cn(
               "flex flex-col items-center justify-center gap-0.5 flex-1 h-full rounded-lg transition-colors",
               isActive(item.path) ? "text-primary" : "text-muted-foreground"

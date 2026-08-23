@@ -7,6 +7,7 @@ import { Image } from "@/components/ui/image";
 import { toast } from "@/components/ui/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import FormSelect from "@/components/create/FormSelect";
 import ReferralDashboard from "@/components/referral/ReferralDashboard";
 import NotificationPreferences from "@/components/NotificationPreferences";
 
@@ -173,9 +174,7 @@ export default function Profile() {
           </div>
           <div>
             <label className="text-xs text-muted-foreground mb-1.5 block">Pays</label>
-            <select value={country} onChange={(e) => setCountry(e.target.value)} className="w-full h-11 rounded-xl bg-card border border-border px-3 text-sm text-white">
-              {["Sénégal","Côte d'Ivoire","Mali","Burkina Faso","Guinée","Bénin","Togo","Niger","Cameroun","Congo","France","Autre"].map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
+            <FormSelect value={country} onValueChange={setCountry} options={["Sénégal","Côte d'Ivoire","Mali","Burkina Faso","Guinée","Bénin","Togo","Niger","Cameroun","Congo","France","Autre"].map(c => ({ value: c, label: c }))} />
           </div>
         </div>
       )}
