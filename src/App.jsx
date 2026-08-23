@@ -28,6 +28,7 @@ import Profile from '@/pages/Profile';
 import Messages from '@/pages/Messages';
 import SuperAdmin from '@/pages/SuperAdmin';
 import VideoEditor from '@/pages/VideoEditor';
+import MontageTemplates from '@/pages/MontageTemplates';
 import DemoGenerator from '@/pages/DemoGenerator';
 import Voices from '@/pages/Voices';
 import PixelTracker from '@/components/PixelTracker';
@@ -77,6 +78,7 @@ const AuthenticatedApp = () => {
           <Route path="/app/profile" element={<Profile />} />
           <Route path="/app/messages" element={<Messages />} />
           <Route path="/app/editor" element={<VideoEditor />} />
+          <Route path="/app/templates" element={<MontageTemplates />} />
           <Route path="/app/demo" element={<DemoGenerator />} />
           <Route path="/app/voices" element={<Voices />} />
         </Route>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext, useSearchParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Upload, Scissors, Send, Loader2, ChevronLeft, Wand2, Play, Save, FolderOpen, Trash2, Clock } from "lucide-react";
 import DiamondIcon from "@/components/DiamondIcon";
@@ -32,12 +32,24 @@ export default function VideoEditor() {
   const [drafts, setDrafts] = useState([]);
   const [savingDraft, setSavingDraft] = useState(false);
   const [showDrafts, setShowDrafts] = useState(false);
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    base44.entities.MontagePreset.filter({ active: true }, "display_order", 10)
+    base44.entities.MontagePreset.filter({ active: true }, "display_order", 50)
       .then(dbPresets => { if (dbPresets.length > 0) setPresets(dbPresets); })
       .catch(() => {});
   }, []);
+
+  // One-click launch from template library: pre-select preset + pre-fill prompt
+  useEffect(() => {
+    const presetId = searchParams.get("preset_id");
+    if (!presetId || presets.length === 0) return;
+    const preset = presets.find(p => p.id === presetId);
+    if (!preset) return;
+    setSelectedPreset(preset);
+    if (preset.technical_description) setPrompt(preset.technical_description);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, presets]);
 
   useEffect(() => {
     if (!currentUser?.id) return;
