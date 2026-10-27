@@ -45,7 +45,12 @@ function releaseSlot() {
  * - IntersectionObserver (300px margin) → load + play when near viewport
  * - Concurrent load limiter (max 3) → no bandwidth contention
  * - `onCanPlay` fade-in → video appears only when enough data is buffered
- * - `onWaiting` → poster reappears during buffering stalls (no freeze)
+ * - Once visible, the video NEVER hides again — at the loop point or during
+ *   a brief buffering stall the last frame simply holds, so the animation
+ *   reads as perpetual with zero "reload" flash
+ * - While the very first frame is still unavailable (no poster yet), an
+ *   animated gradient placeholder keeps the card in motion from the
+ *   moment the app opens
  */
 export default function GalleryVideo({ src, poster, className, onReady, ...props }) {
   const videoRef = useRef(null);
@@ -143,11 +148,6 @@ export default function GalleryVideo({ src, poster, className, onReady, ...props
     onReady?.();
   }, [onReady, src]);
 
-  // Poster reappears during buffering stalls — no frozen frame
-  const handleWaiting = useCallback(() => {
-    setShowVideo(false);
-  }, []);
-
   if (!src) return null;
 
   return (
@@ -164,6 +164,9 @@ export default function GalleryVideo({ src, poster, className, onReady, ...props
           )}
         />
       )}
+      {!effectivePoster && (
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-black to-primary/10 animate-pulse" />
+      )}
       <video
         ref={videoRef}
         src={src}
@@ -174,7 +177,6 @@ export default function GalleryVideo({ src, poster, className, onReady, ...props
         disableRemotePlayback
         onCanPlay={handleCanPlay}
         onPlaying={handleCanPlay}
-        onWaiting={handleWaiting}
         className={cn(
           "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
           showVideo ? "opacity-100" : "opacity-0",
