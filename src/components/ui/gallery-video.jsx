@@ -51,6 +51,7 @@ export default function GalleryVideo({ src, poster, className, onReady, ...props
   const videoRef = useRef(null);
   const [visible, setVisible] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  const [slotReady, setSlotReady] = useState(false);
   // Real frame from video (cached in localStorage) — falls back to `poster` prop
   const [realThumbnail, setRealThumbnail] = useState(() => getCachedThumbnail(src));
   const slotHeldRef = useRef(false);
@@ -88,6 +89,7 @@ export default function GalleryVideo({ src, poster, className, onReady, ...props
     // Seen videos don't need the semaphore — they load from HTTP cache
     if (seenBefore) {
       slotHeldRef.current = true;
+      setSlotReady(true);
       const v = videoRef.current;
       if (v) {
         v.preload = "auto";
@@ -102,6 +104,7 @@ export default function GalleryVideo({ src, poster, className, onReady, ...props
         return;
       }
       slotHeldRef.current = true;
+      setSlotReady(true);
       const v = videoRef.current;
       if (v) {
         v.preload = "auto";
@@ -132,7 +135,7 @@ export default function GalleryVideo({ src, poster, className, onReady, ...props
     } else {
       v.pause();
     }
-  }, [visible, src]);
+  }, [visible, src, slotReady]);
 
   const handleCanPlay = useCallback(() => {
     setShowVideo(true);

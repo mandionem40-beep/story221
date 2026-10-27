@@ -108,6 +108,15 @@
     animation: ken-burns 8s ease-in-out infinite alternate;
   }
 
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+
   .gradient-text-red {
     background: linear-gradient(135deg, #ff0033 0%, #ff4466 100%);
     -webkit-background-clip: text;
