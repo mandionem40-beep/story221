@@ -20,8 +20,8 @@ export default function HeroNoraVideo() {
           loop
           playsInline
           preload="auto"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
+          className="absolute inset-0 w-full h-full object-cover" />
+        
 
         <span className="absolute top-3 left-3 text-[10px] font-semibold text-white bg-black/60 backdrop-blur rounded-full px-2.5 py-1 border border-primary/30">
           Publicité · Bio NORA
@@ -31,8 +31,8 @@ export default function HeroNoraVideo() {
         <button
           onClick={() => setOpen(true)}
           aria-label="Lire la publicité Bio NORA avec le son"
-          className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-primary/95 text-white flex items-center justify-center shadow-lg shadow-primary/50 transition-transform duration-300 hover:scale-110"
-        >
+          className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-primary/95 text-white flex items-center justify-center shadow-lg shadow-primary/50 transition-transform duration-300 hover:scale-110 opacity-0">
+          
           <Play className="w-6 h-6 ml-0.5" />
         </button>
 
@@ -49,6 +49,6 @@ export default function HeroNoraVideo() {
           <video src={NORA_AD_URL} controls autoPlay playsInline className="w-full rounded-xl" />
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>);
+
 }
