@@ -86,7 +86,7 @@ export const characterCategories = [
     id: "creature", label: "Créature", emoji: "🐉", desc: "Invente des créatures fantastiques et mythiques.",
     body_template: "Créature fantastique originale style Story221. Le style de rendu 3D reste constant — seul le type de créature change.",
     image: "https://images.unsplash.com/photo-1559666126-84f389727b9a?w=400&q=80",
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/9b2f85645_Crature.mp4",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/58250e4ae_boukiporteparoledessenegalais.mp4",
     appearances: [
       { emoji: "🐉", label: "Dragon" }, { emoji: "🦄", label: "Licorne" }, { emoji: "👾", label: "Monstre" },
       { emoji: "👽", label: "Alien" }, { emoji: "👻", label: "Fantôme" }, { emoji: "🧚", label: "Fée" },
