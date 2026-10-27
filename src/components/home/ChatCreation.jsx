@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Send, Image as ImageIcon, Video as VideoIcon, ChevronDown, Upload, X, Loader2, Plus, SlidersHorizontal, Volume2, Square, Save, FolderOpen, Trash2, Clock } from "lucide-react";
+import { Send, Image as ImageIcon, Video as VideoIcon, ChevronDown, Upload, X, Loader2, Plus, SlidersHorizontal, Volume2, Square, Save, FolderOpen, Trash2, Clock, Zap } from "lucide-react";
 import DiamondIcon from "@/components/DiamondIcon";
 import { base44 } from "@/api/base44Client";
 import { toast } from "@/components/ui/use-toast";
@@ -32,6 +32,7 @@ export default function ChatCreation({ selectedCategory, currentUser, onSelectCa
   const [drafts, setDrafts] = useState([]);
   const [savingDraft, setSavingDraft] = useState(false);
   const [showDrafts, setShowDrafts] = useState(false);
+  const [quickLoading, setQuickLoading] = useState(false);
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const uploadMenuRef = useRef(null);
@@ -224,6 +225,45 @@ export default function ChatCreation({ selectedCategory, currentUser, onSelectCa
   const removeImage = (idx) => setRefImages(prev => prev.filter((_, i) => i !== idx));
   const removeVideo = () => setRefVideo(null);
 
+  const handleQuickGenerate = async () => {
+    if (!prompt.trim() || quickLoading) return;
+    setQuickLoading(true);
+    try {
+      // Styles préférés mémorisés dans le profil créatif de l'utilisateur
+      let prefs = {};
+      try {
+        const profiles = await base44.entities.UserCreativeProfile.filter(
+          { created_by_id: currentUser.id },
+          "-updated_date",
+          1
+        );
+        if (profiles?.[0]) prefs = profiles[0];
+      } catch { /* pas de profil → valeurs par défaut */ }
+
+      const quickStyle = prefs.preferred_styles?.[0] || selectedCategory?.label || "Cinématique";
+      const quickLang = prefs.preferred_languages?.[0] || language || "Français";
+      const validFormats = ["vertical", "horizontal", "square"];
+      const quickFormat = validFormats.includes(prefs.preferred_formats?.[0])
+        ? prefs.preferred_formats[0]
+        : mediaType === "image" ? "square" : "vertical";
+
+      const params = new URLSearchParams();
+      params.set("type", mediaType);
+      params.set("prompt", prompt.trim());
+      params.set("style", quickStyle);
+      params.set("language", quickLang);
+      params.set("format", quickFormat);
+      params.set("voice", voice);
+      if (mediaType === "video") params.set("duration", duration.minutes);
+      if (refImages.length > 0) params.set("ref_images", refImages.join(","));
+      params.set("auto", "1");
+      navigate(`/app/create?${params.toString()}`);
+    } catch {
+      toast({ title: "Erreur", description: "Impossible de lancer la génération rapide.", variant: "destructive" });
+    }
+    setQuickLoading(false);
+  };
+
   const handleGenerate = () => {
     if (!prompt.trim() || !selectedCategory) return;
     const fullPrompt = buildChatPrompt(selectedCategory, prompt.trim(), {
@@ -350,6 +390,22 @@ export default function ChatCreation({ selectedCategory, currentUser, onSelectCa
           )}
         </div>
       )}
+
+      {/* Génération rapide — styles préférés appliqués automatiquement */}
+      <button
+        onClick={handleQuickGenerate}
+        disabled={!prompt.trim() || quickLoading}
+        className="w-full mt-3 h-9 rounded-lg border border-primary/40 bg-primary/10 text-primary text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {quickLoading ? (
+          <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
+        ) : (
+          <Zap className="w-3.5 h-3.5 flex-shrink-0" />
+        )}
+        <span className="truncate">
+          {quickLoading ? "Application de tes styles préférés…" : "Génération rapide — mes styles préférés"}
+        </span>
+      </button>
 
       {/* Bottom bar: upload + settings + generate (3 zones) */}
       <div className="flex items-center gap-1.5 sm:gap-2 mt-3">

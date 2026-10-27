@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { toast } from "@/components/ui/use-toast";
-import { getContentType, getPipelineSteps, calculateCost } from "@/lib/generation-utils";
+import { getContentType, getPipelineSteps, calculateCost, styles, musics } from "@/lib/generation-utils";
 import { runGenerationPipeline } from "@/lib/generation-pipeline";
 import CreateForm from "@/components/create/CreateForm";
 import PipelineProgress from "@/components/create/PipelineProgress";
@@ -151,6 +151,30 @@ export default function Create() {
     } catch { /* ignore */ }
   };
 
+  // Génération rapide : lancée automatiquement depuis l'accueil (auto=1)
+  const autoStart = urlParams.get("auto") === "1" && !!initialPrompt && !continueId;
+  const [autoLaunched, setAutoLaunched] = useState(false);
+  useEffect(() => {
+    if (!autoStart || autoLaunched || !currentUser) return;
+    setAutoLaunched(true);
+    handleSubmit({
+      prompt: initialPrompt,
+      type,
+      options: {
+        duration: initialDuration,
+        style: urlParams.get("style") || styles[0],
+        format: urlParams.get("format") || "vertical",
+        voice: urlParams.get("voice") || "river",
+        music: urlParams.get("music") || musics[0],
+        resolution: urlParams.get("resolution") || "720p",
+        language: urlParams.get("language") || "Français",
+        engine: urlParams.get("engine") || "gemini",
+        reference_images: (urlParams.get("ref_images") || "").split(",").filter(Boolean),
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoStart, autoLaunched, currentUser?.id]);
+
   const handleLaunchContinue = async () => {
     if (!continueGen) return;
     const genType = continueGen.type;
@@ -246,7 +270,14 @@ export default function Create() {
         </div>
       )}
 
-      {phase === "form" && !continueId && (
+      {phase === "form" && !continueId && autoLaunched && (
+        <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <Sparkles className="w-6 h-6 text-primary animate-pulse" />
+          <p className="text-sm text-muted-foreground">Lancement de la génération rapide…</p>
+        </div>
+      )}
+
+      {phase === "form" && !continueId && !autoLaunched && (
         <CreateForm type={type} onTypeChange={handleTypeChange} user={currentUser} onSubmit={handleSubmit} initialPrompt={initialPrompt} initialDuration={initialDuration} initialStyle={initialStyle} initialLanguage={initialLanguage} />
       )}
 
