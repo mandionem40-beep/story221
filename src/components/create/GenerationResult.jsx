@@ -3,6 +3,7 @@ import { Download, Share2, Clapperboard, Loader2, Lock, Megaphone, Clapperboard 
 import { useState } from "react";
 import { Image } from "@/components/ui/image";
 import ShareModal from "@/components/share/ShareModal";
+import CreativeFeedbackWidget from "@/components/creative/CreativeFeedbackWidget";
 import QuickShareButtons from "@/components/share/QuickShareButtons";
 
 const SUBTITLE_COLORS = [
@@ -338,6 +339,9 @@ export default function GenerationResult({ generation, result, onPublish, onNew,
           </div>
         </div>
       )}
+
+      {/* Creative memory feedback */}
+      <CreativeFeedbackWidget generationId={generation?.id} />
 
       {showShare && (
         <ShareModal

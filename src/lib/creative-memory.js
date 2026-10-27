@@ -154,3 +154,38 @@ export async function upsertProjectMemory(projectKey, patch) {
   }
   return base44.entities.ProjectMemory.create({ project_key: projectKey, ...patch });
 }
+
+/**
+ * Fold a new rating into the user's creative profile (rolling average, totals,
+ * and low-rating improvement tags reused as "corrections to avoid").
+ */
+export async function updateProfileAfterFeedback({ rating, improvementTags = [] } = {}) {
+  try {
+    const me = await base44.auth.me();
+    if (!me || !me.id) return null;
+    const existing = await base44.entities.UserCreativeProfile.filter(
+      { created_by_id: me.id },
+      "-updated_date",
+      1
+    );
+    if (existing && existing[0]) {
+      const p = existing[0];
+      const total = (p.total_ratings || 0) + 1;
+      const avg = (((p.avg_rating || 0) * (p.total_ratings || 0)) + rating) / total;
+      const patch = { avg_rating: avg, total_ratings: total };
+      if (rating <= 2 && improvementTags.length) {
+        const seen = new Set(p.recurring_corrections || []);
+        improvementTags.forEach((t) => seen.add(t));
+        patch.recurring_corrections = Array.from(seen).slice(-10);
+      }
+      return base44.entities.UserCreativeProfile.update(p.id, patch);
+    }
+    return base44.entities.UserCreativeProfile.create({
+      avg_rating: rating,
+      total_ratings: 1,
+      recurring_corrections: rating <= 2 ? improvementTags : [],
+    });
+  } catch (e) {
+    return null; /* non-blocking */
+  }
+}

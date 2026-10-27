@@ -2,6 +2,7 @@ import { useState } from "react";
 import { RotateCcw, Bookmark, BookmarkCheck, Film, Share2, Layers } from "lucide-react";
 import { Image } from "@/components/ui/image";
 import { toast } from "@/components/ui/use-toast";
+import CreativeFeedbackWidget from "@/components/creative/CreativeFeedbackWidget";
 
 export default function QuickCreateResult({ generation, result, character, onPublish, onNew, onSaveCharacter, onEpisode2 }) {
   const [published, setPublished] = useState(generation?.is_published);
@@ -75,6 +76,11 @@ export default function QuickCreateResult({ generation, result, character, onPub
         >
           <RotateCcw className="w-4 h-4" /> Recommencer
         </button>
+      </div>
+
+      {/* Creative memory feedback */}
+      <div className="w-full max-w-sm mt-4">
+        <CreativeFeedbackWidget generationId={generation?.id} />
       </div>
     </div>
   );
