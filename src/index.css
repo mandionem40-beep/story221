@@ -117,6 +117,44 @@
     animation: float 4s ease-in-out infinite;
   }
 
+  @keyframes wave {
+    0%, 100% { transform: scaleY(0.35); }
+    50% { transform: scaleY(1); }
+  }
+
+  .animate-wave {
+    animation: wave 1.2s ease-in-out infinite;
+    transform-origin: center;
+  }
+
+  @keyframes spin-slow {
+    to { transform: rotate(360deg); }
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 14s linear infinite;
+  }
+
+  @keyframes subtitle-bar {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+
+  .animate-subtitle-bar {
+    animation: subtitle-bar 2.4s linear infinite;
+    transform-origin: left;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-float,
+    .animate-ken-burns,
+    .animate-wave,
+    .animate-spin-slow,
+    .animate-subtitle-bar {
+      animation: none;
+    }
+  }
+
   .gradient-text-red {
     background: linear-gradient(135deg, #ff0033 0%, #ff4466 100%);
     -webkit-background-clip: text;

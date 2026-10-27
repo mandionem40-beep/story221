@@ -1,17 +1,16 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Play, Gift, Zap, Diamond, Clapperboard } from "lucide-react";
-import HeroDemo from "@/components/landing/HeroDemo";
-import HeroChat from "@/components/landing/HeroChat";
-
-const badges = [
-{ icon: Gift, label: "1 vidéo offerte" },
-{ icon: Zap, label: "Création en quelques minutes" },
-{ icon: Diamond, label: "Paiement par crédits" },
-{ icon: Clapperboard, label: "Qualité cinéma" }];
-
+import { ArrowRight, Play, Sparkles } from "lucide-react";
+import HeroNoraStage from "@/components/landing/hero/HeroNoraStage";
 
 export default function Hero() {
+  const reduce = useReducedMotion();
+  const enter = (delay) => ({
+    initial: reduce ? false : { opacity: 0, y: 22 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.6, delay, ease: "easeOut" },
+  });
+
   return (
     <section id="hero" className="relative min-h-screen flex items-center pt-24 pb-16 overflow-hidden">
       {/* Background glow */}
@@ -20,119 +19,64 @@ export default function Hero() {
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left: Text */}
+          {/* Left: message */}
           <div className="text-center lg:text-left">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary border border-border mb-6">
-              
+              {...enter(0)}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary border border-primary/30 mb-6"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs sm:text-sm text-white font-medium">Création vidéo IA</span>
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-xs sm:text-sm text-muted-foreground">Le premier studio IA social d'Afrique</span>
             </motion.div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.2]">
-              {"Transformez vos idées en".split(" ").map((word, i) => (
-                <motion.span
-                  key={`a-${i}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.1 + i * 0.12, ease: "easeOut" }}
-                  className="inline-block mr-[0.3em]"
-                >
-                  {word}
-                </motion.span>
-              ))}
-              <motion.span
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
-                className="inline-block gradient-text-red mr-[0.3em]"
-              >
-                films
-              </motion.span>
-              {"grâce à l'IA.".split(" ").map((word, i) => (
-                <motion.span
-                  key={`b-${i}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.7 + i * 0.12, ease: "easeOut" }}
-                  className="inline-block mr-[0.3em]"
-                >
-                  {word}
-                </motion.span>
-              ))}
-            </h1>
+            <motion.h1
+              {...enter(0.12)}
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.15]"
+            >
+              Transformez vos idées en{" "}
+              <span className="gradient-text-red">vidéos percutantes</span> avec l'IA
+            </motion.h1>
 
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="mt-6 text-base sm:text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0">
-              
-              Créez des vidéos, films, séries, animations, images, voix et histoires simplement à partir d'un prompt.
+              {...enter(0.24)}
+              className="mt-6 text-base sm:text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0"
+            >
+              Créez des vidéos, films, séries, animations, images, voix et histoires
+              simplement à partir d'un prompt. Qualité cinéma, en quelques minutes.
             </motion.p>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              
+              {...enter(0.36)}
+              className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
+            >
               <Link
                 to="/register"
-                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-primary text-white font-semibold text-base hover:bg-primary/90 transition-all glow-red hover:scale-[1.02]">
+                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-primary text-white font-semibold text-base hover:bg-primary/90 transition-all glow-red hover:scale-[1.02]"
+              >
                 Commencer à créer
                 <ArrowRight className="w-5 h-5" />
               </Link>
               <a
                 href="#reels"
-                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-secondary border border-border text-white font-semibold text-base hover:bg-secondary/80 transition-all">
-                
+                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-secondary border border-border text-white font-semibold text-base hover:bg-secondary/80 transition-all"
+              >
                 <Play className="w-5 h-5" />
                 Voir les créations
               </a>
             </motion.div>
-
-            {/* Badges */}
-            <motion.div
-              className="mt-8 flex flex-wrap gap-2.5 justify-center lg:justify-start"
-            >
-              {badges.map((badge, i) =>
-                <motion.div
-                  key={badge.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.4 + i * 0.1 }}
-                  whileHover={{ y: -3, scale: 1.04 }}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-secondary/60 border border-border text-xs sm:text-sm text-muted-foreground hover:border-primary/40 hover:text-white hover:bg-secondary transition-colors cursor-default"
-                >
-                  <motion.span
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
-                    className="inline-flex"
-                  >
-                    <badge.icon className="w-3.5 h-3.5 text-primary" />
-                  </motion.span>
-                  {badge.label}
-                </motion.div>
-              )}
-            </motion.div>
-
           </div>
 
-          {/* Right: Interactive demo + looping video vignettes */}
+          {/* Right: publicité Bio NORA + cartes flottantes */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={reduce ? false : { opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="relative">
-            <HeroChat />
-            <HeroDemo />
+            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+          >
+            <HeroNoraStage />
           </motion.div>
         </div>
       </div>
-    </section>);
-
+    </section>
+  );
 }
