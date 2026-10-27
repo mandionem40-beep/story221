@@ -28,7 +28,7 @@ export const characterCategories = [
     id: "animal", label: "Animaux", emoji: "🐾", desc: "Personnages animaux animés style 3D.",
     body_template: "Personnage animal stylisé 3D Story221. Le style de rendu (textures, proportions cartoon 3D, qualité cinématique) reste constant — seul l'espèce animale change.",
     image: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/656a1b063_image.png",
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/682350670_Animaux.mp4",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/b967a8660_mp4publicitairedelaformationbouki.mp4",
     appearances: [
       { emoji: "🦁", label: "Lion" }, { emoji: "🐘", label: "Éléphant" }, { emoji: "🐒", label: "Singe" },
       { emoji: "🐱", label: "Chat" }, { emoji: "🐶", label: "Chien" }, { emoji: "🦅", label: "Aigle" },
