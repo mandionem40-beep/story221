@@ -30,6 +30,7 @@ export async function runGenerationPipeline(config, callbacks) {
       prompt: enrichedPrompt,
       type,
       options,
+      engine: options?.engine || "gemini",
       generationId,
       mode: mode || "create",
       previousGeneration: previousGeneration || null,

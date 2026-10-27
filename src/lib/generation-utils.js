@@ -19,11 +19,23 @@ export const contentTypes = [
   { id: "influencer", label: "Influenceur IA", icon: UserCircle, costType: "per_minute", baseCost: 12, color: "from-fuchsia-500/20 to-pink-500/20" },
 ];
 
-export function calculateCost(typeId, duration = 1) {
+// Moteurs de génération vidéo disponibles pour le client (le coût dépend du moteur choisi)
+export const videoEngines = [
+  { id: "gemini", label: "Gemini", desc: "Moteur standard — rapide et stable", multiplier: 1 },
+  { id: "higgsfield", label: "Higgsfield", desc: "Moteur premium — rendu cinématique avancé", multiplier: 2 },
+];
+
+export function isVideoType(typeId) {
+  return ["video", "film", "serie", "anime", "cartoon", "ad", "music_clip", "influencer"].includes(typeId);
+}
+
+export function calculateCost(typeId, duration = 1, engineId = "gemini") {
   const config = contentTypes.find((t) => t.id === typeId);
   if (!config) return 0;
-  if (config.costType === "per_minute") return config.baseCost * duration;
-  return config.baseCost;
+  let cost = config.costType === "per_minute" ? config.baseCost * duration : config.baseCost;
+  const engine = videoEngines.find((e) => e.id === engineId);
+  if (isVideoType(typeId) && engine) cost = Math.round(cost * engine.multiplier);
+  return cost;
 }
 
 export function getContentType(typeId) {

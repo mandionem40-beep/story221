@@ -5,7 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Upload, Loader2, AlertCircle, X } from "lucide-react";
 import DiamondIcon from "@/components/DiamondIcon";
-import { styles, formats, voices, musics, resolutions, languages, adSectors, calculateCost, getContentType } from "@/lib/generation-utils";
+import { styles, formats, voices, musics, resolutions, languages, adSectors, calculateCost, getContentType, videoEngines, isVideoType } from "@/lib/generation-utils";
 import { base44 } from "@/api/base44Client";
 import { toast } from "@/components/ui/use-toast";
 import FormSelect from "@/components/create/FormSelect";
@@ -19,6 +19,7 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit, initial
   const [music, setMusic] = useState(musics[0]);
   const [resolution, setResolution] = useState("720p");
   const [language, setLanguage] = useState(initialLanguage || "Français");
+  const [engine, setEngine] = useState(videoEngines[0].id);
   const [adSector, setAdSector] = useState(adSectors[0].id);
   const [adBrandName, setAdBrandName] = useState("");
   const [adMessage, setAdMessage] = useState("");
@@ -39,7 +40,7 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit, initial
   const [submitting, setSubmitting] = useState(false);
 
   const config = getContentType(type);
-  const cost = calculateCost(type, duration);
+  const cost = calculateCost(type, duration, engine);
   const diamonds = user?.diamonds ?? 0;
   const canAfford = diamonds >= cost;
 
@@ -78,7 +79,7 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit, initial
         prompt: prompt.trim(),
         type,
         options: {
-          duration, style, format, voice, music, resolution, language,
+          duration, style, format, voice, music, resolution, language, engine,
           adSector, adBrandName, adMessage, adLogoUrl, adColors, adPrivateUse,
           reference_images: referenceImages,
         },
@@ -104,6 +105,31 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit, initial
           })}
         />
       </div>
+
+      {/* Video engine */}
+      {isVideoType(type) && (
+        <div>
+          <Label className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Moteur de génération vidéo</Label>
+          <div className="grid grid-cols-2 gap-2">
+            {videoEngines.map((e) => (
+              <button
+                key={e.id}
+                type="button"
+                onClick={() => setEngine(e.id)}
+                className={`p-3 rounded-xl border text-left transition-colors ${
+                  engine === e.id ? "bg-primary/10 border-primary/40" : "bg-card border-border"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-white">{e.label}</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-primary font-semibold">×{e.multiplier}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">{e.desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Prompt */}
       <div>

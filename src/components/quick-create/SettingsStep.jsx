@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight, Play, Volume2 } from "lucide-react";
 import { quickDurations, quickVoices, quickLanguages, quickMusics, quickFormats } from "@/lib/quick-create-data";
+import { videoEngines } from "@/lib/generation-utils";
 import DiamondIcon from "@/components/DiamondIcon";
 
 export default function SettingsStep({ settings, onChange, onNext, onBack, diamonds }) {
@@ -44,6 +45,29 @@ export default function SettingsStep({ settings, onChange, onNext, onBack, diamo
               <span className="flex items-center gap-0.5 text-[10px] text-primary">
                 <DiamondIcon className="w-3 h-3" />{d.cost}
               </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Video engine */}
+      <div className="mb-6">
+        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Moteur de génération vidéo</label>
+        <div className="grid grid-cols-2 gap-2">
+          {videoEngines.map((e) => (
+            <button
+              key={e.id}
+              type="button"
+              onClick={() => update({ engine: e.id })}
+              className={`p-3 rounded-xl border text-left transition-all ${
+                (settings.engine || "gemini") === e.id ? "bg-primary/10 border-primary/40" : "bg-card border-border"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-white">{e.label}</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-primary font-semibold">×{e.multiplier}</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">{e.desc}</p>
             </button>
           ))}
         </div>

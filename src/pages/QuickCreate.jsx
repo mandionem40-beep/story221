@@ -3,7 +3,7 @@ import { useNavigate, useOutletContext, useSearchParams } from "react-router-dom
 import { base44 } from "@/api/base44Client";
 import { toast } from "@/components/ui/use-toast";
 import { runGenerationPipeline } from "@/lib/generation-pipeline";
-import { getPipelineSteps } from "@/lib/generation-utils";
+import { getPipelineSteps, videoEngines } from "@/lib/generation-utils";
 import {
   characterCategories, quickDurations, quickVoices, quickMusics, quickFormats,
   quickLanguages, defaultScenarios, randomizeCharacter, pickRandomScenario, buildPrompt,
@@ -28,7 +28,7 @@ export default function QuickCreate() {
   const [character, setCharacter] = useState({ category: initialCategory, appearance: null, color: null, visualStyle: null, traits: [], name: "" });
   const [story, setStory] = useState({ scenario: null, secondCharacter: null, detail: "" });
   const [settings, setSettings] = useState({
-    duration: quickDurations[1], voice: "river", language: "Français", music: "Joyeuse", format: "vertical",
+    duration: quickDurations[1], voice: "river", language: "Français", music: "Joyeuse", format: "vertical", engine: "gemini",
   });
   const [scenarios, setScenarios] = useState([]);
   const [savedCharacters, setSavedCharacters] = useState([]);
@@ -66,7 +66,8 @@ export default function QuickCreate() {
     return unsubscribe;
   }, [generation, phase]);
 
-  const cost = settings.duration.cost;
+  const engineMultiplier = videoEngines.find((e) => e.id === settings.engine)?.multiplier || 1;
+  const cost = Math.round(settings.duration.cost * engineMultiplier);
 
   const handleSurprise = () => {
     const rand = randomizeCharacter();
@@ -98,6 +99,7 @@ export default function QuickCreate() {
       resolution: "720p",
       status: "processing",
       pipeline_step: "script",
+      provider: settings.engine || "gemini",
       reference_images: [],
     });
     setGeneration(gen);
@@ -106,7 +108,7 @@ export default function QuickCreate() {
     setPipelineError(null);
 
     await runGenerationPipeline(
-      { prompt, type: "video", options: { duration: settings.duration.minutes, language: settings.language, style: character.visualStyle?.label, format: settings.format, voice: settings.voice, music: settings.music, resolution: "720p" }, generationId: gen.id },
+      { prompt, type: "video", options: { duration: settings.duration.minutes, language: settings.language, style: character.visualStyle?.label, format: settings.format, voice: settings.voice, music: settings.music, resolution: "720p", engine: settings.engine || "gemini" }, generationId: gen.id },
       {
         onComplete: (res) => { setResult(res); setPhase("result"); refreshUser(); },
         onError: (error) => { setPipelineError(error); setPhase("error"); refreshUser(); },

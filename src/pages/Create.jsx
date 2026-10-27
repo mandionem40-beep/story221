@@ -60,7 +60,7 @@ export default function Create() {
   };
 
   const handleSubmit = async ({ prompt, type: genType, options }) => {
-    const cost = calculateCost(genType, options.duration);
+    const cost = calculateCost(genType, options.duration, options.engine);
     const user = await base44.auth.me();
     if (user.diamonds < cost) {
       toast({ title: "Solde insuffisant", description: "Achetez des diamants pour continuer.", variant: "destructive" });
@@ -82,6 +82,7 @@ export default function Create() {
       resolution: options.resolution,
       status: "processing",
       pipeline_step: "script",
+      provider: options.engine || "gemini",
       ad_sector: genType === "ad" ? options.adSector : undefined,
       ad_brand_name: genType === "ad" ? options.adBrandName : undefined,
       ad_logo_url: genType === "ad" ? options.adLogoUrl : undefined,

@@ -21,6 +21,15 @@
       ],
       "default": "video"
     },
+    "provider": {
+      "type": "string",
+      "enum": [
+        "gemini",
+        "higgsfield"
+      ],
+      "default": "gemini",
+      "description": "Moteur de g\u00e9n\u00e9ration vid\u00e9o choisi par le client (Gemini Veo ou Higgsfield)"
+    },
     "title": {
       "type": "string"
     },
