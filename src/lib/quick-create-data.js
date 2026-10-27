@@ -127,7 +127,7 @@ export const characterCategories = [
     id: "music_clip", label: "Clip Musique", emoji: "🎵", desc: "Des clips musicaux dynamiques et néon.", isNew: true,
     body_template: "Clip musical dynamique style Story221. Le style visuel néon/énergique reste constant.",
     image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&q=80",
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/190d62bac_Clip_Musique.mp4",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/3bc0461f9_fill.mp4",
     appearances: [
       { emoji: "🎤", label: "Rap" }, { emoji: "🎸", label: "Rock" }, { emoji: "🥁", label: "Afrobeat" },
       { emoji: "🎹", label: "Électro" }, { emoji: "🎷", label: "Jazz" }, { emoji: "🎻", label: "Classique" },
