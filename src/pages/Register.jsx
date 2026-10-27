@@ -433,7 +433,7 @@ export default function Register() {
         <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
           <Gift className="w-4 h-4 text-primary flex-shrink-0" />
           <p className="text-xs text-muted-foreground">
-            Recevez gratuitement votre première génération vidéo après votre inscription.
+            Achetez vos diamants et lancez votre première création vidéo dès votre inscription.
           </p>
         </div>
 

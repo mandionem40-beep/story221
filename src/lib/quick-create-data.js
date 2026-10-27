@@ -172,15 +172,6 @@ export const characterCategories = [
   },
 ];
 
-export const FREE_TRIAL_MINUTES = 1;
-export const FREE_TRIAL_COST = 10;
-
-export function calculateFreeTrial(cost, freeTrialUsed) {
-  if (freeTrialUsed) return { covered: 0, remaining: cost };
-  const covered = Math.min(cost, FREE_TRIAL_COST);
-  return { covered, remaining: cost - covered };
-}
-
 export const colors = [
   { id: "red", label: "Rouge", hex: "#ef4444" },
   { id: "blue", label: "Bleu", hex: "#3b82f6" },

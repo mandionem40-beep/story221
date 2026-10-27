@@ -78,12 +78,8 @@ export default function QuickCreate() {
 
   const handleGenerate = async () => {
     const user = await base44.auth.me();
-    const FREE_TRIAL_MAX = 10;
-    const useFreeTrial = !user.free_trial_used;
-    const freeTrialCover = useFreeTrial ? Math.min(cost, FREE_TRIAL_MAX) : 0;
-    const remainingCost = cost - freeTrialCover;
-    if (user.diamonds < remainingCost) {
-      toast({ title: "Solde insuffisant", description: `Essai gratuit couvre 1 min (${freeTrialCover} 💎). Il reste ${remainingCost} 💎 à payer.`, variant: "destructive" });
+    if (user.diamonds < cost) {
+      toast({ title: "Solde insuffisant", description: "Achetez des diamants pour commencer à créer.", variant: "destructive" });
       navigate("/app/diamonds");
       return;
     }

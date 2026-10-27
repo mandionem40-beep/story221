@@ -119,7 +119,7 @@ export default function Pricing() {
         )}
 
         <p className="mt-8 text-center text-sm text-muted-foreground">
-          🎁 Chaque nouvel utilisateur reçoit <span className="text-primary font-semibold">1 génération vidéo gratuite</span> à l'inscription.
+          Achetez le pack de <span className="text-primary font-semibold">Diamants</span> qu'il vous faut et lancez votre première création dès votre inscription.
         </p>
       </div>
     </section>

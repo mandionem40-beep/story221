@@ -62,12 +62,7 @@ export default function Create() {
   const handleSubmit = async ({ prompt, type: genType, options }) => {
     const cost = calculateCost(genType, options.duration);
     const user = await base44.auth.me();
-    const FREE_TRIAL_MAX_COST = 10;
-    const useFreeTrial = !user.free_trial_used && cost > 0;
-    const freeTrialCover = useFreeTrial ? Math.min(cost, FREE_TRIAL_MAX_COST) : 0;
-    const remainingCost = cost - freeTrialCover;
-
-    if (user.diamonds < remainingCost) {
+    if (user.diamonds < cost) {
       toast({ title: "Solde insuffisant", description: "Achetez des diamants pour continuer.", variant: "destructive" });
       navigate("/app/diamonds");
       return;
@@ -169,10 +164,7 @@ export default function Create() {
     };
     const cost = calculateCost(genType, options.duration);
     const user = await base44.auth.me();
-    const useFreeTrial = !user.free_trial_used && cost > 0;
-    const freeTrialCover = useFreeTrial ? Math.min(cost, 10) : 0;
-    const remainingCost = cost - freeTrialCover;
-    if (user.diamonds < remainingCost) {
+    if (user.diamonds < cost) {
       toast({ title: "Solde insuffisant", description: "Achetez des diamants pour continuer.", variant: "destructive" });
       navigate("/app/diamonds");
       return;

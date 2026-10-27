@@ -28,8 +28,7 @@ export default function CreateInfluencerContent({ influencer, onClose, onPublish
       return;
     }
     const user = await base44.auth.me();
-    const useFreeTrial = !user.free_trial_used && cost > 0;
-    if (!useFreeTrial && user.diamonds < cost) {
+    if (user.diamonds < cost) {
       toast({ title: "Solde insuffisant", variant: "destructive" });
       navigate("/app/diamonds");
       return;

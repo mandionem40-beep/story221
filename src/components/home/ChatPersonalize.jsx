@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { X, Send, ChevronDown, Sparkles } from "lucide-react";
 import DiamondIcon from "@/components/DiamondIcon";
-import { quickDurations, quickLanguages, quickVoices, quickFormats, buildChatPrompt, calculateFreeTrial } from "@/lib/quick-create-data";
+import { quickDurations, quickLanguages, quickVoices, quickFormats, buildChatPrompt } from "@/lib/quick-create-data";
 
 export default function ChatPersonalize({ category, currentUser, onClose }) {
   const navigate = useNavigate();
@@ -27,7 +27,6 @@ export default function ChatPersonalize({ category, currentUser, onClose }) {
   }, [currentUser, category]);
 
   const cost = duration.cost;
-  const { covered, remaining } = calculateFreeTrial(cost, currentUser?.free_trial_used);
 
   const handleGenerate = () => {
     if (!detail.trim()) return;
@@ -200,15 +199,7 @@ export default function ChatPersonalize({ category, currentUser, onClose }) {
               <DiamondIcon className="w-4 h-4" />
               <span className="text-sm font-semibold text-white">{cost} 💎</span>
             </div>
-            {covered > 0 && remaining > 0 ? (
-              <span className="text-xs text-muted-foreground">
-                Essai gratuit: -{covered} 💎 → <span className="text-primary font-semibold">{remaining} 💎</span>
-              </span>
-            ) : covered > 0 ? (
-              <span className="text-xs text-primary font-semibold">Essai gratuit ✨</span>
-            ) : (
-              <span className="text-xs text-muted-foreground">{duration.minutes} min</span>
-            )}
+            <span className="text-xs text-muted-foreground">{duration.minutes} min</span>
           </div>
 
           {/* Generate button */}
@@ -218,7 +209,7 @@ export default function ChatPersonalize({ category, currentUser, onClose }) {
             className="w-full h-12 rounded-2xl bg-primary text-white font-semibold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed glow-red-sm"
           >
             <Send className="w-4 h-4" />
-            {detail.trim() ? `Générer (${remaining > 0 ? remaining : 0} 💎)` : "Décris ton histoire..."}
+            {detail.trim() ? `Générer (${cost} 💎)` : "Décris ton histoire..."}
           </button>
         </div>
       </div>

@@ -21,15 +21,15 @@ export default function FinalCTA() {
           <div className="relative">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/30 mb-6">
               <Gift className="w-4 h-4 text-primary" />
-              <span className="text-sm text-white font-medium">Offre de bienvenue</span>
+              <span className="text-sm text-white font-medium">Prêt à créer</span>
             </div>
 
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white max-w-2xl mx-auto leading-tight">
-              Commencez votre première création <span className="gradient-text-red">gratuitement</span>
+              Commencez votre première création <span className="gradient-text-red">maintenant</span>
             </h2>
 
             <p className="mt-5 text-base sm:text-lg text-white/70 max-w-xl mx-auto">
-              Recevez une vidéo IA offerte dès votre inscription. Aucune carte requise.
+              Achetez vos premiers diamants et transformez vos idées en vidéos dès votre inscription.
             </p>
 
             <Link

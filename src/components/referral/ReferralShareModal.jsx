@@ -5,7 +5,7 @@ import { toast } from "@/components/ui/use-toast";
 export default function ReferralShareModal({ referralLink, onClose }) {
   const [copied, setCopied] = useState(false);
 
-  const shareText = "Rejoins-moi sur Story221, le studio IA social d'Afrique ! Crée des vidéos IA à partir d'un simple prompt et reçois ton premier essai gratuit 👇";
+  const shareText = "Rejoins-moi sur Story221, le studio IA social d'Afrique ! Crée des vidéos IA à partir d'un simple prompt 👇";
   const encodedUrl = encodeURIComponent(referralLink);
   const encodedText = encodeURIComponent(shareText);
 

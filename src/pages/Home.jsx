@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useOutletContext, Link } from "react-router-dom";
-import { Sparkles, Gift } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import DiamondIcon from "@/components/DiamondIcon";
 import { base44 } from "@/api/base44Client";
 import { Image } from "@/components/ui/image";
@@ -32,7 +32,6 @@ export default function Home() {
   }, [currentUser?.id]);
 
   const diamonds = currentUser?.diamonds ?? 0;
-  const freeTrialAvailable = !currentUser?.free_trial_used;
 
   const handleSelectCategory = useCallback((cat) => {
     if (cat.redirect) {
@@ -72,12 +71,7 @@ export default function Home() {
           <DiamondIcon className="w-4 h-4" />
           <span className="text-sm font-bold text-primary">{diamonds}</span>
         </div>
-        {freeTrialAvailable && (
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-            <Gift className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Essai gratuit (1 min)</span>
-          </div>
-        )}
+
       </div>
 
       {/* Chat Creation Zone */}

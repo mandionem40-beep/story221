@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Upload, Loader2, Gift, AlertCircle, X } from "lucide-react";
+import { Upload, Loader2, AlertCircle, X } from "lucide-react";
 import DiamondIcon from "@/components/DiamondIcon";
 import { styles, formats, voices, musics, resolutions, languages, adSectors, calculateCost, getContentType } from "@/lib/generation-utils";
 import { base44 } from "@/api/base44Client";
@@ -41,9 +41,7 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit, initial
   const config = getContentType(type);
   const cost = calculateCost(type, duration);
   const diamonds = user?.diamonds ?? 0;
-  const freeTrialAvailable = !user?.free_trial_used;
   const canAfford = diamonds >= cost;
-  const canUseFreeTrial = freeTrialAvailable && cost > 0;
 
   const handleLogoUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -296,13 +294,7 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit, initial
             <DiamondIcon className="w-3.5 h-3.5" />
           </span>
         </div>
-        {canUseFreeTrial && (
-          <div className="mt-3 flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/20">
-            <Gift className="w-4 h-4 text-primary" />
-            <span className="text-xs text-muted-foreground">Essai gratuit disponible — cette génération sera gratuite !</span>
-          </div>
-        )}
-        {!canAfford && !canUseFreeTrial && (
+        {!canAfford && (
           <div className="mt-3 flex items-center gap-2 p-2 rounded-lg bg-destructive/5 border border-destructive/20">
             <AlertCircle className="w-4 h-4 text-destructive" />
             <span className="text-xs text-destructive">Solde insuffisant — achetez des diamants</span>
@@ -313,7 +305,7 @@ export default function CreateForm({ type, onTypeChange, user, onSubmit, initial
       {/* Generate button */}
       <Button
         onClick={handleSubmit}
-        disabled={!prompt.trim() || submitting || uploading || (!canAfford && !canUseFreeTrial)}
+        disabled={!prompt.trim() || submitting || uploading || !canAfford}
         className="w-full h-12 font-semibold text-base"
       >
         {submitting ? (

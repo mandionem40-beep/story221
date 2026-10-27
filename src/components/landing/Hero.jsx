@@ -83,7 +83,7 @@ export default function Hero() {
               <Link
                 to="/register"
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-primary text-white font-semibold text-base hover:bg-primary/90 transition-all glow-red hover:scale-[1.02]">
-                Créer gratuitement
+                Commencer à créer
                 <ArrowRight className="w-5 h-5" />
               </Link>
               <a

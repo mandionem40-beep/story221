@@ -4,7 +4,7 @@ import { Send, Image as ImageIcon, Video as VideoIcon, ChevronDown, Upload, X, L
 import DiamondIcon from "@/components/DiamondIcon";
 import { base44 } from "@/api/base44Client";
 import { toast } from "@/components/ui/use-toast";
-import { characterCategories, quickDurations, quickLanguages, quickVoices, buildChatPrompt, calculateFreeTrial } from "@/lib/quick-create-data";
+import { characterCategories, quickDurations, quickLanguages, quickVoices, buildChatPrompt } from "@/lib/quick-create-data";
 
 // Cache system voices once — avoids calling getVoices() on every preview
 const _voicesCache = { loaded: false, voices: [] };
@@ -188,7 +188,6 @@ export default function ChatCreation({ selectedCategory, currentUser, onSelectCa
   };
 
   const cost = mediaType === "video" ? duration.cost : 5;
-  const { covered, remaining } = calculateFreeTrial(cost, currentUser?.free_trial_used);
 
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files || []);

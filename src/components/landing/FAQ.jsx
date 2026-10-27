@@ -9,7 +9,7 @@ const faqs = [
   },
   {
     q: "Dois-je payer un abonnement ?",
-    a: "Non. Story221 fonctionne par crédits (Diamants). Vous achetez uniquement les packs dont vous avez besoin, sans engagement. Chaque nouvel utilisateur reçoit une génération vidéo gratuite à l'inscription.",
+    a: "Non. Story221 fonctionne par crédits (Diamants). Vous achetez uniquement les packs dont vous avez besoin, sans engagement, et vous pouvez créer dès votre inscription.",
   },
   {
     q: "Comment fonctionnent les Diamants ?",
