@@ -74,7 +74,7 @@ export const characterCategories = [
     id: "object", label: "Publicité", emoji: "📢", desc: "Crée des publicités pour ta marque (logo fourni par toi).",
     body_template: "Publicité cinématographique hyper-réaliste style Story221. Mascotte anthropomorphe (vache Laicran) en 3D: tête de vache cartoon avec museau blanc, taches noires autour de grands yeux expressifs, cornes sombres courbées, sourire amical. Tenue: t-shirt blanc col bleu avec logo 'Laicran' sur la poitrine et slogan 'Le lait qui nourrit toute la famille', jean bleu avec ceinture en cuir brun. Mascotte tenant le produit (sachet bleu Laicran avec en-tête rouge) dans un champ pastoral vert avec clôtures en bois, collines, ciel bleu avec nuages, éclaboussures de lait réaliste autour. ⚠️ CORPS CONSTANT OBLIGATOIRE: la mascotte garde le MÊME design, les MÊMES proportions, le MÊME style de rendu — seule la pose, l'animation et la personnalisation utilisateur changent.",
     image: "https://media.base44.com/images/public/6a60e6aa3a8e9910256fd580/0793c47cf_image.png",
-    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/abf028cd0_Pub_Laicran_Cow_2.mp4",
+    video_url: "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/b1871b145_LotionAnti-TachesAnti-AcnBIONORADitesAdieuauxImperfectionsetRvlezlclatNatureldeVotrePeau.mp4",
     appearances: [
       { emoji: "🥛", label: "Lait Laicran" }, { emoji: "🥤", label: "Jus Préséa" },
       { emoji: "🤖", label: "Robot" }, { emoji: "💡", label: "Lampe" }, { emoji: "📱", label: "Téléphone" },
