@@ -1,27 +1,40 @@
-import { motion, useReducedMotion } from "framer-motion";
+import { useRef, useEffect, useState } from "react";
 import { Shapes } from "lucide-react";
 import HeroCard from "./HeroCard";
 
+const MOTION_VIDEO_URL = "https://media.base44.com/videos/public/6a60e6aa3a8e9910256fd580/167942bfb_Pinterestvideo774124931963319.mp4";
+
 export default function HeroCardMotion({ delay = 0, floatDelay = 0, float = true, className }) {
-  const reduce = useReducedMotion();
-  const loop = (animate, transition) =>
-    reduce ? {} : { animate, transition };
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => setInView(e.isIntersecting), {
+      threshold: 0.01,
+      rootMargin: "100px",
+    });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   return (
     <HeroCard label="Motion design" icon={Shapes} delay={delay} floatDelay={floatDelay} float={float} className={className}>
-      <div className="relative aspect-square rounded-xl bg-black/70 overflow-hidden">
-        <motion.span
-          className="absolute left-3 top-4 w-10 h-10 rounded-full bg-primary/60 blur-[6px]"
-          {...loop({ x: [0, 44, 0], y: [0, 22, 0] }, { duration: 5, repeat: Infinity, ease: "easeInOut" })}
-        />
-        <motion.span
-          className="absolute right-4 bottom-5 w-7 h-7 rounded-lg border-2 border-red-400/70"
-          {...loop({ rotate: [0, 180, 360] }, { duration: 8, repeat: Infinity, ease: "linear" })}
-        />
-        <motion.span
-          className="absolute left-4 bottom-6 w-12 h-1 rounded-full bg-gradient-to-r from-primary to-transparent"
-          {...loop({ scaleX: [0.4, 1, 0.4] }, { duration: 3, repeat: Infinity, ease: "easeInOut" })}
-        />
+      <div ref={ref} className="relative aspect-square rounded-xl overflow-hidden bg-black">
+        {inView ? (
+          <video
+            src={MOTION_VIDEO_URL}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-secondary to-black" />
+        )}
       </div>
     </HeroCard>
   );
